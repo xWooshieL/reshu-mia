@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>РешуМИА — тренажёр к экзамену по «Математике в действии»</title>
+  <meta name="description" content="Подготовка к экзамену по курсу «Математика в действии». Тренируйся по типам задач или сдавай полный вариант на 180 минут." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- ========== APP SHELL ========== -->
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a href="#" class="brand" data-screen="home">
+        <span class="brand__mark">Р</span>
+        <span class="brand__text">РешуМИА</span>
+      </a>
+      <nav class="nav">
+        <button type="button" class="nav__item active" data-screen="home">Главная</button>
+        <button type="button" class="nav__item" data-screen="bank">Банк по типам</button>
+        <button type="button" class="nav__item" data-screen="exam" disabled id="nav-exam">Текущий вариант</button>
+        <button type="button" class="nav__item" data-screen="results" disabled id="nav-results">Результаты</button>
+      </nav>
+      <div class="topbar__actions" id="topbar-actions">
+        <span class="muted small" id="topbar-status"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ====== SCREEN: HOME ====== -->
+    <section class="screen screen--active" id="screen-home">
+      <div class="hero">
+        <div class="hero__badge">Подготовка к экзамену</div>
+        <h1 class="hero__title">Тренажёр к экзамену по&nbsp;«Математике в&nbsp;действии»</h1>
+        <p class="hero__lead">
+          Сдай пробный вариант на&nbsp;180 минут или прорешай задачи по каждому из 20 типов отдельно.
+          Все задачи &mdash; из реальных контрольных, контестов и&nbsp;летнего экзамена 2025.
+        </p>
+        <div class="hero__actions">
+          <button type="button" class="btn btn--primary btn--lg" id="btn-start-variant">
+            Сгенерировать вариант
+          </button>
+          <button type="button" class="btn btn--ghost btn--lg" id="btn-go-bank">
+            Прорешать по типам
+          </button>
+        </div>
+        <div class="hero__meta">
+          <div class="hero__meta-item">
+            <strong>20</strong>
+            <span>типов задач</span>
+          </div>
+          <div class="hero__meta-item">
+            <strong>180&nbsp;мин</strong>
+            <span>длительность</span>
+          </div>
+          <div class="hero__meta-item">
+            <strong>10</strong>
+            <span>максимум баллов</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="features">
+        <div class="feature">
+          <div class="feature__icon">⌚</div>
+          <h3>Реальный таймер</h3>
+          <p>180 минут как на экзамене. Можно завершить досрочно. Прогресс сохраняется автоматически.</p>
+        </div>
+        <div class="feature">
+          <div class="feature__icon">▦</div>
+          <h3>20 типов задач</h3>
+          <p>Каждый номер &mdash; отдельный тип. В&nbsp;варианте по одной задаче из каждого типа.</p>
+        </div>
+        <div class="feature">
+          <div class="feature__icon">✎</div>
+          <h3>Решения и&nbsp;критерии</h3>
+          <p>После завершения &mdash; пошаговое решение и критерии оценивания каждой задачи.</p>
+        </div>
+        <div class="feature">
+          <div class="feature__icon">∑</div>
+          <h3>Оценка по формуле</h3>
+          <p>Итог = (сумма баллов + 2) / 3, но&nbsp;не&nbsp;более 10. Самооценка по&nbsp;каждой задаче.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h2>Как формируется оценка</h2>
+        <ul class="info-list">
+          <li><strong>1 балл</strong> &mdash; задача с одной звёздочкой (★) &mdash; типы №1&ndash;10</li>
+          <li><strong>2 балла</strong> &mdash; задача с двумя звёздочками (★★) &mdash; типы №11&ndash;16</li>
+          <li><strong>3 балла</strong> &mdash; задача с тремя звёздочками (★★★) &mdash; типы №17&ndash;20</li>
+        </ul>
+        <p class="muted">Максимум за вариант: 1·10 + 2·6 + 3·4 = <strong>34 балла</strong>. Итог: <code>min(10, (балл + 2) / 3)</code>.</p>
+      </div>
+    </section>
+
+    <!-- ====== SCREEN: PRE-EXAM (information) ====== -->
+    <section class="screen" id="screen-pre-exam">
+      <div class="pre-exam">
+        <h1 class="pre-exam__title">Информация перед началом</h1>
+
+        <div class="info-block">
+          <h2>Длительность</h2>
+          <p class="info-block__big">180&nbsp;минут</p>
+          <p class="muted">Таймер запустится сразу после нажатия кнопки «Начать вариант». Можно поставить на паузу.</p>
+        </div>
+
+        <div class="info-block">
+          <h2>Правила экзамена</h2>
+          <ol class="rules">
+            <li>На экзамене не разрешается пользоваться никакой дополнительной информацией: чит-листы и телефоны запрещены.</li>
+            <li>За каждый правильный шаг начисляются баллы. Лучше расписывать решение поэтапно. Если ответ недостаточно обоснован, оценка снижается.</li>
+            <li>Если используешь теорему или лемму &mdash; напиши какую.</li>
+            <li>Если решение неверное &mdash; зачеркни и напиши новое. Оценивается только первое.</li>
+            <li>Можно завершить работу досрочно.</li>
+          </ol>
+        </div>
+
+        <div class="info-block">
+          <h2>Как вводить ответы</h2>
+          <p>В этом тренажёре все задачи &mdash; <strong>с развёрнутым решением</strong>. После завершения варианта тебе будет показано подробное решение каждой задачи и критерии оценивания. Ты сам ставишь себе балл от 0 до максимума за каждую задачу.</p>
+          <p class="muted">Поле для черновика автоматически сохраняется. Можно отметить задачу как решённую, нажав кнопку <strong>«Отметить решённой»</strong>.</p>
+        </div>
+
+        <div class="info-block">
+          <h2>Распределение баллов</h2>
+          <table class="grade-table">
+            <thead>
+              <tr><th>Тип</th><th>Балл</th><th>Кол-во задач</th><th>Итого</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>★ (одна звёздочка)</td><td>1</td><td>10 (№1&ndash;10)</td><td>10</td></tr>
+              <tr><td>★★ (две звёздочки)</td><td>2</td><td>6 (№11&ndash;16)</td><td>12</td></tr>
+              <tr><td>★★★ (три звёздочки)</td><td>3</td><td>4 (№17&ndash;20)</td><td>12</td></tr>
+              <tr class="grade-table__total"><td colspan="3">Максимум баллов</td><td><strong>34</strong></td></tr>
+            </tbody>
+          </table>
+          <p class="muted">Итоговая оценка: <code>оценка = min(10, (твои_баллы + 2) / 3)</code>.</p>
+        </div>
+
+        <div class="pre-exam__actions">
+          <button type="button" class="btn btn--ghost" id="btn-pre-back">← Вернуться</button>
+          <button type="button" class="btn btn--primary btn--lg" id="btn-pre-start">Начать вариант →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== SCREEN: BANK (по типам) ====== -->
+    <section class="screen" id="screen-bank">
+      <div id="bank-overview">
+        <header class="screen__header">
+          <h1>Банк задач по типам</h1>
+          <p class="muted">Выбери тип задачи &mdash; и получи все задания этого номера. Удобно тренировать конкретный тип отдельно.</p>
+        </header>
+
+        <div class="bank-grid" id="bank-grid"></div>
+      </div>
+
+      <div id="bank-detail" hidden>
+        <button type="button" class="btn btn--ghost" id="btn-bank-back">← К списку типов</button>
+        <header class="screen__header">
+          <h1 id="bank-detail-title">Тип №?</h1>
+          <p id="bank-detail-desc" class="muted"></p>
+          <div id="bank-detail-criteria" class="info-card"></div>
+        </header>
+
+        <div class="bank-detail__layout">
+          <aside class="bank-tasks-list" id="bank-tasks-list"></aside>
+          <div class="bank-task-view" id="bank-task-view">
+            <p class="muted">Выбери задание слева &mdash; тут появится условие, решение и критерии.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== SCREEN: EXAM ====== -->
+    <section class="screen" id="screen-exam">
+      <div class="exam-head">
+        <div class="exam-head__timer">
+          <span class="exam-head__timer-label">Осталось</span>
+          <span class="exam-head__timer-value" id="timer-display">180:00</span>
+          <button type="button" class="btn btn--small" id="btn-timer-pause">Пауза</button>
+        </div>
+        <div class="exam-head__progress">
+          <span class="muted small" id="progress-text">0 решено / 20</span>
+          <div class="progress">
+            <div class="progress__bar" id="progress-bar" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="exam-head__actions">
+          <button type="button" class="btn btn--danger" id="btn-finish">Завершить</button>
+        </div>
+      </div>
+
+      <div class="exam-layout">
+        <aside class="exam-nav">
+          <h3 class="exam-nav__title">Задачи</h3>
+          <div class="exam-nav__grid" id="q-nav"></div>
+          <div class="exam-nav__legend">
+            <span class="legend-item"><span class="legend-dot legend-dot--active"></span>Текущая</span>
+            <span class="legend-item"><span class="legend-dot legend-dot--done"></span>Решено</span>
+            <span class="legend-item"><span class="legend-dot legend-dot--draft"></span>Черновик</span>
+          </div>
+        </aside>
+
+        <div class="exam-body" id="exam-body"></div>
+      </div>
+    </section>
+
+    <!-- ====== SCREEN: RESULTS ====== -->
+    <section class="screen" id="screen-results">
+      <div class="results">
+        <header class="screen__header">
+          <h1>Результаты варианта</h1>
+        </header>
+        <div class="results__summary" id="results-summary"></div>
+        <div class="results__detail" id="results-detail"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <span class="muted small">РешуМИА &middot; учебный проект для подготовки к экзамену по курсу «Математика в действии»</span>
+      <a href="https://github.com" target="_blank" rel="noopener" class="muted small" id="github-link">GitHub →</a>
+    </div>
+  </footer>
+</div>
+
+<!-- KaTeX (рендер LaTeX) -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
+<!-- Банк задач (заглушки + 5 файлов с решениями) -->
+<script src="js/tasks.js" defer></script>
+<script src="js/tasks-part1.js" defer></script>
+<script src="js/tasks-part2.js" defer></script>
+<script src="js/tasks-part3.js" defer></script>
+<script src="js/tasks-part4.js" defer></script>
+<script src="js/tasks-part5.js" defer></script>
+
+<!-- Логика приложения -->
+<script src="js/app.js" defer></script>
+
+</body>
+</html>
