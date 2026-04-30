@@ -556,6 +556,43 @@ hr {
   min-height: 300px;
 }
 
+.bank-task-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+/* свёртываемая «общая» критериальная плашка */
+.info-card-collapsible {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+}
+.info-card-collapsible > summary {
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.info-card-collapsible > summary::before {
+  content: '▶';
+  font-size: 0.75rem;
+  color: var(--muted);
+  transition: transform 0.18s;
+  display: inline-block;
+}
+.info-card-collapsible[open] > summary::before { transform: rotate(90deg); }
+.info-card-collapsible > summary::-webkit-details-marker { display: none; }
+
 /* ---------- EXAM ---------- */
 .exam-head {
   display: flex;

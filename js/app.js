@@ -651,10 +651,10 @@
           <div class="sol-content"></div>
         </div>
 
-        ${slotMeta.criteriaHtml ? `
+        ${(task.criteriaHtml || slotMeta.criteriaHtml) ? `
           <div class="criteria-block math-content">
-            <h4>Критерии оценивания</h4>
-            <div class="crit-content">${slotMeta.criteriaHtml}</div>
+            <h4>${task.criteriaHtml ? 'Критерии для этой задачи' : 'Общие критерии типа'}</h4>
+            <div class="crit-content">${task.criteriaHtml || slotMeta.criteriaHtml}</div>
           </div>
         ` : ''}
 
@@ -852,9 +852,12 @@
     if (detail) detail.hidden = true;
   }
 
-  function openBankSlot(slot) {
+  function openBankSlot(slot, taskIdx) {
     bankActiveSlot = slot;
-    bankActiveTaskIdx = 0;
+    // если taskIdx не передан — используем 0 (первое открытие); если передан — берём его
+    if (typeof taskIdx === 'number') bankActiveTaskIdx = taskIdx;
+    else bankActiveTaskIdx = 0;
+
     $('#bank-overview').hidden = true;
     $('#bank-detail').hidden = false;
 
@@ -868,10 +871,21 @@
     const desc = $('#bank-detail-desc');
     desc.innerHTML = escapeHtml(meta.title || '');
 
+    // Общие критерии для типа теперь показываем СВЁРНУТЫМИ (по умолчанию).
+    // Индивидуальные критерии конкретной задачи будут внутри карточки задачи (если есть).
     const crit = $('#bank-detail-criteria');
     if (meta.criteriaHtml) {
-      crit.innerHTML = `<h2>Критерии оценивания</h2><div class="math-content">${meta.criteriaHtml}</div>`;
-      renderMath(crit);
+      crit.innerHTML = `
+        <details class="info-card-collapsible">
+          <summary><strong>Общие критерии оценивания типа</strong> <span class="muted small">(нажми, чтобы развернуть)</span></summary>
+          <div class="math-content" style="margin-top:0.5rem;">${meta.criteriaHtml}</div>
+        </details>
+      `;
+      const detailsEl = crit.querySelector('details');
+      // рендерим математику только когда раскрыли (лениво)
+      detailsEl.addEventListener('toggle', () => {
+        if (detailsEl.open) renderMath(detailsEl);
+      });
       crit.hidden = false;
     } else {
       crit.innerHTML = '';
@@ -883,25 +897,48 @@
     list.innerHTML = '';
     if (!tasks.length) {
       list.innerHTML = '<p class="muted small" style="padding:1rem;">Задач пока нет.</p>';
-    } else {
-      tasks.forEach((t, idx) => {
-        const item = document.createElement('button');
-        item.type = 'button';
-        item.className = 'bank-task-item';
-        if (idx === bankActiveTaskIdx) item.classList.add('active');
-        item.innerHTML = `
-          <div class="bank-task-item__source">${escapeHtml(t.source || 'Без источника')}</div>
-          <div class="bank-task-item__title">${escapeHtml(t.id || ('Задача ' + (idx + 1)))}</div>
-        `;
-        item.addEventListener('click', () => {
-          bankActiveTaskIdx = idx;
-          openBankSlot(slot);
-        });
-        list.appendChild(item);
-      });
+      renderBankTaskView(null);
+      return;
     }
+    tasks.forEach((t, idx) => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'bank-task-item';
+      if (idx === bankActiveTaskIdx) item.classList.add('active');
+      item.dataset.idx = String(idx);
+      item.innerHTML = `
+        <div class="bank-task-item__source">${escapeHtml(t.source || 'Без источника')}</div>
+        <div class="bank-task-item__title">${escapeHtml(t.id || ('Задача ' + (idx + 1)))}</div>
+      `;
+      item.addEventListener('click', () => selectBankTask(idx));
+      list.appendChild(item);
+    });
 
     renderBankTaskView(tasks[bankActiveTaskIdx]);
+  }
+
+  /**
+   * Переключиться на задачу idx внутри уже открытого слота
+   * (без перерисовки списка слева).
+   */
+  function selectBankTask(idx) {
+    if (bankActiveSlot == null) return;
+    const tasks = (window.TASK_BANK[bankActiveSlot] && window.TASK_BANK[bankActiveSlot].tasks) || [];
+    if (idx < 0 || idx >= tasks.length) return;
+
+    bankActiveTaskIdx = idx;
+
+    // обновим класс active в списке
+    document.querySelectorAll('.bank-task-item').forEach((el) => {
+      const i = parseInt(el.dataset.idx, 10);
+      el.classList.toggle('active', i === idx);
+    });
+
+    renderBankTaskView(tasks[idx]);
+
+    // прокрутим карточку задачи наверх (по правой колонке)
+    const view = $('#bank-task-view');
+    if (view) view.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function loadBankDrafts() {
@@ -924,10 +961,29 @@
       return;
     }
     const meta = (window.TASK_BANK && window.TASK_BANK[bankActiveSlot]) || {};
+    const tasks = meta.tasks || [];
     const draftSaved = (loadBankDrafts())[task.id] || '';
 
+    // Какие критерии показывать к этой задаче?
+    // - если у задачи есть индивидуальные task.criteriaHtml — берём их (помечаем "Критерии для этой задачи")
+    // - иначе — fallback на общие критерии типа (помечаем "Общие критерии типа")
+    const hasOwnCriteria = !!task.criteriaHtml;
+    const critHtml = hasOwnCriteria ? task.criteriaHtml : (meta.criteriaHtml || '');
+    const critTitle = hasOwnCriteria ? 'Критерии для этой задачи' : 'Общие критерии типа';
+
+    const idx = bankActiveTaskIdx;
+    const total = tasks.length;
+    const hasPrev = idx > 0;
+    const hasNext = idx < total - 1;
+
     view.innerHTML = `
-      <div class="task-card__heading" style="margin-bottom:1rem;">
+      <div class="bank-task-nav">
+        <button type="button" class="btn btn--ghost btn--small" id="bank-prev" ${hasPrev ? '' : 'disabled'}>← Предыдущая</button>
+        <span class="muted small">Задача ${idx + 1} из ${total}</span>
+        <button type="button" class="btn btn--ghost btn--small" id="bank-next" ${hasNext ? '' : 'disabled'}>Следующая →</button>
+      </div>
+
+      <div class="task-card__heading" style="margin:1rem 0;">
         <span class="task-card__source">${escapeHtml(task.source || '')}</span>
       </div>
       <div class="math-content cond-area"></div>
@@ -946,10 +1002,10 @@
         <div class="bank-sol-content"></div>
       </div>
 
-      ${meta.criteriaHtml ? `
+      ${critHtml ? `
         <div class="criteria-block math-content" id="bank-crit" hidden>
-          <h4>Критерии оценивания</h4>
-          <div class="bank-crit-content">${meta.criteriaHtml}</div>
+          <h4>${critTitle}</h4>
+          <div class="bank-crit-content">${critHtml}</div>
         </div>
       ` : ''}
     `;
@@ -960,6 +1016,10 @@
 
     const draftInput = $('#bank-draft-input');
     draftInput.addEventListener('input', () => saveBankDraft(task.id, draftInput.value));
+
+    // навигация prev/next
+    $('#bank-prev').addEventListener('click', () => { if (hasPrev) selectBankTask(idx - 1); });
+    $('#bank-next').addEventListener('click', () => { if (hasNext) selectBankTask(idx + 1); });
 
     const solEl = $('#bank-sol');
     const critEl = $('#bank-crit');
