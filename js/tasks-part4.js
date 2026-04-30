@@ -191,7 +191,8 @@
         <p><strong>Шаг 3.</strong> Объединяем:</p>
         <p>$$\\int x^2 \\sin(2x)\\,dx = -\\frac{x^2\\cos(2x)}{2} + \\frac{x\\sin(2x)}{2} + \\frac{\\cos(2x)}{4} + C.$$</p>
         <p><strong>Проверка.</strong> Производная даёт</p>
-        <p>$$-x\\cos(2x) + x^2\\sin(2x) + \\frac{\\sin(2x)}{2} + x\\cos(2x) - \\frac{\\sin(2x)}{2} = x^2 \\sin(2x).\\;\\checkmark$$</p>
+        <p>$$-x\\cos(2x) + x^2\\sin(2x) + \\frac{\\sin(2x)}{2} + x\\cos(2x) - \\frac{\\sin(2x)}{2} = x^2 \\sin(2x).$$</p>
+        <p style="color:var(--success);">✓ верно</p>
         <hr>
         <p><strong>Ответ:</strong> $\\displaystyle\\int x^2 \\sin(2x)\\,dx = -\\dfrac{x^2\\cos(2x)}{2} + \\dfrac{x\\sin(2x)}{2} + \\dfrac{\\cos(2x)}{4} + C$.</p>
       `,
@@ -211,7 +212,7 @@
         <p><strong>Шаг 3.</strong> Подставляем:</p>
         <p>$$\\int x^2\\cos(2x)\\,dx = \\frac{x^2 \\sin(2x)}{2} - \\!\\left(-\\frac{x\\cos(2x)}{2} + \\frac{\\sin(2x)}{4}\\right) + C.$$</p>
         <p>$$ = \\frac{x^2 \\sin(2x)}{2} + \\frac{x\\cos(2x)}{2} - \\frac{\\sin(2x)}{4} + C.$$</p>
-        <p><strong>Проверка.</strong> Производная: $x\\sin(2x) + x^2\\cos(2x) + \\tfrac{\\cos(2x)}{2} - x\\sin(2x) - \\tfrac{\\cos(2x)}{2} = x^2 \\cos(2x).\\;\\checkmark$</p>
+        <p><strong>Проверка.</strong> Производная: $x\\sin(2x) + x^2\\cos(2x) + \\tfrac{\\cos(2x)}{2} - x\\sin(2x) - \\tfrac{\\cos(2x)}{2} = x^2 \\cos(2x).$ <span style="color:var(--success);">✓</span></p>
         <hr>
         <p><strong>Ответ:</strong> $\\displaystyle\\int x^2 \\cos(2x)\\,dx = \\dfrac{x^2 \\sin(2x)}{2} + \\dfrac{x\\cos(2x)}{2} - \\dfrac{\\sin(2x)}{4} + C$.</p>
       `,
