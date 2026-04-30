@@ -16,3 +16,6 @@ package-lock.json
 
 # Local server temp
 .cache/
+
+# git commit message buffer (PowerShell heredoc workaround)
+.commit-msg.txt
