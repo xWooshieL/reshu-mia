@@ -698,7 +698,45 @@
       detail.appendChild(card);
     }
 
-    // кнопки
+    // ----- финальный блок с оценкой и кнопкой пересчёта (внизу страницы) -----
+    const finalBlock = document.createElement('div');
+    finalBlock.className = 'results__final-recompute';
+    finalBlock.innerHTML = `
+      <div class="results__final-inner">
+        <div class="results__final-grade">
+          <span class="muted small">Текущая оценка</span>
+          <strong id="grade-output-bottom">—</strong>
+        </div>
+        <div class="results__final-actions">
+          <button type="button" class="btn btn--primary btn--lg" id="btn-recompute-bottom">
+            Пересчитать оценку
+          </button>
+          <button type="button" class="btn btn--ghost" id="btn-scroll-top">
+            ↑ В начало
+          </button>
+        </div>
+      </div>
+    `;
+    detail.appendChild(finalBlock);
+
+    // обработчики финального блока
+    $('#btn-recompute-bottom').addEventListener('click', () => {
+      updateGradeOutput();
+      // подсветим, чтобы пользователь увидел реакцию
+      const bottomGrade = $('#grade-output-bottom');
+      if (bottomGrade) {
+        bottomGrade.classList.add('flash');
+        setTimeout(() => bottomGrade.classList.remove('flash'), 700);
+      }
+      // плавно прокрутим к итогу наверху
+      const summary = $('#results-summary');
+      if (summary) summary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    $('#btn-scroll-top').addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // кнопки наверху
     $('#btn-recompute').addEventListener('click', updateGradeOutput);
     $('#btn-new-variant').addEventListener('click', async () => {
       const ok = await showModal({
@@ -759,6 +797,12 @@
       ${breakdown}
     `;
     renderMath(out);
+
+    // дублируем оценку в нижнюю плашку (если есть)
+    const bottom = $('#grade-output-bottom');
+    if (bottom) {
+      bottom.textContent = formatScore(grade) + ' / 10';
+    }
   }
 
   function perSlotBreakdownHtml() {

@@ -902,6 +902,54 @@ hr {
 
 .results__detail .task-card { margin-bottom: 1rem; }
 
+/* финальная плашка с пересчётом внизу страницы */
+.results__final-recompute {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+.results__final-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.results__final-grade {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.results__final-grade strong {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.results__final-grade strong.flash {
+  animation: gradeFlash 0.7s ease-out;
+}
+.results__final-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+@keyframes gradeFlash {
+  0%   { color: var(--ink); transform: scale(1); }
+  35%  { color: var(--success); transform: scale(1.15); }
+  100% { color: var(--ink); transform: scale(1); }
+}
+
+@media (max-width: 640px) {
+  .results__final-inner { flex-direction: column; align-items: stretch; }
+  .results__final-actions { flex-direction: column; }
+  .results__final-actions .btn { justify-content: center; }
+}
+
 /* ---------- Math content ---------- */
 .math-content { line-height: 1.7; }
 .math-content p { margin: 0.4rem 0; }
