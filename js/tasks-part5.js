@@ -549,39 +549,34 @@
         <p><em>Указание:</em> решение обязательно должно демонстрировать применение метода Лагранжа.</p>
       `,
       solutionHtml: `
-        <p><strong>Шаг 1. Функция Лагранжа.</strong> Связь $g(x,y) = x^2 + y^2 - 1 = 0$. Вводим</p>
-        <p>$$\\mathcal{L}(x, y, \\lambda) = xy + \\lambda\\bigl(1 - x^2 - y^2\\bigr).$$</p>
+        <p><strong>Шаг 1. Градиенты.</strong> Связь $g(x;y) = x^2 + y^2 - 1 = 0$. Считаем градиенты:</p>
+        <p>$$\\nabla f = \\begin{pmatrix} y \\\\ x \\end{pmatrix}, \\qquad \\nabla g = \\begin{pmatrix} 2x \\\\ 2y \\end{pmatrix}.$$</p>
 
-        <p><strong>Шаг 2. Система стационарности.</strong></p>
+        <p><strong>Шаг 2. Точки, где $\\nabla g = 0$.</strong> $\\nabla g = 0 \\Rightarrow x = 0,\\, y = 0$. Но $(0;0)$ не лежит на связи ($0 \\ne 1$), так что таких кандидатов нет.</p>
+
+        <p><strong>Шаг 3. Система $\\nabla f = \\lambda \\nabla g$.</strong></p>
+        <p>$$\\begin{cases} y = 2\\lambda x \\\\ x = 2\\lambda y \\\\ x^2 + y^2 = 1 \\end{cases}$$</p>
+
+        <p><strong>Шаг 4. Решаем систему.</strong> Подставим $y = 2\\lambda x$ во второе уравнение: $x = 2\\lambda(2\\lambda x) = 4\\lambda^2 x \\Rightarrow x(1 - 4\\lambda^2) = 0$.</p>
         <ul>
-          <li>$\\mathcal{L}_x = y - 2\\lambda x = 0 \\Rightarrow y = 2\\lambda x$;</li>
-          <li>$\\mathcal{L}_y = x - 2\\lambda y = 0 \\Rightarrow x = 2\\lambda y$;</li>
-          <li>$\\mathcal{L}_\\lambda = 1 - x^2 - y^2 = 0.$</li>
+          <li>$x = 0$: тогда $y = 0$ — не на связи. Отбрасываем.</li>
+          <li>$4\\lambda^2 = 1 \\Rightarrow \\lambda = \\pm\\tfrac{1}{2}$.</li>
+        </ul>
+        <p>Подставляем оба значения $\\lambda$ в систему:</p>
+        <ul>
+          <li>$\\lambda = \\tfrac{1}{2}$: $y = x$. Из связи $2x^2 = 1 \\Rightarrow x = \\pm\\tfrac{1}{\\sqrt 2}$. Точки: $\\bigl(\\tfrac{1}{\\sqrt 2};\\,\\tfrac{1}{\\sqrt 2}\\bigr)$ и $\\bigl(-\\tfrac{1}{\\sqrt 2};\\,-\\tfrac{1}{\\sqrt 2}\\bigr)$.</li>
+          <li>$\\lambda = -\\tfrac{1}{2}$: $y = -x$. Снова $2x^2 = 1$. Точки: $\\bigl(\\tfrac{1}{\\sqrt 2};\\,-\\tfrac{1}{\\sqrt 2}\\bigr)$ и $\\bigl(-\\tfrac{1}{\\sqrt 2};\\,\\tfrac{1}{\\sqrt 2}\\bigr)$.</li>
         </ul>
 
-        <p><strong>Шаг 3. Решаем систему.</strong> Подставляя $y = 2\\lambda x$ во второе уравнение, получаем $x = 2\\lambda(2\\lambda x) = 4\\lambda^2 x,$ то есть $x(1 - 4\\lambda^2) = 0.$</p>
+        <p><strong>Шаг 5. Значения $f = xy$ в кандидатах.</strong></p>
         <ul>
-          <li>Случай $x = 0$: тогда $y = 2\\lambda\\cdot 0 = 0$, но $0 + 0 \\ne 1$ — противоречит связи. Отбрасываем.</li>
-          <li>Случай $4\\lambda^2 = 1$: $\\lambda = \\pm\\tfrac{1}{2}.$</li>
+          <li>$\\bigl(\\tfrac{1}{\\sqrt 2};\\,\\tfrac{1}{\\sqrt 2}\\bigr)$ и $\\bigl(-\\tfrac{1}{\\sqrt 2};\\,-\\tfrac{1}{\\sqrt 2}\\bigr)$: $f = \\tfrac{1}{2}$.</li>
+          <li>$\\bigl(\\tfrac{1}{\\sqrt 2};\\,-\\tfrac{1}{\\sqrt 2}\\bigr)$ и $\\bigl(-\\tfrac{1}{\\sqrt 2};\\,\\tfrac{1}{\\sqrt 2}\\bigr)$: $f = -\\tfrac{1}{2}$.</li>
         </ul>
-
-        <p><strong>Шаг 4. Точки-кандидаты.</strong></p>
-        <ul>
-          <li>$\\lambda = \\tfrac{1}{2}$: $y = x.$ Подставим в связь: $2x^2 = 1 \\Rightarrow x = \\pm\\tfrac{1}{\\sqrt{2}}.$ Точки: $\\bigl(\\tfrac{1}{\\sqrt{2}},\\,\\tfrac{1}{\\sqrt{2}}\\bigr)$ и $\\bigl(-\\tfrac{1}{\\sqrt{2}},\\,-\\tfrac{1}{\\sqrt{2}}\\bigr)$.</li>
-          <li>$\\lambda = -\\tfrac{1}{2}$: $y = -x.$ Снова $2x^2 = 1$, точки: $\\bigl(\\tfrac{1}{\\sqrt{2}},\\,-\\tfrac{1}{\\sqrt{2}}\\bigr)$ и $\\bigl(-\\tfrac{1}{\\sqrt{2}},\\,\\tfrac{1}{\\sqrt{2}}\\bigr)$.</li>
-        </ul>
-
-        <p><strong>Шаг 5. Значения $f = xy$.</strong></p>
-        <ul>
-          <li>$\\bigl(\\tfrac{1}{\\sqrt{2}},\\,\\tfrac{1}{\\sqrt{2}}\\bigr)$: $f = \\tfrac{1}{2}$;</li>
-          <li>$\\bigl(-\\tfrac{1}{\\sqrt{2}},\\,-\\tfrac{1}{\\sqrt{2}}\\bigr)$: $f = \\tfrac{1}{2}$;</li>
-          <li>$\\bigl(\\tfrac{1}{\\sqrt{2}},\\,-\\tfrac{1}{\\sqrt{2}}\\bigr)$: $f = -\\tfrac{1}{2}$;</li>
-          <li>$\\bigl(-\\tfrac{1}{\\sqrt{2}},\\,\\tfrac{1}{\\sqrt{2}}\\bigr)$: $f = -\\tfrac{1}{2}.$</li>
-        </ul>
-        <p>Окружность компактна и $f$ непрерывна, поэтому максимум и минимум существуют и совпадают с найденными значениями.</p>
+        <p>Окружность компактна, $f$ непрерывна — максимум и минимум достигаются.</p>
 
         <hr>
-        <p><strong>Ответ:</strong> $f_{\\max} = \\tfrac{1}{2}$ (в точках $(\\tfrac{1}{\\sqrt{2}},\\tfrac{1}{\\sqrt{2}})$ и $(-\\tfrac{1}{\\sqrt{2}},-\\tfrac{1}{\\sqrt{2}})$); $f_{\\min} = -\\tfrac{1}{2}$ (в точках $(\\tfrac{1}{\\sqrt{2}},-\\tfrac{1}{\\sqrt{2}})$ и $(-\\tfrac{1}{\\sqrt{2}},\\tfrac{1}{\\sqrt{2}})$).</p>
+        <p><strong>Ответ:</strong> $f_{\\max} = \\tfrac{1}{2}$ (в $\\bigl(\\pm\\tfrac{1}{\\sqrt 2};\\,\\pm\\tfrac{1}{\\sqrt 2}\\bigr)$ — со <em>совпадающими</em> знаками); $f_{\\min} = -\\tfrac{1}{2}$ (в $\\bigl(\\pm\\tfrac{1}{\\sqrt 2};\\,\\mp\\tfrac{1}{\\sqrt 2}\\bigr)$ — с <em>противоположными</em> знаками).</p>
       `
     },
 
@@ -621,36 +616,34 @@
       source: 'Летний экзамен, 2025, вариант 1',
       questionLatex: `<p>Найди экстремум функции $f(x;\\,y) = 2x + y$ при условии $4x^2 + y^2 = 1.$</p>`,
       solutionHtml: `
-        <p><strong>Шаг 1. Функция Лагранжа.</strong></p>
-        <p>$$\\mathcal{L}(x,y,\\lambda) = 2x + y + \\lambda(1 - 4x^2 - y^2).$$</p>
+        <p><strong>Шаг 1. Градиенты.</strong> Связь $g(x;y) = 4x^2 + y^2 - 1 = 0$.</p>
+        <p>$$\\nabla f = \\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}, \\qquad \\nabla g = \\begin{pmatrix} 8x \\\\ 2y \\end{pmatrix}.$$</p>
 
-        <p><strong>Шаг 2. Система.</strong></p>
-        <ul>
-          <li>$\\mathcal{L}_x = 2 - 8\\lambda x = 0 \\Rightarrow x = \\dfrac{1}{4\\lambda}$;</li>
-          <li>$\\mathcal{L}_y = 1 - 2\\lambda y = 0 \\Rightarrow y = \\dfrac{1}{2\\lambda}$;</li>
-          <li>$\\mathcal{L}_\\lambda = 1 - 4x^2 - y^2 = 0.$</li>
-        </ul>
-        <p>Сразу видно, что $\\lambda \\ne 0$ (иначе $f_x = 2 \\ne 0$, что несовместимо).</p>
+        <p><strong>Шаг 2. Точки, где $\\nabla g = 0$.</strong> $\\nabla g = 0 \\Rightarrow x = 0, y = 0$ — не на связи. Кандидатов нет.</p>
 
-        <p><strong>Шаг 3. Подставляем в связь.</strong></p>
+        <p><strong>Шаг 3. Система $\\nabla f = \\lambda \\nabla g$.</strong></p>
+        <p>$$\\begin{cases} 2 = 8\\lambda x \\\\ 1 = 2\\lambda y \\\\ 4x^2 + y^2 = 1 \\end{cases}$$</p>
+        <p>Из первых двух $\\lambda \\ne 0$ (иначе $2 = 0$ и $1 = 0$). Тогда $x = \\dfrac{1}{4\\lambda}$, $y = \\dfrac{1}{2\\lambda}$.</p>
+
+        <p><strong>Шаг 4. Подставляем в связь.</strong></p>
         <p>$$4\\cdot\\dfrac{1}{16\\lambda^2} + \\dfrac{1}{4\\lambda^2} = \\dfrac{1}{4\\lambda^2} + \\dfrac{1}{4\\lambda^2} = \\dfrac{1}{2\\lambda^2} = 1.$$</p>
-        <p>Отсюда $\\lambda^2 = \\tfrac{1}{2},\\;\\lambda = \\pm\\tfrac{1}{\\sqrt{2}}.$</p>
+        <p>$\\lambda^2 = \\tfrac{1}{2} \\Rightarrow \\lambda = \\pm\\tfrac{1}{\\sqrt 2}$.</p>
 
-        <p><strong>Шаг 4. Точки-кандидаты.</strong></p>
+        <p><strong>Шаг 5. Точки-кандидаты.</strong></p>
         <ul>
-          <li>$\\lambda = \\tfrac{1}{\\sqrt{2}}$: $x = \\tfrac{\\sqrt{2}}{4},\\; y = \\tfrac{\\sqrt{2}}{2}$;</li>
-          <li>$\\lambda = -\\tfrac{1}{\\sqrt{2}}$: $x = -\\tfrac{\\sqrt{2}}{4},\\; y = -\\tfrac{\\sqrt{2}}{2}.$</li>
+          <li>$\\lambda = \\tfrac{1}{\\sqrt 2}$: $x = \\tfrac{\\sqrt 2}{4},\\; y = \\tfrac{\\sqrt 2}{2}$;</li>
+          <li>$\\lambda = -\\tfrac{1}{\\sqrt 2}$: $x = -\\tfrac{\\sqrt 2}{4},\\; y = -\\tfrac{\\sqrt 2}{2}$.</li>
         </ul>
 
-        <p><strong>Шаг 5. Значения $f$.</strong></p>
+        <p><strong>Шаг 6. Значения $f$.</strong></p>
         <ul>
-          <li>$f\\bigl(\\tfrac{\\sqrt{2}}{4},\\tfrac{\\sqrt{2}}{2}\\bigr) = 2\\cdot\\tfrac{\\sqrt{2}}{4} + \\tfrac{\\sqrt{2}}{2} = \\tfrac{\\sqrt{2}}{2} + \\tfrac{\\sqrt{2}}{2} = \\sqrt{2}$;</li>
-          <li>$f\\bigl(-\\tfrac{\\sqrt{2}}{4},-\\tfrac{\\sqrt{2}}{2}\\bigr) = -\\sqrt{2}.$</li>
+          <li>$f\\bigl(\\tfrac{\\sqrt 2}{4},\\tfrac{\\sqrt 2}{2}\\bigr) = 2\\cdot\\tfrac{\\sqrt 2}{4} + \\tfrac{\\sqrt 2}{2} = \\tfrac{\\sqrt 2}{2} + \\tfrac{\\sqrt 2}{2} = \\sqrt 2$.</li>
+          <li>$f\\bigl(-\\tfrac{\\sqrt 2}{4},-\\tfrac{\\sqrt 2}{2}\\bigr) = -\\sqrt 2$.</li>
         </ul>
-        <p>Эллипс $4x^2 + y^2 = 1$ компактен, $f$ непрерывна, значит это и есть глобальные максимум и минимум.</p>
+        <p>Эллипс компактен, $f$ непрерывна — найденные значения и есть глобальные max/min.</p>
 
         <hr>
-        <p><strong>Ответ:</strong> $f_{\\max} = \\sqrt{2}$ в $\\bigl(\\tfrac{\\sqrt{2}}{4},\\,\\tfrac{\\sqrt{2}}{2}\\bigr)$; $f_{\\min} = -\\sqrt{2}$ в $\\bigl(-\\tfrac{\\sqrt{2}}{4},\\,-\\tfrac{\\sqrt{2}}{2}\\bigr).$</p>
+        <p><strong>Ответ:</strong> $f_{\\max} = \\sqrt 2$ в $\\bigl(\\tfrac{\\sqrt 2}{4};\\,\\tfrac{\\sqrt 2}{2}\\bigr)$; $f_{\\min} = -\\sqrt 2$ в $\\bigl(-\\tfrac{\\sqrt 2}{4};\\,-\\tfrac{\\sqrt 2}{2}\\bigr)$.</p>
       `
     },
 
@@ -659,33 +652,32 @@
       source: 'Летний экзамен, 2025, вариант 2',
       questionLatex: `<p>Найди экстремум функции $f(x;\\,y) = x + 2y$ при условии $x^2 + 4y^2 = 1.$</p>`,
       solutionHtml: `
-        <p><strong>Шаг 1. Функция Лагранжа.</strong></p>
-        <p>$$\\mathcal{L}(x,y,\\lambda) = x + 2y + \\lambda(1 - x^2 - 4y^2).$$</p>
+        <p><strong>Шаг 1. Градиенты.</strong> Связь $g(x;y) = x^2 + 4y^2 - 1 = 0$.</p>
+        <p>$$\\nabla f = \\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}, \\qquad \\nabla g = \\begin{pmatrix} 2x \\\\ 8y \\end{pmatrix}.$$</p>
 
-        <p><strong>Шаг 2. Система.</strong></p>
+        <p><strong>Шаг 2. Точки, где $\\nabla g = 0$.</strong> $\\nabla g = 0 \\Rightarrow x = y = 0$ — не на связи. Кандидатов нет.</p>
+
+        <p><strong>Шаг 3. Система $\\nabla f = \\lambda \\nabla g$.</strong></p>
+        <p>$$\\begin{cases} 1 = 2\\lambda x \\\\ 2 = 8\\lambda y \\\\ x^2 + 4y^2 = 1 \\end{cases}$$</p>
+        <p>Отсюда $\\lambda \\ne 0$, $x = \\dfrac{1}{2\\lambda}$, $y = \\dfrac{1}{4\\lambda}$.</p>
+
+        <p><strong>Шаг 4. Подставляем в связь.</strong></p>
+        <p>$$\\dfrac{1}{4\\lambda^2} + 4\\cdot\\dfrac{1}{16\\lambda^2} = \\dfrac{1}{4\\lambda^2} + \\dfrac{1}{4\\lambda^2} = \\dfrac{1}{2\\lambda^2} = 1 \\Rightarrow \\lambda = \\pm\\tfrac{1}{\\sqrt 2}.$$</p>
+
+        <p><strong>Шаг 5. Точки-кандидаты.</strong></p>
         <ul>
-          <li>$\\mathcal{L}_x = 1 - 2\\lambda x = 0 \\Rightarrow x = \\dfrac{1}{2\\lambda}$;</li>
-          <li>$\\mathcal{L}_y = 2 - 8\\lambda y = 0 \\Rightarrow y = \\dfrac{1}{4\\lambda}$;</li>
-          <li>$\\mathcal{L}_\\lambda = 1 - x^2 - 4y^2 = 0.$</li>
+          <li>$\\lambda = \\tfrac{1}{\\sqrt 2}$: $x = \\tfrac{\\sqrt 2}{2},\\; y = \\tfrac{\\sqrt 2}{4}$;</li>
+          <li>$\\lambda = -\\tfrac{1}{\\sqrt 2}$: $x = -\\tfrac{\\sqrt 2}{2},\\; y = -\\tfrac{\\sqrt 2}{4}$.</li>
         </ul>
 
-        <p><strong>Шаг 3. Подставляем.</strong></p>
-        <p>$$\\dfrac{1}{4\\lambda^2} + 4\\cdot\\dfrac{1}{16\\lambda^2} = \\dfrac{1}{4\\lambda^2} + \\dfrac{1}{4\\lambda^2} = \\dfrac{1}{2\\lambda^2} = 1 \\;\\Longrightarrow\\; \\lambda = \\pm\\tfrac{1}{\\sqrt{2}}.$$</p>
-
-        <p><strong>Шаг 4. Точки-кандидаты.</strong></p>
+        <p><strong>Шаг 6. Значения $f$.</strong></p>
         <ul>
-          <li>$\\lambda = \\tfrac{1}{\\sqrt{2}}$: $x = \\tfrac{\\sqrt{2}}{2},\\; y = \\tfrac{\\sqrt{2}}{4}$;</li>
-          <li>$\\lambda = -\\tfrac{1}{\\sqrt{2}}$: $x = -\\tfrac{\\sqrt{2}}{2},\\; y = -\\tfrac{\\sqrt{2}}{4}.$</li>
-        </ul>
-
-        <p><strong>Шаг 5. Значения $f$.</strong></p>
-        <ul>
-          <li>$f\\bigl(\\tfrac{\\sqrt{2}}{2},\\tfrac{\\sqrt{2}}{4}\\bigr) = \\tfrac{\\sqrt{2}}{2} + 2\\cdot\\tfrac{\\sqrt{2}}{4} = \\tfrac{\\sqrt{2}}{2} + \\tfrac{\\sqrt{2}}{2} = \\sqrt{2}$;</li>
-          <li>$f\\bigl(-\\tfrac{\\sqrt{2}}{2},-\\tfrac{\\sqrt{2}}{4}\\bigr) = -\\sqrt{2}.$</li>
+          <li>$f\\bigl(\\tfrac{\\sqrt 2}{2},\\tfrac{\\sqrt 2}{4}\\bigr) = \\tfrac{\\sqrt 2}{2} + 2\\cdot\\tfrac{\\sqrt 2}{4} = \\sqrt 2$.</li>
+          <li>$f\\bigl(-\\tfrac{\\sqrt 2}{2},-\\tfrac{\\sqrt 2}{4}\\bigr) = -\\sqrt 2$.</li>
         </ul>
 
         <hr>
-        <p><strong>Ответ:</strong> $f_{\\max} = \\sqrt{2}$ в $\\bigl(\\tfrac{\\sqrt{2}}{2},\\,\\tfrac{\\sqrt{2}}{4}\\bigr)$; $f_{\\min} = -\\sqrt{2}$ в $\\bigl(-\\tfrac{\\sqrt{2}}{2},\\,-\\tfrac{\\sqrt{2}}{4}\\bigr).$</p>
+        <p><strong>Ответ:</strong> $f_{\\max} = \\sqrt 2$ в $\\bigl(\\tfrac{\\sqrt 2}{2};\\,\\tfrac{\\sqrt 2}{4}\\bigr)$; $f_{\\min} = -\\sqrt 2$ в $\\bigl(-\\tfrac{\\sqrt 2}{2};\\,-\\tfrac{\\sqrt 2}{4}\\bigr)$.</p>
       `
     },
 
@@ -694,25 +686,23 @@
       source: 'Демо-вариант КР №2, 2024–2025, задача №2 (тест)',
       questionLatex: `<p>В какой точке достигается максимум функции $f(x;\\,y) = x + y$ при условии $x^2 + y^2 = 1$?</p>`,
       solutionHtml: `
-        <p><strong>Шаг 1. Функция Лагранжа.</strong></p>
-        <p>$$\\mathcal{L}(x,y,\\lambda) = x + y + \\lambda(1 - x^2 - y^2).$$</p>
+        <p><strong>Шаг 1. Градиенты.</strong> Связь $g(x;y) = x^2 + y^2 - 1 = 0$.</p>
+        <p>$$\\nabla f = \\begin{pmatrix} 1 \\\\ 1 \\end{pmatrix}, \\qquad \\nabla g = \\begin{pmatrix} 2x \\\\ 2y \\end{pmatrix}.$$</p>
 
-        <p><strong>Шаг 2. Система.</strong></p>
-        <ul>
-          <li>$\\mathcal{L}_x = 1 - 2\\lambda x = 0 \\Rightarrow x = \\dfrac{1}{2\\lambda}$;</li>
-          <li>$\\mathcal{L}_y = 1 - 2\\lambda y = 0 \\Rightarrow y = \\dfrac{1}{2\\lambda}$;</li>
-          <li>$x^2 + y^2 = 1.$</li>
-        </ul>
-        <p>Из первых двух — $x = y.$ Подставим: $2x^2 = 1,\\; x = \\pm\\tfrac{1}{\\sqrt{2}}.$</p>
+        <p><strong>Шаг 2. Точки, где $\\nabla g = 0$.</strong> $\\nabla g = 0 \\Rightarrow x = y = 0$ — не на связи. Кандидатов нет.</p>
 
-        <p><strong>Шаг 3. Точки-кандидаты и значения.</strong></p>
+        <p><strong>Шаг 3. Система $\\nabla f = \\lambda \\nabla g$.</strong></p>
+        <p>$$\\begin{cases} 1 = 2\\lambda x \\\\ 1 = 2\\lambda y \\\\ x^2 + y^2 = 1 \\end{cases}$$</p>
+        <p>Из первых двух $x = y$. Из связи: $2x^2 = 1 \\Rightarrow x = \\pm\\tfrac{1}{\\sqrt 2}$.</p>
+
+        <p><strong>Шаг 4. Точки-кандидаты и значения.</strong></p>
         <ul>
-          <li>$\\bigl(\\tfrac{1}{\\sqrt{2}},\\,\\tfrac{1}{\\sqrt{2}}\\bigr)$: $f = \\sqrt{2}$ (максимум);</li>
-          <li>$\\bigl(-\\tfrac{1}{\\sqrt{2}},\\,-\\tfrac{1}{\\sqrt{2}}\\bigr)$: $f = -\\sqrt{2}$ (минимум).</li>
+          <li>$\\bigl(\\tfrac{1}{\\sqrt 2};\\,\\tfrac{1}{\\sqrt 2}\\bigr)$: $f = \\sqrt 2$ — максимум;</li>
+          <li>$\\bigl(-\\tfrac{1}{\\sqrt 2};\\,-\\tfrac{1}{\\sqrt 2}\\bigr)$: $f = -\\sqrt 2$ — минимум.</li>
         </ul>
 
         <hr>
-        <p><strong>Ответ:</strong> максимум $f_{\\max} = \\sqrt{2}$ достигается в точке $\\bigl(\\tfrac{1}{\\sqrt{2}},\\,\\tfrac{1}{\\sqrt{2}}\\bigr) = \\bigl(\\tfrac{\\sqrt{2}}{2},\\,\\tfrac{\\sqrt{2}}{2}\\bigr).$</p>
+        <p><strong>Ответ:</strong> максимум $f_{\\max} = \\sqrt 2$ достигается в точке $\\bigl(\\tfrac{\\sqrt 2}{2};\\,\\tfrac{\\sqrt 2}{2}\\bigr)$.</p>
       `
     },
 
@@ -721,21 +711,19 @@
       source: 'Демо-вариант КР №2, 2024–2025, задача №7 (тест)',
       questionLatex: `<p>В какой точке $(x;\\,y)$ функция $f(x;\\,y) = x^2 + y^2$ достигает минимума при условии $x + y = 10$?</p>`,
       solutionHtml: `
-        <p><strong>Шаг 1. Функция Лагранжа.</strong></p>
-        <p>$$\\mathcal{L}(x,y,\\lambda) = x^2 + y^2 + \\lambda(10 - x - y).$$</p>
+        <p><strong>Шаг 1. Градиенты.</strong> Связь $g(x;y) = x + y - 10 = 0$.</p>
+        <p>$$\\nabla f = \\begin{pmatrix} 2x \\\\ 2y \\end{pmatrix}, \\qquad \\nabla g = \\begin{pmatrix} 1 \\\\ 1 \\end{pmatrix}.$$</p>
 
-        <p><strong>Шаг 2. Система.</strong></p>
-        <ul>
-          <li>$\\mathcal{L}_x = 2x - \\lambda = 0 \\Rightarrow \\lambda = 2x$;</li>
-          <li>$\\mathcal{L}_y = 2y - \\lambda = 0 \\Rightarrow \\lambda = 2y$;</li>
-          <li>$x + y = 10.$</li>
-        </ul>
-        <p>Из первых двух $x = y.$ Тогда $2x = 10,\\; x = 5,\\; y = 5.$</p>
+        <p><strong>Шаг 2. Точки, где $\\nabla g = 0$.</strong> $\\nabla g = (1;1) \\ne 0$ при любых $x, y$ — таких точек нет.</p>
 
-        <p><strong>Шаг 3. Значение и характер.</strong> $f(5;\\,5) = 25 + 25 = 50.$ Геометрически $f = x^2 + y^2$ — квадрат расстояния до начала координат. На прямой $x + y = 10$ ближайшая к нулю точка — это основание перпендикуляра, равное $(5;\\,5)$. Значит это <em>минимум</em> (максимума не существует, так как прямая не ограничена).</p>
+        <p><strong>Шаг 3. Система $\\nabla f = \\lambda \\nabla g$.</strong></p>
+        <p>$$\\begin{cases} 2x = \\lambda \\\\ 2y = \\lambda \\\\ x + y = 10 \\end{cases}$$</p>
+        <p>Из первых двух $x = y$. Из связи: $2x = 10 \\Rightarrow x = y = 5$.</p>
+
+        <p><strong>Шаг 4. Значение и характер.</strong> $f(5;\\,5) = 25 + 25 = 50$. Геометрически $f = x^2 + y^2$ — квадрат расстояния до начала координат. На прямой $x + y = 10$ ближайшая к нулю точка — основание перпендикуляра $(5;\\,5)$. Значит это <em>минимум</em> (максимум не существует, так как прямая не ограничена).</p>
 
         <hr>
-        <p><strong>Ответ:</strong> минимум достигается в точке $(5;\\,5)$, $f_{\\min} = 50.$</p>
+        <p><strong>Ответ:</strong> минимум достигается в точке $(5;\\,5)$, $f_{\\min} = 50$.</p>
       `
     },
 
@@ -744,29 +732,28 @@
       source: 'Демо-вариант КР №2, 2024–2025, задача №19 (тест)',
       questionLatex: `<p>Используя метод множителей Лагранжа, найди максимальное и минимальное значения функции $f(x;\\,y) = x^2 y$ при условии $x^2 + y^2 = 1.$</p>`,
       solutionHtml: `
-        <p><strong>Шаг 1. Функция Лагранжа.</strong></p>
-        <p>$$\\mathcal{L}(x,y,\\lambda) = x^2 y + \\lambda(1 - x^2 - y^2).$$</p>
+        <p><strong>Шаг 1. Градиенты.</strong> Связь $g(x;y) = x^2 + y^2 - 1 = 0$.</p>
+        <p>$$\\nabla f = \\begin{pmatrix} 2xy \\\\ x^2 \\end{pmatrix}, \\qquad \\nabla g = \\begin{pmatrix} 2x \\\\ 2y \\end{pmatrix}.$$</p>
 
-        <p><strong>Шаг 2. Система.</strong></p>
-        <ul>
-          <li>$\\mathcal{L}_x = 2xy - 2\\lambda x = 2x(y - \\lambda) = 0$;</li>
-          <li>$\\mathcal{L}_y = x^2 - 2\\lambda y = 0$;</li>
-          <li>$x^2 + y^2 = 1.$</li>
-        </ul>
+        <p><strong>Шаг 2. Точки, где $\\nabla g = 0$.</strong> $\\nabla g = 0 \\Rightarrow x = y = 0$ — не на связи. Кандидатов нет.</p>
 
-        <p><strong>Шаг 3. Случай $x = 0$.</strong> Из связи $y^2 = 1$, то есть $y = \\pm 1.$ Точки $(0;\\,1)$ и $(0;\\,-1).$ Значение $f = 0.$</p>
+        <p><strong>Шаг 3. Система $\\nabla f = \\lambda \\nabla g$.</strong></p>
+        <p>$$\\begin{cases} 2xy = 2\\lambda x \\\\ x^2 = 2\\lambda y \\\\ x^2 + y^2 = 1 \\end{cases}$$</p>
+        <p>Из первого: $2x(y - \\lambda) = 0 \\Rightarrow x = 0$ или $y = \\lambda$.</p>
 
-        <p><strong>Шаг 4. Случай $y = \\lambda$.</strong> Из второго: $x^2 = 2\\lambda y = 2y^2.$ Из связи: $2y^2 + y^2 = 1 \\Rightarrow y^2 = \\tfrac{1}{3},\\; y = \\pm\\tfrac{1}{\\sqrt{3}}.$ Тогда $x^2 = \\tfrac{2}{3}.$</p>
+        <p><strong>Шаг 4. Случай $x = 0$.</strong> Из связи $y^2 = 1$, то есть $y = \\pm 1$. Точки $(0;\\,\\pm 1)$. Значение $f = 0$.</p>
+
+        <p><strong>Шаг 5. Случай $y = \\lambda$.</strong> Из второго: $x^2 = 2\\lambda y = 2y^2$. Из связи: $2y^2 + y^2 = 1 \\Rightarrow y^2 = \\tfrac{1}{3},\\; y = \\pm\\tfrac{1}{\\sqrt 3}$. Тогда $x^2 = \\tfrac{2}{3}$, $x = \\pm\\sqrt{\\tfrac{2}{3}}$.</p>
         <p>Значения $f = x^2 y = \\tfrac{2}{3}\\cdot y$:</p>
         <ul>
-          <li>$y = \\tfrac{1}{\\sqrt{3}}$: $f = \\tfrac{2}{3\\sqrt{3}} = \\tfrac{2\\sqrt{3}}{9}$;</li>
-          <li>$y = -\\tfrac{1}{\\sqrt{3}}$: $f = -\\tfrac{2\\sqrt{3}}{9}.$</li>
+          <li>$y = \\tfrac{1}{\\sqrt 3}$: $f = \\tfrac{2}{3\\sqrt 3} = \\tfrac{2\\sqrt 3}{9}$;</li>
+          <li>$y = -\\tfrac{1}{\\sqrt 3}$: $f = -\\tfrac{2\\sqrt 3}{9}$.</li>
         </ul>
 
-        <p><strong>Шаг 5. Сравнение.</strong> Кандидаты: $0$, $\\pm\\tfrac{2\\sqrt{3}}{9}.$ Максимум $\\tfrac{2\\sqrt{3}}{9}\\approx 0{,}385$, минимум $-\\tfrac{2\\sqrt{3}}{9}.$</p>
+        <p><strong>Шаг 6. Сравнение.</strong> Кандидаты: $0$, $\\pm\\tfrac{2\\sqrt 3}{9}$. Так как $\\tfrac{2\\sqrt 3}{9} \\approx 0{,}385 > 0$, имеем максимум $\\tfrac{2\\sqrt 3}{9}$ и минимум $-\\tfrac{2\\sqrt 3}{9}$.</p>
 
         <hr>
-        <p><strong>Ответ:</strong> $f_{\\max} = \\dfrac{2\\sqrt{3}}{9}$ (в точках $\\bigl(\\pm\\sqrt{2/3},\\,1/\\sqrt{3}\\bigr)$); $f_{\\min} = -\\dfrac{2\\sqrt{3}}{9}$ (в точках $\\bigl(\\pm\\sqrt{2/3},\\,-1/\\sqrt{3}\\bigr)$).</p>
+        <p><strong>Ответ:</strong> $f_{\\max} = \\dfrac{2\\sqrt 3}{9}$ (в точках $\\bigl(\\pm\\sqrt{2/3};\\,\\tfrac{1}{\\sqrt 3}\\bigr)$); $f_{\\min} = -\\dfrac{2\\sqrt 3}{9}$ (в точках $\\bigl(\\pm\\sqrt{2/3};\\,-\\tfrac{1}{\\sqrt 3}\\bigr)$).</p>
       `
     },
 
