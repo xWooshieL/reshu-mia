@@ -907,6 +907,92 @@ hr {
 .math-content p { margin: 0.4rem 0; }
 .math-content ul, .math-content ol { margin: 0.5rem 0; padding-left: 1.25rem; }
 .math-content .katex-display { margin: 0.6em 0; }
+.formula-display {
+  margin: 0.85rem 0 0.4rem;
+  padding: 0.75rem 1rem;
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+/* ---------- Modal ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: modalFadeIn 0.18s ease-out;
+}
+.modal[hidden] { display: none; }
+.modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 14, 16, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.modal__dialog {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 2rem 1.75rem 1.5rem;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  animation: modalScaleIn 0.2s ease-out;
+}
+.modal__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  margin: 0 auto 1rem;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.modal__icon--warn { background: var(--warning-soft); color: var(--warning); }
+.modal__icon--danger { background: var(--danger-soft); color: var(--danger); }
+.modal__icon--info { background: var(--info-soft); color: var(--info); }
+.modal__icon--success { background: var(--success-soft); color: var(--success); }
+.modal__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.modal__message {
+  margin: 0 0 1.5rem;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.modal__actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.modal__actions .btn { min-width: 110px; justify-content: center; }
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modalScaleIn {
+  from { transform: scale(0.94) translateY(8px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* блокируем скролл боди когда модалка открыта */
+body.modal-open { overflow: hidden; }
 
 /* ---------- Адаптивность ---------- */
 @media (max-width: 920px) {

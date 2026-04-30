@@ -106,6 +106,129 @@
     const nav = $(`.nav__item[data-screen="${name}"]`);
     if (nav && !nav.disabled) nav.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'instant' });
+    // авторендер математики на экране (для статических LaTeX-блоков)
+    if (el) {
+      el.querySelectorAll('.math-content').forEach(renderMath);
+    }
+  }
+
+  // ============================================================
+  // КАСТОМНОЕ МОДАЛЬНОЕ ОКНО (вместо confirm/alert)
+  // ============================================================
+
+  /**
+   * Показывает модальное окно. Возвращает Promise<boolean>:
+   *   true  — пользователь нажал «подтверждаю»
+   *   false — отменил (Esc, клик по фону, кнопка отмены)
+   *
+   * @param {Object} opts
+   * @param {string} opts.title         — заголовок
+   * @param {string} opts.message       — сообщение
+   * @param {string} [opts.confirmText] — текст кнопки подтверждения (по умолчанию «ОК»)
+   * @param {string} [opts.cancelText]  — текст кнопки отмены (если null — кнопки не будет = alert)
+   * @param {string} [opts.variant]     — 'default' | 'warn' | 'danger' | 'info' | 'success'
+   * @param {string} [opts.icon]        — символ для иконки (по умолчанию выбирается по variant)
+   */
+  function showModal(opts) {
+    const o = Object.assign({
+      title: 'Подтверждение',
+      message: '',
+      confirmText: 'ОК',
+      cancelText: 'Отмена',
+      variant: 'default',
+      icon: null,
+    }, opts || {});
+
+    const modal = $('#modal');
+    const titleEl = $('#modal-title');
+    const msgEl = $('#modal-message');
+    const iconEl = $('#modal-icon');
+    const actionsEl = $('#modal-actions');
+
+    if (!modal) {
+      // fallback на нативный
+      const ok = window.confirm((o.title ? o.title + '\n\n' : '') + o.message);
+      return Promise.resolve(o.cancelText === null ? true : ok);
+    }
+
+    titleEl.textContent = o.title;
+    msgEl.textContent = o.message;
+
+    // иконка по варианту
+    const icons = { default: '?', warn: '!', danger: '!', info: 'i', success: '✓' };
+    iconEl.textContent = o.icon || icons[o.variant] || '?';
+    iconEl.className = 'modal__icon' + (o.variant && o.variant !== 'default' ? ` modal__icon--${o.variant}` : '');
+
+    // кнопки
+    actionsEl.innerHTML = '';
+    let cleanup = null;
+
+    return new Promise((resolve) => {
+      const close = (result) => {
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (cleanup) cleanup();
+        resolve(result);
+      };
+
+      // primary
+      const confirmBtn = document.createElement('button');
+      confirmBtn.type = 'button';
+      const isDanger = o.variant === 'danger';
+      confirmBtn.className = 'btn ' + (isDanger ? 'btn--danger' : 'btn--primary');
+      confirmBtn.textContent = o.confirmText;
+      confirmBtn.addEventListener('click', () => close(true));
+
+      // cancel (если не null)
+      let cancelBtn = null;
+      if (o.cancelText !== null) {
+        cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'btn btn--ghost';
+        cancelBtn.textContent = o.cancelText;
+        cancelBtn.addEventListener('click', () => close(false));
+        actionsEl.appendChild(cancelBtn);
+      }
+      actionsEl.appendChild(confirmBtn);
+
+      // закрытие по клику по фону
+      const overlayHandler = (e) => {
+        if (e.target.hasAttribute('data-modal-close')) close(false);
+      };
+      modal.addEventListener('click', overlayHandler);
+
+      // Esc → отмена; Enter → подтверждение
+      const keyHandler = (e) => {
+        if (e.key === 'Escape') { e.preventDefault(); close(false); }
+        else if (e.key === 'Enter') { e.preventDefault(); close(true); }
+      };
+      document.addEventListener('keydown', keyHandler);
+
+      cleanup = () => {
+        modal.removeEventListener('click', overlayHandler);
+        document.removeEventListener('keydown', keyHandler);
+      };
+
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+
+      // фокус на основную кнопку
+      setTimeout(() => confirmBtn.focus(), 50);
+    });
+  }
+
+  // удобные шорткаты
+  function showAlert(title, message, opts) {
+    return showModal(Object.assign({
+      title, message, confirmText: 'Понятно', cancelText: null, variant: 'info',
+    }, opts || {}));
+  }
+  function showConfirm(title, message, opts) {
+    return showModal(Object.assign({
+      title, message, confirmText: 'Подтвердить', cancelText: 'Отмена', variant: 'warn',
+    }, opts || {}));
   }
 
   // ============================================================
@@ -216,8 +339,11 @@
       if (timerSec === 0) {
         clearInterval(timerId);
         timerId = null;
-        alert('Время вышло! Сейчас будут показаны результаты.');
-        goToResults({ skipConfirm: true });
+        showAlert(
+          'Время вышло',
+          'Прошло 180 минут. Сейчас будут показаны результаты с решениями и критериями для самооценки.',
+          { variant: 'warn', icon: '⏰' }
+        ).then(() => goToResults({ skipConfirm: true }));
       }
     }, 1000);
   }
@@ -436,12 +562,20 @@
   // RESULTS
   // ============================================================
 
-  function goToResults(opts) {
+  async function goToResults(opts) {
     opts = opts || {};
     const fromRestore = opts.fromRestore;
     const skipConfirm = opts.skipConfirm;
     if (!fromRestore && !skipConfirm) {
-      if (!confirm('Завершить вариант? Таймер остановится, ты увидишь решения и выставишь самооценку.')) return;
+      const ok = await showModal({
+        title: 'Завершить вариант?',
+        message: 'Таймер остановится. После завершения ты увидишь решения каждой задачи, критерии оценивания и сможешь выставить самооценку.',
+        confirmText: 'Завершить',
+        cancelText: 'Продолжить решать',
+        variant: 'warn',
+        icon: '⚑',
+      });
+      if (!ok) return;
     }
     stopTimer();
     timerPaused = true;
@@ -460,15 +594,17 @@
 
     summary.innerHTML = `
       <div id="grade-output"></div>
-      <div class="results__formula">
-        <strong>Формула:</strong> итоговая оценка = <code>min(10, (твои_баллы + 2) / 3)</code>.
-        Максимум за вариант: <strong>${totalMaxScore()}</strong> баллов.
+      <div class="results__formula math-content">
+        <strong>Формула:</strong>
+        <p class="formula-display" style="margin-top:0.5rem;">$$\\text{оценка} = \\min\\!\\left(10,\\ \\dfrac{\\text{твои баллы} + 2}{3}\\right)$$</p>
+        <p class="muted small" style="margin-top:0.4rem;">Максимум за вариант: <strong>${totalMaxScore()}</strong> баллов.</p>
       </div>
       <div style="display:flex; gap:0.5rem; margin-top:1rem; flex-wrap:wrap;">
         <button type="button" class="btn btn--primary" id="btn-recompute">Пересчитать оценку</button>
         <button type="button" class="btn btn--ghost" id="btn-new-variant">Сгенерировать новый вариант</button>
       </div>
     `;
+    renderMath(summary);
 
     detail.innerHTML = '';
 
@@ -564,8 +700,16 @@
 
     // кнопки
     $('#btn-recompute').addEventListener('click', updateGradeOutput);
-    $('#btn-new-variant').addEventListener('click', () => {
-      if (!confirm('Сгенерировать новый вариант? Текущие результаты будут потеряны.')) return;
+    $('#btn-new-variant').addEventListener('click', async () => {
+      const ok = await showModal({
+        title: 'Сгенерировать новый вариант?',
+        message: 'Текущие результаты, черновики и самооценки будут потеряны. Это действие нельзя отменить.',
+        confirmText: 'Да, сгенерировать',
+        cancelText: 'Оставить как есть',
+        variant: 'danger',
+        icon: '↻',
+      });
+      if (!ok) return;
       phase = 'idle';
       currentVariant = null;
       drafts = {}; solved = {}; selfGrades = {};
@@ -603,9 +747,9 @@
           <strong>${formatScore(total)}</strong>
           <span>сумма баллов из ${totalMaxScore()}</span>
         </div>
-        <div class="results__breakdown-item">
+        <div class="results__breakdown-item math-content">
           <strong>${formatScore(grade)}</strong>
-          <span>= min(10, (${formatScore(total)} + 2) / 3)</span>
+          <span>$= \\min(10,\\ \\frac{${formatScore(total)} + 2}{3})$</span>
         </div>
         <div class="results__breakdown-item">
           <strong>${countSolved()}/${TOTAL_SLOTS}</strong>
@@ -614,6 +758,7 @@
       </div>
       ${breakdown}
     `;
+    renderMath(out);
   }
 
   function perSlotBreakdownHtml() {

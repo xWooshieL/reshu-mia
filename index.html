@@ -91,18 +91,19 @@
         <div class="feature">
           <div class="feature__icon">∑</div>
           <h3>Оценка по формуле</h3>
-          <p>Итог = (сумма баллов + 2) / 3, но&nbsp;не&nbsp;более 10. Самооценка по&nbsp;каждой задаче.</p>
+          <p class="math-content">$\text{итог} = \min\!\left(10,\ \dfrac{\text{баллы} + 2}{3}\right)$. Самооценка по&nbsp;каждой задаче.</p>
         </div>
       </div>
 
-      <div class="info-card">
+      <div class="info-card math-content">
         <h2>Как формируется оценка</h2>
         <ul class="info-list">
           <li><strong>1 балл</strong> &mdash; задача с одной звёздочкой (★) &mdash; типы №1&ndash;10</li>
           <li><strong>2 балла</strong> &mdash; задача с двумя звёздочками (★★) &mdash; типы №11&ndash;16</li>
           <li><strong>3 балла</strong> &mdash; задача с тремя звёздочками (★★★) &mdash; типы №17&ndash;20</li>
         </ul>
-        <p class="muted">Максимум за вариант: 1·10 + 2·6 + 3·4 = <strong>34 балла</strong>. Итог: <code>min(10, (балл + 2) / 3)</code>.</p>
+        <p class="muted">Максимум за вариант: $1\cdot 10 + 2\cdot 6 + 3\cdot 4 = \mathbf{34}$ балла. Итог:</p>
+        <p class="formula-display">$$\text{оценка} = \min\!\left(10,\ \dfrac{\text{баллы} + 2}{3}\right)$$</p>
       </div>
     </section>
 
@@ -134,7 +135,7 @@
           <p class="muted">Поле для черновика автоматически сохраняется. Можно отметить задачу как решённую, нажав кнопку <strong>«Отметить решённой»</strong>.</p>
         </div>
 
-        <div class="info-block">
+        <div class="info-block math-content">
           <h2>Распределение баллов</h2>
           <table class="grade-table">
             <thead>
@@ -147,7 +148,8 @@
               <tr class="grade-table__total"><td colspan="3">Максимум баллов</td><td><strong>34</strong></td></tr>
             </tbody>
           </table>
-          <p class="muted">Итоговая оценка: <code>оценка = min(10, (твои_баллы + 2) / 3)</code>.</p>
+          <p class="muted">Итоговая оценка по формуле:</p>
+          <p class="formula-display">$$\text{оценка} = \min\!\left(10,\ \dfrac{\text{твои баллы} + 2}{3}\right)$$</p>
         </div>
 
         <div class="pre-exam__actions">
@@ -235,9 +237,20 @@
   <footer class="footer">
     <div class="footer__inner">
       <span class="muted small">РешуМИА &middot; учебный проект для подготовки к экзамену по курсу «Математика в действии»</span>
-      <a href="https://github.com" target="_blank" rel="noopener" class="muted small" id="github-link">GitHub →</a>
+      <a href="https://github.com/xWooshieL/reshu-mia" target="_blank" rel="noopener" class="muted small" id="github-link">GitHub →</a>
     </div>
   </footer>
+</div>
+
+<!-- ========== MODAL (custom confirm/alert) ========== -->
+<div class="modal" id="modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal__overlay" data-modal-close></div>
+  <div class="modal__dialog" role="document">
+    <div class="modal__icon" id="modal-icon" aria-hidden="true"></div>
+    <h3 class="modal__title" id="modal-title">Подтверждение</h3>
+    <p class="modal__message" id="modal-message"></p>
+    <div class="modal__actions" id="modal-actions"></div>
+  </div>
 </div>
 
 <!-- KaTeX (рендер LaTeX) -->
