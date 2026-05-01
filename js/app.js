@@ -326,7 +326,7 @@
           <span class="lecture-box__corner-tr">Сем. ${lec.semester || 1}</span>
           <p class="lecture-box__title math-content">${lec.title || 'Без названия'}</p>
           <div class="lecture-box__footer">
-            <span class="lecture-box__play">▶ Смотреть</span>
+            <span class="lecture-box__play">▶ Смотреть на Я.Диске ↗</span>
           </div>
         `;
         card.addEventListener('click', () => openPlayer(lec.id));
@@ -465,117 +465,25 @@
     `;
   }
 
-  async function openPlayer(lectureId) {
+  // Встроенный <video> плеер не работает с Я.Диском: тот отдаёт
+  // Content-Disposition: attachment в подписанной URL, и Chrome отказывается
+  // играть такой поток (MediaError 4). Обойти это без серверного прокси
+  // нельзя, поэтому просто открываем лекцию на самом Я.Диске в новой
+  // вкладке — там их собственный плеер работает гарантированно.
+  function openPlayer(lectureId) {
     const lectures = getLectures();
     const lec = lectures.find((l) => l.id === lectureId);
     if (!lec) {
       console.warn('[player] Лекция не найдена:', lectureId);
       return;
     }
-
-    console.log('[player] Открываем лекцию №' + lec.num + ':', lec.title);
-
-    playerCurrentLectureId = lectureId;
-    cancelAutoNext();
-
-    const playerEl = $('#player');
-    const videoEl = $('#player-video');
-    const loadingEl = $('#player-loading');
-    const errorEl = $('#player-error');
-
-    $('#player-category').textContent = categoryLabel(lec.category);
-    $('#player-semester').textContent = 'Семестр ' + (lec.semester || 1);
-    $('#player-num').textContent = '№' + lec.num;
-    $('#player-title').innerHTML = lec.title || 'Лекция';
-    renderMath($('#player-title'));
-
-    // Сброс состояния
-    videoEl.hidden = true;
-    try { videoEl.pause(); } catch (_) {}
-    videoEl.removeAttribute('src');
-    videoEl.removeAttribute('poster');
-    videoEl.onerror = null;
-    videoEl.load();
-    errorEl.hidden = true;
-    errorEl.innerHTML = '';
-    loadingEl.hidden = false;
-
-    // Открываем модалку
-    playerEl.hidden = false;
-    playerEl.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('modal-open');
-
-    updatePlayerNav();
-
-    let directUrl = null;
-    let previewUrl = null;
-    try {
-      const res = await resolveYandexResources(lec.yandex);
-      directUrl = res.directUrl;
-      previewUrl = res.previewUrl;
-    } catch (e) {
-      console.error('[player] API ошибка:', e);
-      showPlayerFallback(lec, null, e.message);
+    const url = originalYandexUrl(lec.yandex, lec);
+    if (!url || url === '#') {
+      showAlert('У лекции нет ссылки на Я.Диск.');
       return;
     }
-
-    if (playerCurrentLectureId !== lectureId) return;
-
-    // Нет прямой ссылки — сразу fallback
-    if (!directUrl) {
-      showPlayerFallback(lec, previewUrl, 'Яндекс.Диск не вернул прямую ссылку (для /i/… ссылок часто требуется капча).');
-      return;
-    }
-
-    // Пробуем встроенный плеер. Ставим poster = preview.
-    if (previewUrl) videoEl.poster = previewUrl;
-
-    let canplayHit = false;
-    let fallbackFired = false;
-
-    const triggerFallback = (reason) => {
-      if (fallbackFired) return;
-      if (playerCurrentLectureId !== lectureId) return;
-      fallbackFired = true;
-      videoEl.onerror = null;
-      console.warn('[player] fallback:', reason);
-      showPlayerFallback(lec, previewUrl, reason);
-    };
-
-    videoEl.onerror = () => {
-      const err = videoEl.error;
-      const codes = { 1: 'Загрузка прервана', 2: 'Ошибка сети', 3: 'Не удалось декодировать', 4: 'Формат не поддерживается браузером' };
-      const code = err ? err.code : '?';
-      const codeName = err ? (codes[err.code] || 'неизвестно') : 'n/a';
-      triggerFallback(`MediaError ${code} — ${codeName}. Я.Диск отдаёт файл с заголовком disposition=attachment, который блокирует воспроизведение во встроенном плеере.`);
-    };
-
-    videoEl.addEventListener('canplay', function onCanPlay() {
-      canplayHit = true;
-      console.log('[player] canplay — видео играет!');
-      videoEl.removeEventListener('canplay', onCanPlay);
-    });
-
-    // Устанавливаем src
-    loadingEl.hidden = true;
-    videoEl.hidden = false;
-    videoEl.src = directUrl;
-    videoEl.load();
-
-    // Таймер: если за 6 секунд ничего не произошло — fallback
-    setTimeout(() => {
-      if (!canplayHit && !fallbackFired && playerCurrentLectureId === lectureId) {
-        triggerFallback('Видео не начало загружаться за 6 секунд.');
-      }
-    }, 6000);
-
-    // Пробуем запустить
-    const playPromise = videoEl.play();
-    if (playPromise && playPromise.catch) {
-      playPromise.catch((e) => {
-        console.log('[player] autoplay заблокирован:', e && e.message);
-      });
-    }
+    console.log('[player] Открываем на Я.Диске в новой вкладке:', lec.title);
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   function closePlayer() {
@@ -2487,9 +2395,13 @@
       });
     }
 
-    // плеер
-    const playerEl = $('#player');
-    if (playerEl) {
+    // Встроенный плеер отключён — openPlayer теперь просто открывает
+    // лекцию на Я.Диске в новой вкладке (disposition=attachment
+    // блокирует HTMLVideoElement, исправить без прокси-сервера нельзя).
+    // Модалка-плеер остаётся в DOM (на случай возвращения), но
+    // обработчиков не вешаем и наружу не показываем.
+    if (false) {
+      const playerEl = $('#player');
       $('#player-close').addEventListener('click', closePlayer);
       playerEl.addEventListener('click', (e) => {
         if (e.target.hasAttribute('data-player-close')) closePlayer();
