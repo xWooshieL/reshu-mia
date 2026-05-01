@@ -825,7 +825,6 @@
       exam: '/exam',
       results: '/results',
       final: '/final',
-      pdf: '/pdf',
       presets: '/presets',
       bank: '/bank',
       learn: '/learn',
@@ -895,12 +894,6 @@
 
     if (a === 'final') {
       if (phase === 'results') showScreen('final');
-      else { writeHash('/'); showScreen('home'); }
-      return;
-    }
-
-    if (a === 'pdf') {
-      if (currentVariant) openPrintView();
       else { writeHash('/'); showScreen('home'); }
       return;
     }
@@ -2166,35 +2159,138 @@
     `;
   }
 
-  // Где мы были до PDF-превью (чтобы «← Назад» возвращал туда)
-  let pdfReturnScreen = 'exam';
-
   function openPrintView() {
     if (!currentVariant) {
       showAlert('Сначала начни вариант, тогда появится PDF.');
       return;
     }
-    const root = $('#print-root');
-    if (!root) return;
-    // Запоминаем откуда пришли
-    pdfReturnScreen = (phase === 'results') ? 'results' : 'exam';
-    root.innerHTML = buildPrintPages();
-    renderMath(root);
-    showScreen('pdf');
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }
 
-  function closePrintView() {
-    showScreen(pdfReturnScreen);
-  }
+    const variantName = (currentVariantMeta && currentVariantMeta.title)
+      ? currentVariantMeta.title
+      : 'Случайный вариант';
+    const contentHtml = buildPrintPages();
 
-  function triggerPrintDialog() {
-    // Класс для управления @media print (скрывает всё кроме #print-root)
-    document.body.classList.add('printing');
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => document.body.classList.remove('printing'), 300);
-    }, 60);
+    // CSS для нового окна — компактный, landscape, без page-breaks между частями
+    const style = `
+      @page { size: A4 landscape; margin: 10mm 9mm; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; background: #fff; color: #000;
+                   font-family: "Times New Roman", Times, Georgia, serif;
+                   font-size: 10.5pt; line-height: 1.32; }
+      .print-doc { padding: 0; }
+
+      .print-head { display: flex; justify-content: space-between; align-items: baseline;
+                    font-size: 8.5pt; color: #000; padding-bottom: 3pt;
+                    border-bottom: 0.4pt solid #000; margin-bottom: 8pt; }
+
+      .print-variant-title { text-align: center; font-size: 11pt; font-weight: 700;
+                             font-style: italic; margin: 0 0 10pt; }
+
+      /* Инфо-страница — 2 колонки, на первой странице */
+      .print-info { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10mm;
+                    padding-bottom: 10pt; border-bottom: 0.4pt solid #999;
+                    margin-bottom: 12pt; break-after: page; page-break-after: always; }
+      .print-info__h1 { text-align: center; font-size: 13pt; font-weight: 700;
+                        margin: 0 0 8pt; line-height: 1.3; }
+      .print-info__sub { text-align: center; font-weight: 700; margin: 0 0 8pt; }
+      .print-info__body p { margin: 0 0 5pt; text-align: justify; }
+      .print-info__wish { text-align: center; margin-top: 8pt !important; }
+      .print-info__ol { margin: 3pt 0 8pt 1.3em; padding: 0; }
+      .print-info__ol li { margin: 0 0 4pt; }
+      .print-info__ol code { font-family: "Consolas", "Courier New", monospace;
+                             font-size: 9.5pt; background: #f2f2f2;
+                             padding: 0 3px; border-radius: 2px; }
+      .print-info__notice-small { font-size: 9pt; color: #555;
+                                  text-align: center; margin: 0 0 4pt; }
+      .print-info__h2 { text-align: center; font-size: 11pt; font-weight: 700;
+                        margin: 8pt 0 4pt; }
+      .print-info__col > .print-info__h2:first-child { margin-top: 0; }
+      .print-info__formulas p { margin: 2pt 0; text-align: center; }
+      .print-info__formulas .katex { font-size: 9.5pt !important; }
+
+      /* Части подряд, БЕЗ разрыва страниц между ними */
+      .print-part { break-before: avoid; page-break-before: avoid; }
+      .print-part + .print-part { margin-top: 10pt; }
+      .print-part__title { text-align: center; font-size: 12pt; font-weight: 700;
+                           margin: 0 0 8pt; break-after: avoid; page-break-after: avoid; }
+      .print-part__columns { columns: 2; column-gap: 8mm; column-fill: balance; }
+
+      /* Задача */
+      .print-task { break-inside: avoid; page-break-inside: avoid;
+                    margin-bottom: 10pt; display: block; }
+      .print-task__head { display: flex; align-items: center; gap: 6pt;
+                          margin-bottom: 3pt; break-inside: avoid; }
+      .print-task__num { display: inline-block; min-width: 32pt; padding: 2pt 8pt;
+                         text-align: center; font-weight: 700; font-size: 11pt;
+                         border: 0.8pt solid #000; background: #fff;
+                         flex-shrink: 0; letter-spacing: 0.02em; }
+      .print-task__meta { font-size: 8pt; color: #555; font-style: italic; line-height: 1.25; }
+      .print-task__body { text-align: justify; font-size: 10pt; }
+      .print-task__body p { margin: 0 0 3pt; }
+      .print-task__body .katex { font-size: 10pt !important; }
+      .print-task__body img, .print-task__body svg { max-width: 100%; height: auto; }
+
+      .print-foot { text-align: center; font-size: 8pt; color: #555;
+                    margin-top: 10pt; padding-top: 6pt; border-top: 0.4pt dashed #aaa; }
+
+      /* Тулбар для предпросмотра (скрывается при печати) */
+      .toolbar { position: fixed; top: 0; left: 0; right: 0;
+                 display: flex; gap: 0.6rem; align-items: center; justify-content: center;
+                 background: #222; color: #fff; padding: 8px 12px; z-index: 10000;
+                 font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 14px; }
+      .toolbar button { padding: 6px 14px; font-size: 14px; cursor: pointer;
+                        background: #fff; color: #111; border: 0; border-radius: 4px;
+                        font-weight: 600; }
+      .toolbar button:hover { background: #f0f0f0; }
+      body { padding-top: 48px; }
+
+      @media print {
+        .toolbar { display: none !important; }
+        body { padding-top: 0; }
+      }
+    `;
+
+    const fullHtml = '<!doctype html>\n<html lang="ru"><head>'
+      + '<meta charset="UTF-8">'
+      + '<title>РешуМИА — ' + escapeHtml(variantName) + '</title>'
+      + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">'
+      + '<style>' + style + '</style>'
+      + '</head><body>'
+      + '<div class="toolbar">'
+      +   '<button type="button" onclick="window.print()">⬇ Скачать / распечатать PDF</button>'
+      +   '<button type="button" onclick="window.close()">Закрыть</button>'
+      + '</div>'
+      + contentHtml
+      + '<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"><\/script>'
+      + '<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"><\/script>'
+      + '<script>'
+      +   'window.addEventListener("load", function(){'
+      +     'function go(){'
+      +       'if (window.renderMathInElement){'
+      +         'renderMathInElement(document.body, {'
+      +           'delimiters: ['
+      +             '{left:"$$",right:"$$",display:true},'
+      +             '{left:"$",right:"$",display:false},'
+      +             '{left:"\\\\[",right:"\\\\]",display:true},'
+      +             '{left:"\\\\(",right:"\\\\)",display:false}'
+      +           '], throwOnError:false'
+      +         '});'
+      +         'setTimeout(function(){ window.print(); }, 350);'
+      +       '} else { setTimeout(go, 120); }'
+      +     '}'
+      +     'go();'
+      +   '});'
+      + '<\/script>'
+      + '</body></html>';
+
+    const w = window.open('', '_blank');
+    if (!w) {
+      showAlert('Не удалось открыть новое окно. Разреши всплывающие окна для сайта и попробуй ещё раз.');
+      return;
+    }
+    w.document.open();
+    w.document.write(fullHtml);
+    w.document.close();
   }
 
   // ============================================================
@@ -2323,12 +2419,6 @@
 
     const pdfBtn = $('#btn-pdf');
     if (pdfBtn) pdfBtn.addEventListener('click', () => openPrintView());
-
-    const pdfBackBtn = $('#btn-pdf-back');
-    if (pdfBackBtn) pdfBackBtn.addEventListener('click', () => closePrintView());
-
-    const pdfDownloadBtn = $('#btn-pdf-download');
-    if (pdfDownloadBtn) pdfDownloadBtn.addEventListener('click', () => triggerPrintDialog());
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') persist();
