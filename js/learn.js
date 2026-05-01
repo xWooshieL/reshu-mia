@@ -27,10 +27,14 @@ window.LEARN_DATA = (function () {
 
   const lectures = [
     // ─── ЛИНЕЙНАЯ АЛГЕБРА ──────────────────────────────────────────
+    // (для первых двух заменил /i/… на путь в общей папке — API Яндекс.Диска
+    //  не выдаёт прямую ссылку по одиночным /i/… публикациям из-за капчи)
     { id:  1, num:  1, title: 'Проекция точки на прямую в $\\mathbb{R}^n$', category: 'linalg', semester: 1,
-      yandex: U('https://disk.yandex.ru/i/NVe2IateQp_AfQ') },
+      yandex: F('/S1/CU_lesson_S1E04/CU_lesson_S1E4.1.1_Проекция точки на прямую в R^n.mp4'),
+      fallbackUrl: 'https://disk.yandex.ru/i/NVe2IateQp_AfQ' },
     { id:  2, num:  2, title: 'Проекция вектора на подпространство в $\\mathbb{R}^n$', category: 'linalg', semester: 1,
-      yandex: U('https://disk.yandex.ru/i/RNr9HRGS-RPKFA') },
+      yandex: F('/S1/CU_lesson_S1E04/CU_lesson_S1E4.1.2_Проекция вектора на подпространство в R^n.mp4'),
+      fallbackUrl: 'https://disk.yandex.ru/i/RNr9HRGS-RPKFA' },
     { id:  3, num:  3, title: 'Линейная независимость', category: 'linalg', semester: 1,
       yandex: F('/CU_lesson_S2E02/1.1. Линейная независимость.mp4') },
     { id:  4, num:  4, title: 'Метод ортогонализации Грама–Шмидта', category: 'linalg', semester: 1,

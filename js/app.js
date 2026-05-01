@@ -361,7 +361,7 @@
 
   // ------- Yandex.Disk — получение прямой ссылки на .mp4 -------
   async function resolveYandexVideo(y) {
-    if (!y) throw new Error('Нет ссылки');
+    if (!y) throw new Error('Нет ссылки на Яндекс.Диск');
     const api = new URL('https://cloud-api.yandex.net/v1/disk/public/resources/download');
     if (y.url) {
       api.searchParams.set('public_key', y.url);
@@ -369,30 +369,63 @@
       api.searchParams.set('public_key', y.folder);
       if (y.path) api.searchParams.set('path', y.path);
     } else {
-      throw new Error('Неверный формат ссылки');
+      throw new Error('Неверный формат ссылки на Яндекс.Диск');
     }
-    const res = await fetch(api.toString());
-    if (!res.ok) throw new Error('Яндекс.Диск API вернул ' + res.status);
+    const apiUrl = api.toString();
+    console.log('[player] GET', apiUrl);
+    const res = await fetch(apiUrl);
+    if (!res.ok) {
+      throw new Error('Яндекс.Диск API вернул ' + res.status + ' ' + res.statusText);
+    }
     const data = await res.json();
-    if (!data.href) throw new Error('Нет прямой ссылки в ответе API');
+    console.log('[player] API ответ:', data);
+    if (!data.href) {
+      // Бывает для одиночных /i/… ссылок, когда Яндекс требует капчу
+      throw new Error('API Яндекс.Диска не вернул прямую ссылку (антибот-защита или приватный файл). Попробуй открыть в новой вкладке.');
+    }
     return data.href;
   }
 
-  function originalYandexUrl(y) {
+  function originalYandexUrl(y, lecture) {
+    // Приоритет: явный fallbackUrl (если задан) → оригинальная ссылка
+    if (lecture && lecture.fallbackUrl) return lecture.fallbackUrl;
     if (!y) return '#';
     if (y.url) return y.url;
     if (y.folder) {
-      if (y.path) return y.folder + '/' + y.path.split('/').map((p) => encodeURIComponent(p)).join('/').replace(/^\//, '');
+      if (y.path) return y.folder + '/' + y.path.split('/').filter(Boolean).map(encodeURIComponent).join('/');
       return y.folder;
     }
     return '#';
   }
 
   // ------- Плеер -------
+  function showPlayerError(lec, message, directUrl) {
+    const errorEl = $('#player-error');
+    const loadingEl = $('#player-loading');
+    const videoEl = $('#player-video');
+    loadingEl.hidden = true;
+    videoEl.hidden = true;
+    errorEl.hidden = false;
+    const yandexFallback = originalYandexUrl(lec.yandex, lec);
+    errorEl.innerHTML = `
+      <p><strong>Не удалось загрузить видео во встроенный плеер</strong></p>
+      <p class="muted small" style="margin:0.5rem 0 1.25rem; max-width:480px; margin-left:auto; margin-right:auto;">${escapeHtml(message || 'Неизвестная ошибка.')}</p>
+      <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
+        <a href="${escapeHtml(yandexFallback)}" target="_blank" rel="noopener" class="btn btn--primary">Открыть на Яндекс.Диске →</a>
+        ${directUrl ? `<a href="${escapeHtml(directUrl)}" target="_blank" rel="noopener" class="btn btn--ghost">Прямая ссылка на файл</a>` : ''}
+      </div>
+    `;
+  }
+
   async function openPlayer(lectureId) {
     const lectures = getLectures();
     const lec = lectures.find((l) => l.id === lectureId);
-    if (!lec) return;
+    if (!lec) {
+      console.warn('[player] Лекция не найдена:', lectureId);
+      return;
+    }
+
+    console.log('[player] Открываем лекцию №' + lec.num + ':', lec.title);
 
     playerCurrentLectureId = lectureId;
     cancelAutoNext();
@@ -408,35 +441,80 @@
     $('#player-title').innerHTML = lec.title || 'Лекция';
     renderMath($('#player-title'));
 
-    // спрятать видео, показать loading
+    // Сброс состояния
     videoEl.hidden = true;
-    videoEl.pause();
+    try { videoEl.pause(); } catch (_) {}
     videoEl.removeAttribute('src');
     videoEl.load();
     errorEl.hidden = true;
     loadingEl.hidden = false;
 
-    // fallback-ссылка (на всякий случай)
-    $('#player-fallback-link').href = originalYandexUrl(lec.yandex);
-
-    // открыть модалку
+    // Открываем модалку
     playerEl.hidden = false;
     playerEl.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
 
-    // обновим prev/next кнопки
     updatePlayerNav();
 
+    let directUrl = null;
     try {
-      const directUrl = await resolveYandexVideo(lec.yandex);
-      loadingEl.hidden = true;
-      videoEl.hidden = false;
-      videoEl.src = directUrl;
-      videoEl.play().catch(() => { /* autoplay может быть заблокирован — это нормально */ });
+      directUrl = await resolveYandexVideo(lec.yandex);
+      console.log('[player] Прямая ссылка получена, длина URL:', directUrl.length);
     } catch (e) {
-      console.error('Video load failed:', e);
-      loadingEl.hidden = true;
-      errorEl.hidden = false;
+      console.error('[player] Не удалось получить прямую ссылку:', e);
+      showPlayerError(lec, e.message, null);
+      return;
+    }
+
+    // Проверим, что текущая лекция ещё та же (пользователь мог переключиться)
+    if (playerCurrentLectureId !== lectureId) return;
+
+    // Вешаем обработчик ошибок ДО установки src
+    const onVideoError = (ev) => {
+      const err = videoEl.error;
+      let msg = 'Браузер не смог воспроизвести видео.';
+      if (err) {
+        const codes = {
+          1: 'Загрузка прервана',
+          2: 'Ошибка сети',
+          3: 'Не удалось декодировать',
+          4: 'Формат не поддерживается браузером',
+        };
+        msg += ' Код: ' + err.code + ' (' + (codes[err.code] || 'неизвестно') + ').';
+      }
+      console.error('[player] <video> error:', err, ev);
+      showPlayerError(lec, msg, directUrl);
+    };
+    videoEl.onerror = onVideoError;
+
+    // Устанавливаем src и показываем
+    loadingEl.hidden = true;
+    videoEl.hidden = false;
+    videoEl.src = directUrl;
+    videoEl.load();
+
+    // Некоторые браузеры (Safari) не бросают `error`, если ответ 403 —
+    // проверим через canplay-таймер
+    let canplayHit = false;
+    const onCanPlay = () => {
+      canplayHit = true;
+      console.log('[player] canplay — видео готово к воспроизведению');
+      videoEl.removeEventListener('canplay', onCanPlay);
+    };
+    videoEl.addEventListener('canplay', onCanPlay);
+    setTimeout(() => {
+      if (!canplayHit && !videoEl.error && playerCurrentLectureId === lectureId && !errorEl.hidden === false) {
+        // прошло 15 секунд, а canplay не случился — что-то не так
+        console.warn('[player] canplay не произошёл за 15 с, возможно проблемы с загрузкой');
+      }
+    }, 15000);
+
+    // Пробуем запустить (autoplay может быть заблокирован браузером — это нормально)
+    const playPromise = videoEl.play();
+    if (playPromise && playPromise.catch) {
+      playPromise.catch((e) => {
+        console.log('[player] autoplay заблокирован, жди ручного клика:', e && e.message);
+      });
     }
   }
 
