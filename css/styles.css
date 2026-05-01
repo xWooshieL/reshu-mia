@@ -433,6 +433,93 @@ hr {
   margin-top: 2rem;
 }
 
+/* ---------- Presets (готовые варианты) ---------- */
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.preset-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.3rem;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.preset-card:hover {
+  border-color: var(--ink);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.preset-card:active { transform: translateY(0); }
+.preset-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.preset-card__subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+.presets-badge {
+  display: inline-block;
+  padding: 0.3rem 0.65rem;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.presets-badge--demo { background: var(--info-soft); color: var(--info); }
+.presets-badge--v1 { background: var(--warning-soft); color: var(--warning); }
+.presets-badge--v2 { background: var(--success-soft); color: var(--success); }
+
+.preset-card__title {
+  margin: 0.3rem 0 0.1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.preset-card__desc {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.preset-card__footer {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.preset-card__ok {
+  color: var(--success);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.preset-card__partial {
+  color: var(--warning);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.preset-card__cta {
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
 /* ---------- Bank (типы задач) ---------- */
 .bank-grid {
   display: grid;

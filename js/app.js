@@ -169,10 +169,112 @@
   // ============================================================
 
   let currentVariant = null; // { 1: task, 2: task, ... 20: task }
+  let currentVariantMeta = null; // { key, title, subtitle } или null для случайного
+  let pendingPreset = null;  // выбранный preset, ждущий нажатия "Начать"
   let drafts = {};           // { slot: текст черновика }
   let solved = {};           // { slot: true/false }
   let selfGrades = {};       // { slot: число баллов }
   let selfCriteria = {};     // { slot: [bool, bool, ...] — отмеченные критерии (чекбоксы) }
+
+  // ============================================================
+  // ГОТОВЫЕ ВАРИАНТЫ (presets)
+  // ============================================================
+
+  const PRESETS = [
+    {
+      key: 'exam2025-demo',
+      title: 'Демо летнего экзамена',
+      subtitle: '2024–2025',
+      desc: 'Демо-вариант реального экзамена по курсу МИА за летнюю сессию 2025. Выдавался студентам для подготовки.',
+      badge: 'Демо',
+      badgeCls: 'presets-badge--demo',
+    },
+    {
+      key: 'exam2025-v1',
+      title: 'Летний экзамен · Вариант 1',
+      subtitle: '2024–2025',
+      desc: 'Первый вариант реального экзамена, который сдавали летом 2025. 20 задач, 180 минут.',
+      badge: 'Вариант 1',
+      badgeCls: 'presets-badge--v1',
+    },
+    {
+      key: 'exam2025-v2',
+      title: 'Летний экзамен · Вариант 2',
+      subtitle: '2024–2025',
+      desc: 'Второй вариант реального экзамена. Задачи аналогичны варианту 1, но с другими числами и формулировками.',
+      badge: 'Вариант 2',
+      badgeCls: 'presets-badge--v2',
+    },
+  ];
+
+  /**
+   * Собирает готовый вариант по префиксу id.
+   * Для каждого типа ищет задачу с id, начинающимся на prefix+'-'.
+   * Если не нашлось — берёт случайную задачу из этого типа (fallback).
+   * Возвращает { variant: { slot: task }, missingSlots: [int] }.
+   */
+  function collectPresetVariant(prefix) {
+    const bank = window.TASK_BANK || {};
+    const variant = {};
+    const missingSlots = [];
+    for (let s = 1; s <= TOTAL_SLOTS; s++) {
+      const tasks = (bank[s] && bank[s].tasks) || [];
+      const hit = tasks.find((t) => t.id && t.id.startsWith(prefix + '-'));
+      if (hit) {
+        variant[s] = hit;
+      } else {
+        // fallback: случайная задача из этого типа
+        if (tasks.length) {
+          variant[s] = tasks[Math.floor(Math.random() * tasks.length)];
+        } else {
+          variant[s] = makePlaceholderTask(s);
+        }
+        missingSlots.push(s);
+      }
+    }
+    return { variant, missingSlots };
+  }
+
+  function buildPresetsGrid() {
+    const grid = $('#presets-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    PRESETS.forEach((p) => {
+      const { missingSlots } = collectPresetVariant(p.key);
+      const complete = missingSlots.length === 0;
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'preset-card';
+      card.innerHTML = `
+        <div class="preset-card__top">
+          <span class="presets-badge ${p.badgeCls}">${escapeHtml(p.badge)}</span>
+          <span class="preset-card__subtitle">${escapeHtml(p.subtitle)}</span>
+        </div>
+        <h3 class="preset-card__title">${escapeHtml(p.title)}</h3>
+        <p class="preset-card__desc">${escapeHtml(p.desc)}</p>
+        <div class="preset-card__footer">
+          <span class="preset-card__meta">
+            ${complete
+              ? '<span class="preset-card__ok">● Все 20 задач из оригинала</span>'
+              : `<span class="preset-card__partial">● ${20 - missingSlots.length}/20 из оригинала, остальные — случайные</span>`}
+          </span>
+          <span class="preset-card__cta">Начать →</span>
+        </div>
+      `;
+      card.addEventListener('click', () => openPresetInfo(p.key));
+      grid.appendChild(card);
+    });
+  }
+
+  function openPresetInfo(presetKey) {
+    const p = PRESETS.find((x) => x.key === presetKey);
+    if (!p) return;
+    pendingPreset = presetKey;
+    // обновим заголовок инфо-экрана
+    const titleEl = $('#pre-exam-title');
+    if (titleEl) titleEl.textContent = p.title + ' · ' + p.subtitle;
+    showScreen('pre-exam');
+  }
   let timerSec = TIMER_DEFAULT_SEC;
   let timerId = null;
   let timerPaused = false;
@@ -525,7 +627,17 @@
   }
 
   function startNewVariant() {
-    currentVariant = pickVariant();
+    // если был выбран preset — используем его; иначе случайный
+    if (pendingPreset) {
+      const preset = PRESETS.find((p) => p.key === pendingPreset);
+      const { variant } = collectPresetVariant(pendingPreset);
+      currentVariant = variant;
+      currentVariantMeta = preset ? { key: preset.key, title: preset.title + ' · ' + preset.subtitle } : null;
+      pendingPreset = null;
+    } else {
+      currentVariant = pickVariant();
+      currentVariantMeta = null;
+    }
     drafts = {};
     solved = {};
     selfGrades = {};
@@ -1346,14 +1458,27 @@
 
   function init() {
     buildBankGrid();
+    buildPresetsGrid();
     buildConversionTable();
 
     $('#btn-start-variant').addEventListener('click', () => {
-      // показываем экран с правилами перед стартом
+      pendingPreset = null;
+      // сброс заголовка на дефолтный
+      const titleEl = $('#pre-exam-title');
+      if (titleEl) titleEl.textContent = 'Информация перед началом';
       showScreen('pre-exam');
     });
     $('#btn-go-bank').addEventListener('click', () => showScreen('bank'));
-    $('#btn-pre-back').addEventListener('click', () => showScreen('home'));
+    $('#btn-go-presets').addEventListener('click', () => showScreen('presets'));
+    $('#btn-pre-back').addEventListener('click', () => {
+      // если открыли инфо из пресета — возвращаем к списку пресетов, иначе домой
+      if (pendingPreset) {
+        pendingPreset = null;
+        showScreen('presets');
+      } else {
+        showScreen('home');
+      }
+    });
     $('#btn-pre-start').addEventListener('click', startNewVariant);
     $('#btn-bank-back').addEventListener('click', exitBankDetail);
 

@@ -32,6 +32,7 @@
       </a>
       <nav class="nav">
         <button type="button" class="nav__item active" data-screen="home">Главная</button>
+        <button type="button" class="nav__item" data-screen="presets">Готовые варианты</button>
         <button type="button" class="nav__item" data-screen="bank">Банк по типам</button>
         <button type="button" class="nav__item" data-screen="exam" disabled id="nav-exam">Текущий вариант</button>
         <button type="button" class="nav__item" data-screen="results" disabled id="nav-results">Результаты</button>
@@ -56,6 +57,9 @@
         <div class="hero__actions">
           <button type="button" class="btn btn--primary btn--lg" id="btn-start-variant">
             Сгенерировать вариант
+          </button>
+          <button type="button" class="btn btn--ghost btn--lg" id="btn-go-presets">
+            Готовые варианты
           </button>
           <button type="button" class="btn btn--ghost btn--lg" id="btn-go-bank">
             Прорешать по типам
@@ -115,7 +119,7 @@
     <!-- ====== SCREEN: PRE-EXAM (information) ====== -->
     <section class="screen" id="screen-pre-exam">
       <div class="pre-exam">
-        <h1 class="pre-exam__title">Информация перед началом</h1>
+        <h1 class="pre-exam__title" id="pre-exam-title">Информация перед началом</h1>
 
         <div class="info-block">
           <h2>Длительность</h2>
@@ -178,6 +182,21 @@
           <button type="button" class="btn btn--ghost" id="btn-pre-back">← Вернуться</button>
           <button type="button" class="btn btn--primary btn--lg" id="btn-pre-start">Начать вариант →</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ====== SCREEN: PRESETS (готовые варианты) ====== -->
+    <section class="screen" id="screen-presets">
+      <header class="screen__header">
+        <h1>Готовые варианты</h1>
+        <p class="muted">Выбери один из реальных экзаменационных вариантов 2025. Начинается как обычный экзамен — с таймером 180 минут, но задачи фиксированные.</p>
+      </header>
+
+      <div class="presets-grid" id="presets-grid"></div>
+
+      <div class="info-card" style="margin-top:1.5rem;">
+        <h2>А ещё можно</h2>
+        <p class="muted">Нажми <strong>«Сгенерировать вариант»</strong> на главной — получишь случайный набор из 20 задач, по одной каждого типа. Это вариант для <em>тренировки</em>, задачи каждый раз разные.</p>
       </div>
     </section>
 
