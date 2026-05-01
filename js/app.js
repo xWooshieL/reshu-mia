@@ -2267,22 +2267,8 @@
       + '.toolbar .hint { color: #bbb; font-size: 12.5px; margin-left: 14px; }'
       + '.print-doc { padding: 10mm 8mm; max-width: 297mm; margin: 0 auto; background: #fff; }'
 
-      /* Только точечное усиление дробных черт и overline/underline.
-         Знак корня в KaTeX 0.16+ рендерится как SVG — он корректно
-         печатается сам. Sqrt-поля проблемы вероятно нет, а если есть —
-         см. обходной путь через увеличение math-размера ниже. */
-      + '.katex .mfrac .frac-line,'
-      + '.katex .overline-line,'
-      + '.katex .underline-line {'
-      +   ' border-bottom-width: 0.6pt !important;'
-      +   ' border-bottom-style: solid !important;'
-      +   ' border-bottom-color: currentColor !important;'
-      + ' }'
-
-      /* Формулы чуть крупнее — так все тонкие детали KaTeX (включая
-         SVG-радикал) получат больший физический размер и надёжно
-         попадут в PDF независимо от print-оптимизаций браузера. */
-      + '.katex { font-size: 1.08em !important; }'
+      /* (KaTeX не используется в PDF-окне — формулы рендерит MathJax SVG.
+          CSS-overrides для KaTeX удалены как мёртвый код.) */
 
       + '@media print {'
       +   ' .toolbar { display: none !important; }'
@@ -2296,10 +2282,8 @@
       + '<meta charset="UTF-8">'
       + '<title>РешуМИА — ' + escapeHtml(variantName) + '</title>'
       + '<style>' + printStyle
-      +   /* MathJax inline/display стили */
-      +   ' mjx-container[jax="SVG"] { display: inline-block; vertical-align: middle; }'
+      +   /* MathJax inline/display — baseline выставляет сам MathJax. */
       +   ' mjx-container[jax="SVG"][display="true"] { display: block; margin: 3pt auto; text-align: center; }'
-      +   ' mjx-container[jax="SVG"] svg { vertical-align: middle; }'
       + '</style>'
       + '<script>'
       +   'window.MathJax = {'
@@ -2308,7 +2292,7 @@
       +       'displayMath: [["$$","$$"],["\\\\[","\\\\]"]],'
       +       'processEscapes: true'
       +     '},'
-      +     'svg: { fontCache: "none", scale: 1.05 },'
+      +     'svg: { fontCache: "none", scale: 1 },'
       +     'startup: { typeset: false }'
       +   '};'
       + '<\/script>'
