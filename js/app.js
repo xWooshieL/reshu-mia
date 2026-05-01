@@ -45,10 +45,15 @@
     // 100-балльная = 10-балльная × 10 (без дробей): 0,7 → 7, 3,7 → 37, 8,3 → 83
     return Math.round(computeGrade(totalPoints) * 10);
   }
-  function gradeLabel(g) {
-    if (g >= 8) return { text: 'отлично', cls: 'ex' };
-    if (g >= 6) return { text: 'хорошо', cls: 'good' };
-    if (g >= 4) return { text: 'удовлетворительно', cls: 'sat' };
+  // Пороги по ПЕРВИЧНЫМ баллам (надёжнее, чем сравнение float'ов):
+  //   21+ → отлично (77+ по 100-балльной)
+  //   15+ → хорошо (57+)
+  //    9+ → удовлетворительно (37+)
+  //    <9 → неудовлетворительно
+  function gradeLabel(rawPoints) {
+    if (rawPoints >= 21) return { text: 'отлично', cls: 'ex' };
+    if (rawPoints >= 15) return { text: 'хорошо', cls: 'good' };
+    if (rawPoints >= 9)  return { text: 'удовлетворительно', cls: 'sat' };
     return { text: 'неудовлетворительно', cls: 'fail' };
   }
 
@@ -159,7 +164,7 @@
     for (let p = 0; p <= maxPoints; p++) {
       const g10 = computeGrade(p);
       const g100 = computeGrade100(p);
-      const lbl = gradeLabel(g10);
+      const lbl = gradeLabel(p);
       rows += `<tr class="conv-row--${lbl.cls}"><td><strong>${p}</strong></td><td>${formatScore(g10)}</td><td>${formatScore(g100)}</td></tr>`;
     }
     tbody.innerHTML = rows;
@@ -1533,7 +1538,7 @@
     }
     const grade = computeGrade(total);
     const grade100 = computeGrade100(total);
-    const gl = gradeLabel(grade);
+    const gl = gradeLabel(total);
     const out = $('#grade-output');
     if (!out) return;
     const breakdown = perSlotBreakdownHtml();
@@ -1629,7 +1634,7 @@
     // hero с крупной оценкой
     const grade = computeGrade(total);
     const grade100 = computeGrade100(total);
-    const gl = gradeLabel(grade);
+    const gl = gradeLabel(total);
     const hero = $('#final-hero');
     if (hero) {
       hero.innerHTML = `
