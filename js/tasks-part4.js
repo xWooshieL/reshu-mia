@@ -148,6 +148,157 @@
         <p><strong>Ответ:</strong> $0$ вещественных собственных значений.</p>
       `,
     },
+
+    // ─── QR-разложение ──────────────────────────────────────────────
+    {
+      id: 'contest4-s2-2025-v1-q1',
+      source: 'Контест 4, 2 сем. 2025–2026, вариант 1, задача №1 (2 балла)',
+      questionLatex: `<p>Найди QR-разложение матрицы</p>$$A = \\begin{pmatrix} -2 & 1 \\\\ 1 & 3 \\end{pmatrix}.$$`,
+      criteriaHtml: `
+        <ul>
+          <li>+0,5 за корректную ортогонализацию Грама–Шмидта столбцов $A$</li>
+          <li>+0,5 за нормирование и построение ортогональной матрицы $Q$</li>
+          <li>+0,5 за вычисление $R = Q^{T} A$ (должна получиться верхнетреугольная)</li>
+          <li>+0,5 за корректный финальный ответ в форме $A = QR$</li>
+          <li>−0,2 за арифметическую ошибку</li>
+        </ul>
+      `,
+      solutionHtml: `
+        <p><strong>Шаг 1. Столбцы матрицы.</strong></p>
+        <p>$$a_1 = \\begin{pmatrix} -2 \\\\ 1 \\end{pmatrix}, \\qquad a_2 = \\begin{pmatrix} 1 \\\\ 3 \\end{pmatrix}.$$</p>
+
+        <p><strong>Шаг 2. Ортогонализация Грама–Шмидта.</strong> Берём $v_1 = a_1$ и вычисляем $\\|v_1\\|^2 = 4 + 1 = 5$.</p>
+        <p>Скалярное произведение: $\\langle a_2, v_1 \\rangle = 1\\cdot(-2) + 3\\cdot 1 = 1.$</p>
+        <p>$$v_2 = a_2 - \\frac{\\langle a_2, v_1 \\rangle}{\\|v_1\\|^2}\\, v_1 = \\begin{pmatrix} 1 \\\\ 3 \\end{pmatrix} - \\frac{1}{5}\\begin{pmatrix} -2 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} 7/5 \\\\ 14/5 \\end{pmatrix} = \\tfrac{7}{5}\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}.$$</p>
+        <p>Значит $\\|v_2\\|^2 = \\tfrac{49}{25}(1 + 4) = \\tfrac{49}{5}$, откуда $\\|v_2\\| = \\tfrac{7}{\\sqrt 5}$.</p>
+
+        <p><strong>Шаг 3. Нормирование.</strong> Разделим $v_1$ и $v_2$ на свои нормы:</p>
+        <p>$$q_1 = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} -2 \\\\ 1 \\end{pmatrix}, \\qquad q_2 = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}.$$</p>
+        <p>$$Q = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} -2 & 1 \\\\ 1 & 2 \\end{pmatrix}.$$</p>
+        <p>Быстрая проверка: $\\langle q_1, q_2 \\rangle = \\tfrac{1}{5}(-2 + 2) = 0$ — столбцы ортогональны.</p>
+
+        <p><strong>Шаг 4. Матрица $R = Q^{T} A$.</strong> Поскольку $Q$ ортогональна, $Q^{-1} = Q^{T}$.</p>
+        <p>$$R = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} -2 & 1 \\\\ 1 & 2 \\end{pmatrix}\\begin{pmatrix} -2 & 1 \\\\ 1 & 3 \\end{pmatrix} = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} 5 & 1 \\\\ 0 & 7 \\end{pmatrix} = \\begin{pmatrix} \\sqrt 5 & 1/\\sqrt 5 \\\\ 0 & 7/\\sqrt 5 \\end{pmatrix}.$$</p>
+
+        <hr>
+        <p><strong>Ответ:</strong></p>
+        <p>$$Q = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} -2 & 1 \\\\ 1 & 2 \\end{pmatrix}, \\qquad R = \\begin{pmatrix} \\sqrt 5 & 1/\\sqrt 5 \\\\ 0 & 7/\\sqrt 5 \\end{pmatrix}.$$</p>
+      `,
+    },
+
+    {
+      id: 'contest4-s2-2025-v2-q1',
+      source: 'Контест 4, 2 сем. 2025–2026, вариант 2, задача №1 (2 балла)',
+      questionLatex: `<p>Найди QR-разложение матрицы</p>$$A = \\begin{pmatrix} 2 & 1 \\\\ 1 & 1 \\end{pmatrix}.$$`,
+      criteriaHtml: `
+        <ul>
+          <li>+0,5 за корректную ортогонализацию Грама–Шмидта столбцов $A$</li>
+          <li>+0,5 за нормирование и построение ортогональной матрицы $Q$</li>
+          <li>+0,5 за вычисление $R = Q^{T} A$</li>
+          <li>+0,5 за корректный финальный ответ $A = QR$</li>
+          <li>−0,2 за арифметическую ошибку</li>
+        </ul>
+      `,
+      solutionHtml: `
+        <p><strong>Шаг 1. Столбцы.</strong></p>
+        <p>$$a_1 = \\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}, \\qquad a_2 = \\begin{pmatrix} 1 \\\\ 1 \\end{pmatrix}.$$</p>
+
+        <p><strong>Шаг 2. Ортогонализация.</strong> $v_1 = a_1$, $\\|v_1\\|^2 = 4 + 1 = 5$.</p>
+        <p>$\\langle a_2, v_1 \\rangle = 2 + 1 = 3$, тогда</p>
+        <p>$$v_2 = a_2 - \\tfrac{3}{5}v_1 = \\begin{pmatrix} 1 - 6/5 \\\\ 1 - 3/5 \\end{pmatrix} = \\begin{pmatrix} -1/5 \\\\ 2/5 \\end{pmatrix}.$$</p>
+        <p>$\\|v_2\\|^2 = \\tfrac{1}{25} + \\tfrac{4}{25} = \\tfrac{1}{5}$, $\\|v_2\\| = \\tfrac{1}{\\sqrt 5}$.</p>
+
+        <p><strong>Шаг 3. Нормирование.</strong></p>
+        <p>$$q_1 = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}, \\qquad q_2 = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} -1 \\\\ 2 \\end{pmatrix}.$$</p>
+        <p>$$Q = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} 2 & -1 \\\\ 1 & 2 \\end{pmatrix}.$$</p>
+
+        <p><strong>Шаг 4. Матрица $R = Q^{T} A$.</strong></p>
+        <p>$$R = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} 2 & 1 \\\\ -1 & 2 \\end{pmatrix}\\begin{pmatrix} 2 & 1 \\\\ 1 & 1 \\end{pmatrix} = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} 5 & 3 \\\\ 0 & 1 \\end{pmatrix} = \\begin{pmatrix} \\sqrt 5 & 3/\\sqrt 5 \\\\ 0 & 1/\\sqrt 5 \\end{pmatrix}.$$</p>
+
+        <hr>
+        <p><strong>Ответ:</strong></p>
+        <p>$$Q = \\tfrac{1}{\\sqrt 5}\\begin{pmatrix} 2 & -1 \\\\ 1 & 2 \\end{pmatrix}, \\qquad R = \\begin{pmatrix} \\sqrt 5 & 3/\\sqrt 5 \\\\ 0 & 1/\\sqrt 5 \\end{pmatrix}.$$</p>
+      `,
+    },
+
+    // ─── LU-разложение ──────────────────────────────────────────────
+    {
+      id: 'contest4-s2-2025-v1-q4',
+      source: 'Контест 4, 2 сем. 2025–2026, вариант 1, задача №4 (2 балла)',
+      questionLatex: `<p>Найди LU-разложение матрицы</p>$$A = \\begin{pmatrix} 2 & 1 & 3 \\\\ 4 & 3 & 5 \\\\ 2 & 4 & 2 \\end{pmatrix}.$$`,
+      criteriaHtml: `
+        <ul>
+          <li>+0,3 за правильную схему исключения Гаусса с хранением множителей $\\ell_{ij}$</li>
+          <li>+0,7 за матрицу $L$ (единицы на диагонали, множители $\\ell_{ij}$ ниже диагонали)</li>
+          <li>+0,7 за верхнетреугольную матрицу $U$</li>
+          <li>+0,3 за проверку $A = LU$</li>
+          <li>−0,2 за арифметическую ошибку</li>
+        </ul>
+      `,
+      solutionHtml: `
+        <p><strong>Идея:</strong> параллельно с методом Гаусса (приведение $A$ к верхнетреугольному виду) запоминаем множители $\\ell_{ij}$, на которые умножали строку $i$ при вычитании из строки $j$. Они заполнят нижнетреугольную часть $L$ с единицами на диагонали.</p>
+
+        <p><strong>Шаг 1. Обнуляем первый столбец ниже диагонали.</strong></p>
+        <p>$\\ell_{21} = \\dfrac{4}{2} = 2$: строка 2 $\\leftarrow$ строка 2 $- 2\\cdot$ строка 1:</p>
+        <p>$$(4,\\, 3,\\, 5) - 2\\cdot(2,\\, 1,\\, 3) = (0,\\, 1,\\, -1).$$</p>
+        <p>$\\ell_{31} = \\dfrac{2}{2} = 1$: строка 3 $\\leftarrow$ строка 3 $- 1\\cdot$ строка 1:</p>
+        <p>$$(2,\\, 4,\\, 2) - 1\\cdot(2,\\, 1,\\, 3) = (0,\\, 3,\\, -1).$$</p>
+        <p>Промежуточно:</p>
+        <p>$$\\begin{pmatrix} 2 & 1 & 3 \\\\ 0 & 1 & -1 \\\\ 0 & 3 & -1 \\end{pmatrix}.$$</p>
+
+        <p><strong>Шаг 2. Обнуляем второй столбец ниже диагонали.</strong></p>
+        <p>$\\ell_{32} = \\dfrac{3}{1} = 3$: строка 3 $\\leftarrow$ строка 3 $- 3\\cdot$ строка 2:</p>
+        <p>$$(0,\\, 3,\\, -1) - 3\\cdot(0,\\, 1,\\, -1) = (0,\\, 0,\\, 2).$$</p>
+
+        <p><strong>Шаг 3. Итог.</strong></p>
+        <p>$$U = \\begin{pmatrix} 2 & 1 & 3 \\\\ 0 & 1 & -1 \\\\ 0 & 0 & 2 \\end{pmatrix}, \\qquad L = \\begin{pmatrix} 1 & 0 & 0 \\\\ \\ell_{21} & 1 & 0 \\\\ \\ell_{31} & \\ell_{32} & 1 \\end{pmatrix} = \\begin{pmatrix} 1 & 0 & 0 \\\\ 2 & 1 & 0 \\\\ 1 & 3 & 1 \\end{pmatrix}.$$</p>
+
+        <p><strong>Шаг 4. Проверка $A = LU$.</strong> Перемножим:</p>
+        <p>$$LU = \\begin{pmatrix} 1 & 0 & 0 \\\\ 2 & 1 & 0 \\\\ 1 & 3 & 1 \\end{pmatrix}\\begin{pmatrix} 2 & 1 & 3 \\\\ 0 & 1 & -1 \\\\ 0 & 0 & 2 \\end{pmatrix} = \\begin{pmatrix} 2 & 1 & 3 \\\\ 4 & 3 & 5 \\\\ 2 & 4 & 2 \\end{pmatrix} = A.$$</p>
+
+        <hr>
+        <p><strong>Ответ:</strong></p>
+        <p>$$L = \\begin{pmatrix} 1 & 0 & 0 \\\\ 2 & 1 & 0 \\\\ 1 & 3 & 1 \\end{pmatrix}, \\qquad U = \\begin{pmatrix} 2 & 1 & 3 \\\\ 0 & 1 & -1 \\\\ 0 & 0 & 2 \\end{pmatrix}.$$</p>
+      `,
+    },
+
+    {
+      id: 'contest4-s2-2025-v2-q4',
+      source: 'Контест 4, 2 сем. 2025–2026, вариант 2, задача №4 (2 балла)',
+      questionLatex: `<p>Найди LU-разложение матрицы</p>$$A = \\begin{pmatrix} 1 & 2 & 3 \\\\ 3 & 7 & 11 \\\\ 2 & 8 & 15 \\end{pmatrix}.$$`,
+      criteriaHtml: `
+        <ul>
+          <li>+0,3 за правильную схему исключения Гаусса с хранением множителей</li>
+          <li>+0,7 за матрицу $L$ (единицы на диагонали, множители ниже)</li>
+          <li>+0,7 за верхнетреугольную $U$</li>
+          <li>+0,3 за проверку $A = LU$</li>
+          <li>−0,2 за арифметическую ошибку</li>
+        </ul>
+      `,
+      solutionHtml: `
+        <p><strong>Шаг 1. Обнуляем первый столбец.</strong></p>
+        <p>$\\ell_{21} = 3$: строка 2 $\\leftarrow$ строка 2 $- 3\\cdot$ строка 1:</p>
+        <p>$$(3,\\, 7,\\, 11) - 3\\cdot(1,\\, 2,\\, 3) = (0,\\, 1,\\, 2).$$</p>
+        <p>$\\ell_{31} = 2$: строка 3 $\\leftarrow$ строка 3 $- 2\\cdot$ строка 1:</p>
+        <p>$$(2,\\, 8,\\, 15) - 2\\cdot(1,\\, 2,\\, 3) = (0,\\, 4,\\, 9).$$</p>
+        <p>Промежуточно:</p>
+        <p>$$\\begin{pmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 2 \\\\ 0 & 4 & 9 \\end{pmatrix}.$$</p>
+
+        <p><strong>Шаг 2. Обнуляем второй столбец.</strong></p>
+        <p>$\\ell_{32} = 4$: строка 3 $\\leftarrow$ строка 3 $- 4\\cdot$ строка 2:</p>
+        <p>$$(0,\\, 4,\\, 9) - 4\\cdot(0,\\, 1,\\, 2) = (0,\\, 0,\\, 1).$$</p>
+
+        <p><strong>Шаг 3. Итог.</strong></p>
+        <p>$$U = \\begin{pmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 2 \\\\ 0 & 0 & 1 \\end{pmatrix}, \\qquad L = \\begin{pmatrix} 1 & 0 & 0 \\\\ 3 & 1 & 0 \\\\ 2 & 4 & 1 \\end{pmatrix}.$$</p>
+
+        <p><strong>Шаг 4. Проверка.</strong></p>
+        <p>$$LU = \\begin{pmatrix} 1 & 0 & 0 \\\\ 3 & 1 & 0 \\\\ 2 & 4 & 1 \\end{pmatrix}\\begin{pmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 2 \\\\ 0 & 0 & 1 \\end{pmatrix} = \\begin{pmatrix} 1 & 2 & 3 \\\\ 3 & 7 & 11 \\\\ 2 & 8 & 15 \\end{pmatrix} = A.$$</p>
+
+        <hr>
+        <p><strong>Ответ:</strong></p>
+        <p>$$L = \\begin{pmatrix} 1 & 0 & 0 \\\\ 3 & 1 & 0 \\\\ 2 & 4 & 1 \\end{pmatrix}, \\qquad U = \\begin{pmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 2 \\\\ 0 & 0 & 1 \\end{pmatrix}.$$</p>
+      `,
+    },
   ];
 
   // ============================================================
