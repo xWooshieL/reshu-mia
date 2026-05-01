@@ -214,9 +214,205 @@ window.LEARN_DATA = (function () {
       yandex: F('/S1/CU_lesson_S1E10/1. Неопределенный интеграл/1.4. Интегрирование тригонометрических функций.mp4') },
   ];
 
-  // Конспекты по каждому из 20 типов (пока пустые, заполни по мере)
+  // Конспекты по каждому из 20 типов (см. правила в site/NOTES_STYLE_GUIDE.md)
   const notes = {
-    1:  { html: '' }, 2:  { html: '' }, 3:  { html: '' }, 4:  { html: '' },
+    1: { html: `
+<div class="note-root">
+
+  <h2 class="note-h2">Скалярное произведение, норма, косинус угла</h2>
+  <p class="note-intro">
+    Самый базовый номер экзамена. Даны один-два вектора (либо их нормы и углы между ними) — нужно посчитать длину, угол или небольшое производное от них выражение. Всё сводится к трём операциям: <strong>скалярное произведение</strong>, <strong>норма</strong>, <strong>косинус угла</strong>. Если умеешь работать с этими тремя штуками — номер даёт 1 балл почти автоматически.
+  </p>
+
+  <!-- ═══ СУТЬ ═══ -->
+  <section class="note-section pastel-peach">
+    <h3 class="note-h3">Геометрический смысл</h3>
+    <p>
+      Скалярное произведение $\\langle \\vec a, \\vec b\\rangle$ — это число, в котором «зашит» угол между векторами и их длины. Формула
+      $\\langle \\vec a, \\vec b\\rangle = \\|\\vec a\\|\\,\\|\\vec b\\|\\cos\\varphi$
+      позволяет одним числом понять сразу <em>три вещи</em>:
+    </p>
+    <p>
+      — знак произведения говорит, острый угол или тупой (плюс / минус);<br>
+      — ноль означает перпендикулярность ($\\vec a \\perp \\vec b$);<br>
+      — модуль показывает, насколько векторы «тянут в одну сторону».
+    </p>
+  </section>
+
+  <!-- ═══ ОПРЕДЕЛЕНИЯ ═══ -->
+  <section class="note-section pastel-mint">
+    <h3 class="note-h3">Три определения</h3>
+
+    <p><strong>1. Скалярное произведение.</strong> Для $\\vec a = (a_1, \\dots, a_n)$ и $\\vec b = (b_1, \\dots, b_n)$:</p>
+    <div class="note-formula">
+      $$\\langle \\vec a, \\vec b\\rangle \\;=\\; a_1 b_1 + a_2 b_2 + \\dots + a_n b_n.$$
+    </div>
+
+    <p><strong>2. Норма (длина).</strong> Это корень из скалярного произведения вектора самого на себя:</p>
+    <div class="note-formula">
+      $$\\|\\vec a\\| \\;=\\; \\sqrt{\\langle \\vec a, \\vec a\\rangle} \\;=\\; \\sqrt{a_1^2 + a_2^2 + \\dots + a_n^2}.$$
+    </div>
+
+    <p><strong>3. Косинус угла.</strong> Главная формула номера:</p>
+    <div class="note-formula">
+      $$\\cos\\varphi \\;=\\; \\dfrac{\\langle \\vec a, \\vec b\\rangle}{\\|\\vec a\\|\\cdot\\|\\vec b\\|}.$$
+    </div>
+  </section>
+
+  <!-- ═══ ВИЗУАЛИЗАЦИЯ ═══ -->
+  <svg class="note-svg" viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="nt1-arr-mint"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#6aab9c"/>
+      </marker>
+      <marker id="nt1-arr-peach" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#e89f85"/>
+      </marker>
+      <marker id="nt1-arr-axis"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#1a1a1a"/>
+      </marker>
+    </defs>
+    <line x1="30" y1="300" x2="420" y2="300" stroke="#1a1a1a" stroke-width="1" marker-end="url(#nt1-arr-axis)"/>
+    <line x1="60" y1="330" x2="60"  y2="20"  stroke="#1a1a1a" stroke-width="1" marker-end="url(#nt1-arr-axis)"/>
+    <text x="425" y="304" font-size="12" fill="#333">x</text>
+    <text x="50"  y="18"  font-size="12" fill="#333">y</text>
+    <text x="46"  y="318" font-size="12" fill="#333">O</text>
+    <line x1="60" y1="300" x2="380" y2="100" stroke="#6aab9c" stroke-width="3.5" marker-end="url(#nt1-arr-mint)"/>
+    <text x="245" y="185" font-size="17" fill="#2e5f55" font-weight="600" font-style="italic">a</text>
+    <line x1="60" y1="300" x2="160" y2="40"  stroke="#e89f85" stroke-width="3.5" marker-end="url(#nt1-arr-peach)"/>
+    <text x="88"  y="160" font-size="17" fill="#8a4b38" font-weight="600" font-style="italic">b</text>
+    <path d="M 102.4 273.5 A 50 50 0 0 0 77.9 253.3" stroke="#9882c3" stroke-width="2.2" fill="rgba(152,130,195,0.18)"/>
+    <text x="88"  y="274" font-size="15" fill="#4e3d7d" font-style="italic">φ</text>
+  </svg>
+
+  <!-- ═══ СВОЙСТВА ═══ -->
+  <section class="note-section pastel-mint">
+    <h3 class="note-h3">Свойства скалярного произведения</h3>
+    <div class="note-formula-list">
+      <div><span class="note-label">симметрия</span>         $\\langle \\vec a, \\vec b\\rangle = \\langle \\vec b, \\vec a\\rangle$</div>
+      <div><span class="note-label">линейность</span>        $\\langle \\alpha\\vec a + \\beta\\vec b,\\; \\vec c\\rangle = \\alpha\\langle \\vec a,\\vec c\\rangle + \\beta\\langle \\vec b,\\vec c\\rangle$</div>
+      <div><span class="note-label">связь с нормой</span>    $\\langle \\vec a, \\vec a\\rangle = \\|\\vec a\\|^2 \\ge 0$</div>
+      <div><span class="note-label">перпендикулярность</span>$\\vec a \\perp \\vec b \\iff \\langle \\vec a, \\vec b\\rangle = 0$</div>
+      <div><span class="note-label">неравенство КБШ</span>   $|\\langle \\vec a, \\vec b\\rangle| \\le \\|\\vec a\\|\\,\\|\\vec b\\|$</div>
+    </div>
+  </section>
+
+  <!-- ═══ ГЛАВНЫЕ ТОЖДЕСТВА ═══ -->
+  <section class="note-section pastel-sky">
+    <h3 class="note-h3">Три тождества, которые нужно знать наизусть</h3>
+    <p>Из симметрии и линейности разом вытекают три формулы — они закрывают почти 80% задач типа №1:</p>
+    <div class="note-formula">
+      $$\\|\\vec a \\pm \\vec b\\|^2 \\;=\\; \\|\\vec a\\|^2 \\;\\pm\\; 2\\langle \\vec a, \\vec b\\rangle \\;+\\; \\|\\vec b\\|^2.$$
+    </div>
+    <div class="note-formula">
+      $$\\langle \\vec a, \\vec b\\rangle \\;=\\; \\tfrac{1}{2}\\bigl(\\|\\vec a + \\vec b\\|^2 - \\|\\vec a\\|^2 - \\|\\vec b\\|^2\\bigr).$$
+    </div>
+    <div class="note-formula">
+      $$S_{\\text{параллелограмма}} \\;=\\; \\|\\vec a\\|\\,\\|\\vec b\\|\\,\\sin\\varphi \\;=\\; \\sqrt{\\|\\vec a\\|^2\\|\\vec b\\|^2 - \\langle \\vec a, \\vec b\\rangle^2}.$$
+    </div>
+    <p>
+      Первая формула — <span class="note-hl-sky">обобщённая теорема Пифагора</span>: если известны нормы $\\|\\vec a\\|, \\|\\vec b\\|, \\|\\vec a \\pm \\vec b\\|$, то скалярное произведение находится в одну строку.
+    </p>
+  </section>
+
+  <!-- ═══ АЛГОРИТМ ═══ -->
+  <section class="note-section pastel-lavender">
+    <h3 class="note-h3">Алгоритм решения</h3>
+    <p>Смотри на то, что дано:</p>
+    <ol class="note-steps">
+      <li class="note-step"><strong>Даны координаты векторов?</strong> Считай $\\langle \\vec a, \\vec b\\rangle$ покоординатно и $\\|\\vec a\\|$ через корень из суммы квадратов.</li>
+      <li class="note-step"><strong>Даны нормы и нужен cos угла?</strong> Раскладывай $\\|\\vec a \\pm \\vec b\\|^2$ — получишь $\\langle \\vec a, \\vec b\\rangle$, а дальше формула косинуса.</li>
+      <li class="note-step"><strong>Спрашивают норму сложного выражения</strong> $\\|\\alpha\\vec a + \\beta\\vec b\\|$? Возведи в квадрат и раскрой как $\\langle \\cdot, \\cdot\\rangle$ — всё сведётся к известным $\\|\\vec a\\|, \\|\\vec b\\|, \\langle \\vec a, \\vec b\\rangle$.</li>
+      <li class="note-step"><strong>Спрашивают площадь параллелограмма / треугольника?</strong> $S = \\|\\vec a\\|\\|\\vec b\\|\\sin\\varphi$, где $\\sin\\varphi$ достань из $\\sin^2 + \\cos^2 = 1$.</li>
+      <li class="note-step"><strong>В конце</strong> упрости дробь ($\\tfrac{1}{\\sqrt 3} \\to \\tfrac{\\sqrt 3}{3}$, сократи общие множители): за неупрощённый ответ снимают $-0{,}2$.</li>
+    </ol>
+  </section>
+
+  <!-- ═══ ПОДВОДНЫЕ КАМНИ ═══ -->
+  <section class="note-section pastel-rose">
+    <h3 class="note-h3">Типичные ошибки</h3>
+    <div class="note-pitfall"><strong>⚠</strong> $\\|\\vec a - \\vec b\\|^2 \\ne \\|\\vec a\\|^2 - \\|\\vec b\\|^2$. В середине сидит $-2\\langle \\vec a, \\vec b\\rangle$.</div>
+    <div class="note-pitfall"><strong>⚠</strong> Если задача говорит про угол между $\\vec a$ и $\\vec a - \\vec b$ (а не между $\\vec a$ и $\\vec b$) — сначала построй новый вектор $\\vec c = \\vec a - \\vec b$ и ищи угол между $\\vec a$ и $\\vec c$.</div>
+    <div class="note-pitfall"><strong>⚠</strong> $\\sqrt{a^2} = |a|$, а не $a$. Если под корнем вылез знак — не забудь про модуль.</div>
+    <div class="note-pitfall"><strong>⚠</strong> Не теряй знак: $\\langle \\vec a, \\vec b\\rangle$ может быть отрицательным, но $\\|\\vec a\\| \\ge 0$ всегда.</div>
+  </section>
+
+  <!-- ═══ ПРИМЕР 1 ═══ -->
+  <section class="note-section note-example pastel-sage">
+    <span class="note-example__label">Пример 1 · Демо летнего экзамена, 2025</span>
+    <p><strong>Условие.</strong> Пусть $\\vec a = (1,\\,0,\\,3)$, $\\vec b = (2,\\,-3,\\,-1)$. Найти $\\|\\vec a - \\langle \\vec a, \\vec b\\rangle\\,\\vec b\\|$.</p>
+
+    <p><strong>Шаг 1.</strong> Считаем скалярное произведение:</p>
+    <p>$\\langle \\vec a, \\vec b\\rangle = 1\\cdot 2 + 0\\cdot(-3) + 3\\cdot(-1) = $ <span class="note-hl-mint">$-1$</span>.</p>
+
+    <p><strong>Шаг 2.</strong> Подставляем в выражение и получаем новый вектор:</p>
+    <p>$\\vec a - (-1)\\cdot \\vec b = \\vec a + \\vec b = (1+2,\\; 0-3,\\; 3-1) = (3,\\,-3,\\,2).$</p>
+
+    <p><strong>Шаг 3.</strong> Считаем норму:</p>
+    <p>$\\|(3,-3,2)\\| = \\sqrt{3^2 + (-3)^2 + 2^2} = \\sqrt{9+9+4} = $ <span class="note-hl-mint">$\\sqrt{22}$</span>.</p>
+
+    <p class="note-answer">Ответ: $\\sqrt{22}$</p>
+  </section>
+
+  <!-- ═══ ПРИМЕР 2 ═══ -->
+  <section class="note-section note-example pastel-sage">
+    <span class="note-example__label">Пример 2 · Летний экзамен, 2025, вариант 1</span>
+    <p><strong>Условие.</strong> Пусть $\\vec a = (1,\\,1,\\,1)$, $\\vec b = (1,\\,-2,\\,1)$. Найти косинус угла между $\\vec a$ и $\\vec a - \\vec b$.</p>
+
+    <p><strong>Шаг 1.</strong> Строим вспомогательный вектор:</p>
+    <p>$\\vec c = \\vec a - \\vec b = (1-1,\\; 1-(-2),\\; 1-1) = (0,\\,3,\\,0).$</p>
+
+    <p><strong>Шаг 2.</strong> Скалярное произведение $\\vec a$ и $\\vec c$:</p>
+    <p>$\\langle \\vec a, \\vec c\\rangle = 1\\cdot 0 + 1\\cdot 3 + 1\\cdot 0 = $ <span class="note-hl-mint">$3$</span>.</p>
+
+    <p><strong>Шаг 3.</strong> Нормы:</p>
+    <p>$\\|\\vec a\\| = \\sqrt{1+1+1} = \\sqrt{3}, \\qquad \\|\\vec c\\| = \\sqrt{0+9+0} = 3.$</p>
+
+    <p><strong>Шаг 4.</strong> Формула косинуса и упрощение:</p>
+    <p>$\\cos\\varphi = \\dfrac{3}{\\sqrt{3}\\cdot 3} = \\dfrac{1}{\\sqrt{3}} = $ <span class="note-hl-mint">$\\dfrac{\\sqrt{3}}{3}$</span>.</p>
+
+    <p class="note-answer">Ответ: $\\dfrac{\\sqrt 3}{3}$</p>
+  </section>
+
+  <!-- ═══ ПРИМЕР 3 ═══ -->
+  <section class="note-section note-example pastel-sage">
+    <span class="note-example__label">Пример 3 · Демо контрольной №1, 2024–2025</span>
+    <p><strong>Условие.</strong> Известно, что $\\|\\vec a\\| = 3$, $\\|\\vec b\\| = 13$, $\\|\\vec a + \\vec b\\| = \\sqrt{208}$. Найти площадь параллелограмма, натянутого на $\\vec a$ и $\\vec b$.</p>
+
+    <p>Координат у векторов нет — работаем через нормы. Это классическая ловушка, где без <em>обобщённой теоремы Пифагора</em> не выжить.</p>
+
+    <p><strong>Шаг 1.</strong> Возводим в квадрат данную норму суммы:</p>
+    <p>$\\|\\vec a + \\vec b\\|^2 = \\|\\vec a\\|^2 + 2\\langle \\vec a, \\vec b\\rangle + \\|\\vec b\\|^2.$</p>
+    <p>$208 = 9 + 2\\langle \\vec a, \\vec b\\rangle + 169 \\;\\Rightarrow\\; 2\\langle \\vec a, \\vec b\\rangle = 30 \\;\\Rightarrow\\; \\langle \\vec a, \\vec b\\rangle = $ <span class="note-hl-mint">$15$</span>.</p>
+
+    <p><strong>Шаг 2.</strong> Находим косинус:</p>
+    <p>$\\cos\\varphi = \\dfrac{15}{3\\cdot 13} = \\dfrac{5}{13}.$</p>
+
+    <p><strong>Шаг 3.</strong> Синус — из основного тригонометрического тождества ($\\sin\\varphi \\ge 0$, угол между векторами в $[0,\\pi]$):</p>
+    <p>$\\sin^2\\varphi = 1 - \\dfrac{25}{169} = \\dfrac{144}{169} \\;\\Rightarrow\\; \\sin\\varphi = \\dfrac{12}{13}.$</p>
+
+    <p><strong>Шаг 4.</strong> Площадь параллелограмма:</p>
+    <p>$S = \\|\\vec a\\|\\,\\|\\vec b\\|\\sin\\varphi = 3 \\cdot 13 \\cdot \\dfrac{12}{13} = $ <span class="note-hl-mint">$36$</span>.</p>
+
+    <p>Эквивалентно — одной формулой через <em>матричный</em> способ:</p>
+    <p>$S = \\sqrt{\\|\\vec a\\|^2\\|\\vec b\\|^2 - \\langle \\vec a, \\vec b\\rangle^2} = \\sqrt{9\\cdot 169 - 225} = \\sqrt{1521 - 225} = \\sqrt{1296} = 36.$</p>
+
+    <p class="note-answer">Ответ: $36$</p>
+  </section>
+
+  <!-- ═══ ПОДСКАЗКА НА БУДУЩЕЕ ═══ -->
+  <section class="note-section pastel-sand">
+    <h3 class="note-h3">Что запомнить в итоге</h3>
+    <p>
+      Почти все задачи типа №1 решаются по схеме: <em>скалярное произведение → нормы → косинус → добить формулой</em>. Если в условии нет координат — значит, нужно использовать
+      $\\|\\vec a \\pm \\vec b\\|^2 = \\|\\vec a\\|^2 \\pm 2\\langle \\vec a, \\vec b\\rangle + \\|\\vec b\\|^2$
+      и выжимать скалярное произведение из того, что есть.
+    </p>
+  </section>
+
+</div>
+` },
+    2:  { html: '' }, 3:  { html: '' }, 4:  { html: '' },
     5:  { html: '' }, 6:  { html: '' }, 7:  { html: '' }, 8:  { html: '' },
     9:  { html: '' }, 10: { html: '' }, 11: { html: '' }, 12: { html: '' },
     13: { html: '' }, 14: { html: '' }, 15: { html: '' }, 16: { html: '' },

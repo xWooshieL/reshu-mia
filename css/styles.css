@@ -2051,6 +2051,256 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ============================================================
+   КОНСПЕКТЫ (раздел «Обучение» → notes[slot].html)
+   Пастельная палитра, без жёстких рамок, мягкие секции.
+   Правила оформления: site/NOTES_STYLE_GUIDE.md
+   ============================================================ */
+
+:root {
+  --pastel-mint-bg:      #eaf4ef;
+  --pastel-mint-accent:  #6aab9c;
+  --pastel-mint-text:    #2e5f55;
+
+  --pastel-peach-bg:     #fdf1ea;
+  --pastel-peach-accent: #e89f85;
+  --pastel-peach-text:   #8a4b38;
+
+  --pastel-lavender-bg:     #f2edfb;
+  --pastel-lavender-accent: #9882c3;
+  --pastel-lavender-text:   #4e3d7d;
+
+  --pastel-sky-bg:     #eaf3fa;
+  --pastel-sky-accent: #6ba3d6;
+  --pastel-sky-text:   #2e5a85;
+
+  --pastel-rose-bg:     #fcecec;
+  --pastel-rose-accent: #d88a8a;
+  --pastel-rose-text:   #8a3a3a;
+
+  --pastel-sage-bg:     #eff5e5;
+  --pastel-sage-accent: #8ea878;
+  --pastel-sage-text:   #4a5f36;
+
+  --pastel-sand-bg:     #faf3e4;
+  --pastel-sand-accent: #c9a96a;
+  --pastel-sand-text:   #7a5e2f;
+}
+
+/* корневой контейнер с конспектом */
+.note-root {
+  max-width: 960px;
+  margin: 0 auto;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: #222;
+}
+.note-root > * + * { margin-top: 1.2rem; }
+
+/* заголовки */
+.note-h2 {
+  font-size: 1.55rem;
+  font-weight: 600;
+  margin: 0 0 0.65rem;
+  letter-spacing: -0.01em;
+  color: #181818;
+}
+.note-h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+  color: #181818;
+  letter-spacing: -0.005em;
+}
+.note-intro {
+  font-size: 1.05rem;
+  color: #555;
+  margin: 0 0 1rem;
+}
+
+/* пастельная секция */
+.note-section {
+  padding: 1.1rem 1.3rem 1.15rem;
+  border-radius: 10px;
+  border-left: 4px solid transparent;
+}
+.note-section p { margin: 0 0 0.55rem; }
+.note-section p:last-child { margin-bottom: 0; }
+.note-section + .note-section { margin-top: 1.1rem; }
+
+.pastel-mint     { background: var(--pastel-mint-bg);     border-left-color: var(--pastel-mint-accent); }
+.pastel-peach    { background: var(--pastel-peach-bg);    border-left-color: var(--pastel-peach-accent); }
+.pastel-lavender { background: var(--pastel-lavender-bg); border-left-color: var(--pastel-lavender-accent); }
+.pastel-sky      { background: var(--pastel-sky-bg);      border-left-color: var(--pastel-sky-accent); }
+.pastel-rose     { background: var(--pastel-rose-bg);     border-left-color: var(--pastel-rose-accent); }
+.pastel-sage     { background: var(--pastel-sage-bg);     border-left-color: var(--pastel-sage-accent); }
+.pastel-sand     { background: var(--pastel-sand-bg);     border-left-color: var(--pastel-sand-accent); }
+
+/* формула-визитка */
+.note-formula {
+  padding: 0.7rem 1rem;
+  margin: 0.8rem 0;
+  text-align: center;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ececec;
+}
+.note-formula .katex { font-size: 1.08em !important; }
+
+/* список формул / свойств (без буллетов, с «меткой» слева) */
+.note-formula-list {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.6rem 0;
+}
+.note-formula-list > div {
+  padding: 0.4rem 0.8rem;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.note-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #666;
+  font-weight: 600;
+  min-width: 9em;
+  flex-shrink: 0;
+}
+
+/* алгоритм — пронумерованные шаги */
+.note-steps {
+  list-style: none;
+  counter-reset: note-step;
+  padding: 0;
+  margin: 0.6rem 0 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.note-step {
+  counter-increment: note-step;
+  position: relative;
+  padding: 0.55rem 0.8rem 0.55rem 2.6rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+}
+.note-step::before {
+  content: counter(note-step);
+  position: absolute;
+  left: 0.7rem;
+  top: 0.55rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  line-height: 1.5rem;
+  border-radius: 50%;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: var(--pastel-lavender-accent);
+  color: #fff;
+}
+
+/* инлайн-перечисление в строку */
+.note-inline-list {
+  display: inline-flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.note-inline-list > span {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  background: rgba(255, 255, 255, 0.75);
+  color: #444;
+}
+
+/* подводный камень */
+.note-pitfall {
+  padding: 0.7rem 0.95rem;
+  background: var(--pastel-rose-bg);
+  border-left: 3px solid var(--pastel-rose-accent);
+  border-radius: 8px;
+  margin: 0.55rem 0;
+  font-size: 0.97rem;
+}
+.note-pitfall strong {
+  color: var(--pastel-rose-text);
+  margin-right: 0.35rem;
+}
+
+/* пример / разбор задачи */
+.note-example {
+  padding: 1rem 1.2rem 1.1rem;
+  border-radius: 10px;
+}
+.note-example__label {
+  display: inline-block;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pastel-sage-text);
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  margin-bottom: 0.7rem;
+}
+.note-example p { margin: 0 0 0.55rem; }
+.note-example p:last-child { margin-bottom: 0; }
+.note-example__sub {
+  margin-top: 0.8rem !important;
+  padding-top: 0.6rem;
+  border-top: 1px dashed rgba(0, 0, 0, 0.12);
+}
+.note-answer {
+  display: inline-block;
+  margin-top: 0.4rem !important;
+  padding: 0.3rem 0.8rem;
+  background: #fff;
+  border-radius: 6px;
+  font-weight: 500;
+  border: 1px solid var(--pastel-sage-accent);
+}
+
+/* выделение ключевого числа / выражения в формуле */
+.note-hl-mint     { color: var(--pastel-mint-text);     background: rgba(106, 171, 156, 0.18); padding: 0 0.2em; border-radius: 3px; }
+.note-hl-peach    { color: var(--pastel-peach-text);    background: rgba(232, 159, 133, 0.2);  padding: 0 0.2em; border-radius: 3px; }
+.note-hl-lavender { color: var(--pastel-lavender-text); background: rgba(152, 130, 195, 0.18); padding: 0 0.2em; border-radius: 3px; }
+.note-hl-sky      { color: var(--pastel-sky-text);      background: rgba(107, 163, 214, 0.18); padding: 0 0.2em; border-radius: 3px; }
+
+/* SVG-график */
+.note-svg {
+  display: block;
+  margin: 1rem auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* двухколоночные определения / сравнения */
+.note-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+  margin: 0.7rem 0;
+}
+.note-duo > * { min-width: 0; }
+
+/* мобильная адаптация конспекта */
+@media (max-width: 640px) {
+  .note-root { font-size: 0.97rem; }
+  .note-h2 { font-size: 1.35rem; }
+  .note-h3 { font-size: 1.05rem; }
+  .note-section { padding: 0.9rem 1rem; }
+  .note-duo { grid-template-columns: 1fr; gap: 0.6rem; }
+  .note-step { padding-left: 2.4rem; }
+  .note-label { min-width: auto; }
+}
+
+/* ============================================================
    PDF / PRINT — стилизация под открытый вариант ЕГЭ
    Пользователь выбирает «Сохранить как PDF» в диалоге печати.
    ============================================================ */
