@@ -695,11 +695,14 @@
       renderMath(body);
     }
     window.scrollTo({ top: 0, behavior: 'instant' });
+    // Глубокая ссылка: #/notes/<slot>
+    writeHash('/notes/' + slot);
   }
 
   function exitNote() {
     $('#learn-overview').hidden = false;
     $('#learn-detail').hidden = true;
+    writeHash('/learn');
   }
 
   function openPresetInfo(presetKey) {
@@ -753,7 +756,7 @@
   }
 
   function showScreen(name) {
-    if (name !== 'bank') exitBankDetail();
+    if (name !== 'bank') exitBankDetail({ silent: true });
     if (name !== 'learn') {
       const ov = $('#learn-overview'); if (ov) ov.hidden = false;
       const dt = $('#learn-detail'); if (dt) dt.hidden = true;
@@ -769,6 +772,154 @@
     if (el) {
       el.querySelectorAll('.math-content').forEach(renderMath);
     }
+    // синхронизация URL-хэша (если это не изменение пришло из хэша)
+    syncHashForScreen(name);
+  }
+
+  // ============================================================
+  // HASH-РОУТИНГ (чистые ссылки на разделы)
+  //
+  //   #/             → home
+  //   #/learn        → обучение (лекции)
+  //   #/notes        → обучение (вкладка «конспекты»)
+  //   #/notes/3      → конкретный конспект по типу 3
+  //   #/bank         → банк по типам
+  //   #/bank/5       → тип 5, детальный вид
+  //   #/presets      → готовые варианты
+  //   #/info         → информация перед стартом (pre-exam)
+  //   #/exam         → экзамен
+  //   #/results      → результаты
+  //   #/final        → итоговая табличка
+  //   #/pdf          → PDF-превью
+  // ============================================================
+
+  let suppressHashSync = false;
+
+  function writeHash(path) {
+    // На главной убираем хэш совсем — просто "/" без #
+    const isHome = path === '/' || path === '';
+    const want = isHome ? location.pathname + location.search : '#' + path;
+    if (isHome && !location.hash) return;
+    if (!isHome && location.hash === want) return;
+    suppressHashSync = true;
+    try {
+      history.replaceState(null, '', want);
+    } catch (_) {
+      if (isHome) location.hash = '';
+      else location.hash = want;
+    }
+    setTimeout(() => { suppressHashSync = false; }, 30);
+  }
+
+  function parseHash() {
+    const raw = (location.hash || '').replace(/^#\/?/, '').trim();
+    if (!raw) return [];
+    return raw.split('/').filter(Boolean).map(decodeURIComponent);
+  }
+
+  function syncHashForScreen(name) {
+    if (suppressHashSync) return;
+    const map = {
+      home: '/',
+      'pre-exam': '/info',
+      exam: '/exam',
+      results: '/results',
+      final: '/final',
+      pdf: '/pdf',
+      presets: '/presets',
+      bank: '/bank',
+      learn: '/learn',
+    };
+    const path = map[name];
+    if (path) writeHash(path);
+  }
+
+  function handleRoute() {
+    const parts = parseHash();
+    const [a, b, c] = parts;
+
+    // пусто или /home → главная
+    if (!a || a === 'home') {
+      showScreen('home');
+      return;
+    }
+
+    // Конспект конкретного типа: /notes/3
+    if (a === 'notes' && b) {
+      const slot = parseInt(b, 10);
+      if (slot >= 1 && slot <= 20) {
+        showScreen('learn');
+        if (typeof setLearnFilter === 'function') setLearnFilter('notes');
+        openNote(slot);
+        return;
+      }
+    }
+    // Вкладка конспектов без конкретного типа
+    if (a === 'notes') {
+      showScreen('learn');
+      if (typeof setLearnFilter === 'function') setLearnFilter('notes');
+      return;
+    }
+
+    // Банк по типам: /bank или /bank/5
+    if (a === 'bank') {
+      showScreen('bank');
+      if (b) {
+        const slot = parseInt(b, 10);
+        if (slot >= 1 && slot <= 20) {
+          const taskIdx = c ? parseInt(c, 10) : 0;
+          openBankSlot(slot, isFinite(taskIdx) ? taskIdx : 0);
+        }
+      }
+      return;
+    }
+
+    // Обучение (lectures)
+    if (a === 'learn') {
+      showScreen('learn');
+      return;
+    }
+
+    // Экзамен — только если реально идёт сессия
+    if (a === 'exam') {
+      if (phase === 'exam' && currentVariant) showScreen('exam');
+      else { writeHash('/'); showScreen('home'); }
+      return;
+    }
+
+    if (a === 'results') {
+      if (phase === 'results') showScreen('results');
+      else { writeHash('/'); showScreen('home'); }
+      return;
+    }
+
+    if (a === 'final') {
+      if (phase === 'results') showScreen('final');
+      else { writeHash('/'); showScreen('home'); }
+      return;
+    }
+
+    if (a === 'pdf') {
+      if (currentVariant) openPrintView();
+      else { writeHash('/'); showScreen('home'); }
+      return;
+    }
+
+    if (a === 'info' || a === 'pre-exam') {
+      // имеет смысл только если есть pendingPreset или сессия
+      if (pendingPreset || currentVariant) showScreen('pre-exam');
+      else { writeHash('/'); showScreen('home'); }
+      return;
+    }
+
+    if (a === 'presets') {
+      showScreen('presets');
+      return;
+    }
+
+    // неизвестный путь → домой
+    writeHash('/');
+    showScreen('home');
   }
 
   // ============================================================
@@ -1699,13 +1850,17 @@
     }
   }
 
-  function exitBankDetail() {
+  function exitBankDetail(opts) {
     bankActiveSlot = null;
     bankActiveTaskIdx = 0;
     const overview = $('#bank-overview');
     const detail = $('#bank-detail');
     if (overview) overview.hidden = false;
     if (detail) detail.hidden = true;
+    // Если выход из банка инициирован пользователем — вернём #/bank.
+    // При переключении на другой экран (например, home) showScreen сам
+    // перепишет хэш, поэтому здесь нужен silent-режим.
+    if (!(opts && opts.silent)) writeHash('/bank');
   }
 
   function openBankSlot(slot, taskIdx) {
@@ -1716,6 +1871,8 @@
 
     $('#bank-overview').hidden = true;
     $('#bank-detail').hidden = false;
+    // Глубокая ссылка: #/bank/<slot>
+    writeHash('/bank/' + slot);
 
     const meta = (window.TASK_BANK && window.TASK_BANK[slot]) || { title: '', tasks: [], criteriaHtml: '' };
     const tasks = meta.tasks || [];
@@ -2185,8 +2342,18 @@
     // обновление статуса в шапке
     setInterval(updateTopbarStatus, 1000);
 
-    // восстановить сессию
+    // восстановить сессию (может сама вызвать showScreen('exam')/'results')
     tryRestoreSession();
+
+    // Hash-роутинг: при переходе по ссылке/кнопкам back/forward браузера
+    window.addEventListener('hashchange', () => {
+      if (suppressHashSync) return;
+      handleRoute();
+    });
+    // Начальный маршрут — если в URL уже есть #/что-то, открыть сразу
+    if (location.hash && location.hash !== '#/' && location.hash !== '#') {
+      handleRoute();
+    }
   }
 
   if (document.readyState === 'loading') {
