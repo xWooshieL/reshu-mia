@@ -434,13 +434,67 @@ hr {
 }
 
 /* ---------- Learn (лекции + конспекты) ---------- */
-.learn-tabs {
+
+/* поиск */
+.learn-search {
+  position: relative;
+  margin-bottom: 1rem;
+}
+.learn-search__icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+#learn-search-input {
+  width: 100%;
+  padding: 0.8rem 2.5rem 0.8rem 2.6rem;
+  font: inherit;
+  font-size: 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--ink);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+#learn-search-input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+#learn-search-input::placeholder { color: var(--muted); }
+.learn-search__clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 1.35rem;
+  color: var(--muted);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   display: flex;
-  gap: 0.3rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+.learn-search__clear:hover { background: var(--accent-soft); color: var(--ink); }
+
+/* фильтры */
+.learn-filters {
+  display: flex;
+  gap: 0.35rem;
   border-bottom: 1px solid var(--line);
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
-.learn-tab {
+.learn-filter {
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
@@ -451,95 +505,103 @@ hr {
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
   margin-bottom: -1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
-.learn-tab:hover { color: var(--ink); }
-.learn-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.learn-filter:hover { color: var(--ink); }
+.learn-filter.active { color: var(--ink); border-bottom-color: var(--ink); }
+.learn-filter__count {
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.1rem 0.45rem;
+  background: var(--bg-card-2);
+  border-radius: 100px;
+  min-width: 1.8em;
+  text-align: center;
+}
+.learn-filter.active .learn-filter__count { background: var(--ink); color: white; }
+
 .learn-pane { display: none; }
 .learn-pane.active { display: block; }
+.learn-empty { text-align: center; padding: 2rem 1rem; }
 
-/* --- список лекций --- */
-.lectures-list {
-  display: flex;
-  flex-direction: column;
+/* сетка лекций-боксов */
+.lectures-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 0.85rem;
 }
-.lecture-card {
+.lecture-box {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 1.1rem 1.3rem;
+  padding: 2rem 1.1rem 1rem;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
+  overflow: hidden;
+  min-height: 140px;
   display: flex;
-  gap: 1.25rem;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.lecture-box:hover { border-color: var(--ink); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.lecture-box:active { transform: translateY(0); }
+.lecture-box__num {
+  position: absolute;
+  top: 0.35rem;
+  left: 0.6rem;
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--accent-soft);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  pointer-events: none;
+  z-index: 0;
+}
+.lecture-box__corner-tl,
+.lecture-box__corner-tr {
+  position: absolute;
+  top: 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  z-index: 2;
+}
+.lecture-box__corner-tl { right: 4rem; }
+.lecture-box__corner-tr { right: 0.75rem; }
+.lecture-box--calculus .lecture-box__corner-tl { color: #5d4a8b; }
+.lecture-box--linalg .lecture-box__corner-tl { color: #1a6f66; }
+.lecture-box__title {
+  position: relative;
+  z-index: 1;
+  margin: 0.5rem 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.lecture-box__footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--line-2);
+  padding-top: 0.55rem;
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.lecture-card:hover { border-color: var(--ink); box-shadow: var(--shadow-sm); }
-.lecture-card--empty { opacity: 0.75; }
-.lecture-card__head {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  flex: 1;
-  min-width: 250px;
-}
-.lecture-card__week {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 84px;
-  padding: 0.4rem 0.7rem;
-  background: var(--accent-soft);
+.lecture-box__play {
   color: var(--ink);
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 0.82rem;
-  letter-spacing: 0.01em;
-  flex-shrink: 0;
-  white-space: nowrap;
-  align-self: flex-start;
-}
-.lecture-card__title {
-  margin: 0 0 0.35rem;
-  font-size: 1.02rem;
-  font-weight: 700;
-  line-height: 1.35;
-}
-.lecture-tags {
-  display: flex;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-}
-.lecture-tag {
-  display: inline-block;
-  padding: 0.15rem 0.55rem;
-  background: var(--bg-card-2);
-  border-radius: 100px;
-  font-size: 0.78rem;
-  color: var(--ink-2);
-}
-.lecture-card__links {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-.lecture-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.8rem;
-  background: var(--ink);
-  color: white;
-  border-radius: 6px;
-  text-decoration: none;
   font-weight: 600;
-  font-size: 0.88rem;
-  transition: background 0.15s;
+  font-size: 0.86rem;
 }
-.lecture-link:hover { background: #2b2b30; }
-.lecture-link__icon { font-size: 1rem; line-height: 1; }
+.lecture-box--calculus { border-top: 3px solid #5d4a8b; }
+.lecture-box--linalg { border-top: 3px solid #1a6f66; }
 
 /* --- конспекты: сетка --- */
 .notes-grid {
@@ -1544,6 +1606,163 @@ hr {
 
 /* блокируем скролл боди когда модалка открыта */
 body.modal-open { overflow: hidden; }
+
+/* ---------- Video player ---------- */
+.player {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: modalFadeIn 0.18s ease-out;
+}
+.player[hidden] { display: none; }
+.player__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.player__dialog {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 960px;
+  max-height: 94vh;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalScaleIn 0.22s ease-out;
+}
+.player__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+.player__head-info { flex: 1; min-width: 0; }
+.player__badges {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+.player__badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--ink);
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.player__badge--muted { background: var(--bg-card-2); color: var(--muted); }
+.player__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.player__close {
+  background: transparent;
+  border: none;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.player__close:hover { background: var(--accent-soft); color: var(--ink); }
+
+.player__body {
+  background: #0b0b0d;
+  position: relative;
+  flex: 1;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.player__video {
+  width: 100%;
+  max-height: 70vh;
+  display: block;
+  background: #000;
+}
+.player__loading {
+  text-align: center;
+  color: #ccc;
+  padding: 3rem 1rem;
+}
+.player__loading .muted { color: #a0a0a8 !important; }
+.player__spinner {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 1rem;
+  border: 3px solid rgba(255,255,255,0.15);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.player__error {
+  text-align: center;
+  color: white;
+  padding: 2rem 1rem;
+}
+.player__error p { margin-bottom: 1rem; }
+
+.player__foot {
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid var(--line);
+  background: var(--bg-card);
+  flex-wrap: wrap;
+}
+.player__foot-spacer { flex: 1; }
+.player__autonext {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--ink-2);
+  background: var(--success-soft);
+  padding: 0.3rem 0.7rem;
+  border-radius: 100px;
+}
+.player__autonext strong {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--success);
+  font-size: 1rem;
+}
+
+@media (max-width: 640px) {
+  .player { padding: 0; }
+  .player__dialog { max-height: 100vh; border-radius: 0; }
+  .player__head { padding: 0.8rem 1rem 0.7rem; }
+  .player__title { font-size: 0.95rem; }
+  .player__foot { flex-direction: column; align-items: stretch; }
+  .player__foot-spacer { display: none; }
+  .player__foot .btn { justify-content: center; }
+  .player__autonext { justify-content: center; }
+}
 
 /* ---------- Адаптивность ---------- */
 /* ---------- Final page (итоговая табличка) ---------- */

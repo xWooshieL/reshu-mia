@@ -270,53 +270,236 @@
   // LEARN — лекции и конспекты
   // ============================================================
 
-  function buildLecturesList() {
-    const list = $('#lectures-list');
-    if (!list) return;
-    const data = (window.LEARN_DATA && window.LEARN_DATA.lectures) || [];
-    if (!data.length) {
-      list.innerHTML = '<p class="muted">Лекции пока не добавлены. Впиши их в <code>site/js/learn.js</code>.</p>';
-      return;
-    }
-    list.innerHTML = '';
-    data.forEach((lec, idx) => {
-      const hasLinks = Array.isArray(lec.links) && lec.links.length > 0;
-      const card = document.createElement('div');
-      card.className = 'lecture-card' + (hasLinks ? '' : ' lecture-card--empty');
+  let learnCurrentFilter = 'all';      // 'all' | 'calculus' | 'linalg' | 'notes'
+  let learnCurrentQuery = '';
+  let playerCurrentLectureId = null;
+  let playerAutoNextTimer = null;
+  let playerAutoNextSeconds = 0;
 
-      const topicsHtml = (lec.topics || []).map((t) => `<span class="lecture-tag">${escapeHtml(t)}</span>`).join('');
-
-      const linksHtml = hasLinks
-        ? lec.links.map((l) => {
-            const icon = linkIcon(l.type);
-            return `<a class="lecture-link" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">${icon}<span>${escapeHtml(l.label || l.type || 'Открыть')}</span></a>`;
-          }).join('')
-        : '<span class="muted small">Ссылка ещё не добавлена</span>';
-
-      card.innerHTML = `
-        <div class="lecture-card__head">
-          <div class="lecture-card__week">Неделя ${lec.week || '?'}</div>
-          <div class="lecture-card__title-wrap">
-            <h3 class="lecture-card__title math-content">${lec.title || 'Без названия'}</h3>
-            ${topicsHtml ? `<div class="lecture-tags">${topicsHtml}</div>` : ''}
-          </div>
-        </div>
-        <div class="lecture-card__links">${linksHtml}</div>
-      `;
-      list.appendChild(card);
-    });
-    list.querySelectorAll('.math-content').forEach(renderMath);
+  function getLectures() {
+    return (window.LEARN_DATA && window.LEARN_DATA.lectures) || [];
   }
 
-  function linkIcon(type) {
-    const icons = {
-      video: '▶',
-      notes: '≡',
-      slides: '▣',
-      pdf: '⎙',
-      yadisk: '☁',
-    };
-    return `<span class="lecture-link__icon">${icons[type] || '→'}</span>`;
+  function categoryLabel(c) {
+    if (c === 'linalg') return 'Линал';
+    if (c === 'calculus') return 'Матан';
+    return c || '—';
+  }
+
+  // ------- рендер сетки лекций с учётом фильтра + поиска -------
+  function renderLectureGrid() {
+    const grid = $('#lectures-grid');
+    if (!grid) return;
+    const q = learnCurrentQuery.trim().toLowerCase();
+    const all = getLectures();
+
+    const filtered = all.filter((lec) => {
+      if (learnCurrentFilter !== 'all' && learnCurrentFilter !== 'notes') {
+        if (lec.category !== learnCurrentFilter) return false;
+      }
+      if (q) {
+        // поиск по всем лекциям (независимо от фильтра — текст есть текст)
+        const plainTitle = String(lec.title || '').replace(/\$[^$]*\$/g, '').toLowerCase();
+        return plainTitle.includes(q);
+      }
+      return true;
+    });
+
+    grid.innerHTML = '';
+    if (!filtered.length) {
+      $('#learn-empty').hidden = false;
+    } else {
+      $('#learn-empty').hidden = true;
+      filtered.forEach((lec) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'lecture-box lecture-box--' + (lec.category || 'misc');
+        card.innerHTML = `
+          <span class="lecture-box__num">${lec.num}</span>
+          <span class="lecture-box__corner-tl">${escapeHtml(categoryLabel(lec.category))}</span>
+          <span class="lecture-box__corner-tr">Сем. ${lec.semester || 1}</span>
+          <p class="lecture-box__title math-content">${lec.title || 'Без названия'}</p>
+          <div class="lecture-box__footer">
+            <span class="lecture-box__play">▶ Смотреть</span>
+          </div>
+        `;
+        card.addEventListener('click', () => openPlayer(lec.id));
+        grid.appendChild(card);
+      });
+      grid.querySelectorAll('.math-content').forEach(renderMath);
+    }
+
+    // обновим счётчики
+    const all_ = all;
+    $('#count-all').textContent = all_.length;
+    $('#count-calculus').textContent = all_.filter((l) => l.category === 'calculus').length;
+    $('#count-linalg').textContent = all_.filter((l) => l.category === 'linalg').length;
+    $('#count-notes').textContent = '20';
+  }
+
+  function setLearnFilter(filter) {
+    learnCurrentFilter = filter;
+    // переключение между панелью лекций и панелью конспектов
+    const isNotes = (filter === 'notes');
+    $('#learn-pane-lectures').classList.toggle('active', !isNotes);
+    $('#learn-pane-notes').classList.toggle('active', isNotes);
+    // обновим active у кнопок
+    $$('.learn-filter').forEach((b) => b.classList.toggle('active', b.getAttribute('data-filter') === filter));
+    // скрыть/показать поиск (в конспектах поиск не нужен)
+    const search = document.querySelector('.learn-search');
+    if (search) search.style.display = isNotes ? 'none' : '';
+    if (!isNotes) renderLectureGrid();
+  }
+
+  function handleLearnSearch(val) {
+    learnCurrentQuery = val || '';
+    $('#learn-search-clear').hidden = !learnCurrentQuery;
+    // При поиске автоматически показываем панель лекций
+    if (learnCurrentFilter === 'notes') setLearnFilter('all');
+    else renderLectureGrid();
+  }
+
+  // ------- Yandex.Disk — получение прямой ссылки на .mp4 -------
+  async function resolveYandexVideo(y) {
+    if (!y) throw new Error('Нет ссылки');
+    const api = new URL('https://cloud-api.yandex.net/v1/disk/public/resources/download');
+    if (y.url) {
+      api.searchParams.set('public_key', y.url);
+    } else if (y.folder) {
+      api.searchParams.set('public_key', y.folder);
+      if (y.path) api.searchParams.set('path', y.path);
+    } else {
+      throw new Error('Неверный формат ссылки');
+    }
+    const res = await fetch(api.toString());
+    if (!res.ok) throw new Error('Яндекс.Диск API вернул ' + res.status);
+    const data = await res.json();
+    if (!data.href) throw new Error('Нет прямой ссылки в ответе API');
+    return data.href;
+  }
+
+  function originalYandexUrl(y) {
+    if (!y) return '#';
+    if (y.url) return y.url;
+    if (y.folder) {
+      if (y.path) return y.folder + '/' + y.path.split('/').map((p) => encodeURIComponent(p)).join('/').replace(/^\//, '');
+      return y.folder;
+    }
+    return '#';
+  }
+
+  // ------- Плеер -------
+  async function openPlayer(lectureId) {
+    const lectures = getLectures();
+    const lec = lectures.find((l) => l.id === lectureId);
+    if (!lec) return;
+
+    playerCurrentLectureId = lectureId;
+    cancelAutoNext();
+
+    const playerEl = $('#player');
+    const videoEl = $('#player-video');
+    const loadingEl = $('#player-loading');
+    const errorEl = $('#player-error');
+
+    $('#player-category').textContent = categoryLabel(lec.category);
+    $('#player-semester').textContent = 'Семестр ' + (lec.semester || 1);
+    $('#player-num').textContent = '№' + lec.num;
+    $('#player-title').innerHTML = lec.title || 'Лекция';
+    renderMath($('#player-title'));
+
+    // спрятать видео, показать loading
+    videoEl.hidden = true;
+    videoEl.pause();
+    videoEl.removeAttribute('src');
+    videoEl.load();
+    errorEl.hidden = true;
+    loadingEl.hidden = false;
+
+    // fallback-ссылка (на всякий случай)
+    $('#player-fallback-link').href = originalYandexUrl(lec.yandex);
+
+    // открыть модалку
+    playerEl.hidden = false;
+    playerEl.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+
+    // обновим prev/next кнопки
+    updatePlayerNav();
+
+    try {
+      const directUrl = await resolveYandexVideo(lec.yandex);
+      loadingEl.hidden = true;
+      videoEl.hidden = false;
+      videoEl.src = directUrl;
+      videoEl.play().catch(() => { /* autoplay может быть заблокирован — это нормально */ });
+    } catch (e) {
+      console.error('Video load failed:', e);
+      loadingEl.hidden = true;
+      errorEl.hidden = false;
+    }
+  }
+
+  function closePlayer() {
+    cancelAutoNext();
+    const playerEl = $('#player');
+    const videoEl = $('#player-video');
+    if (videoEl) {
+      videoEl.pause();
+      videoEl.removeAttribute('src');
+      videoEl.load();
+    }
+    if (playerEl) {
+      playerEl.hidden = true;
+      playerEl.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('modal-open');
+    playerCurrentLectureId = null;
+  }
+
+  // Следующая/предыдущая — внутри той же категории (если активен фильтр) или всех
+  function getSiblingLectures() {
+    const lectures = getLectures();
+    if (learnCurrentFilter === 'all' || learnCurrentFilter === 'notes') return lectures;
+    return lectures.filter((l) => l.category === learnCurrentFilter);
+  }
+
+  function updatePlayerNav() {
+    const siblings = getSiblingLectures();
+    const idx = siblings.findIndex((l) => l.id === playerCurrentLectureId);
+    $('#player-prev').disabled = (idx <= 0);
+    $('#player-next').disabled = (idx < 0 || idx >= siblings.length - 1);
+  }
+
+  function playerGoRelative(delta) {
+    const siblings = getSiblingLectures();
+    const idx = siblings.findIndex((l) => l.id === playerCurrentLectureId);
+    const next = siblings[idx + delta];
+    if (next) openPlayer(next.id);
+  }
+
+  function startAutoNext() {
+    cancelAutoNext();
+    const siblings = getSiblingLectures();
+    const idx = siblings.findIndex((l) => l.id === playerCurrentLectureId);
+    if (idx < 0 || idx >= siblings.length - 1) return;
+    playerAutoNextSeconds = 7;
+    $('#player-autonext-sec').textContent = String(playerAutoNextSeconds);
+    $('#player-autonext').hidden = false;
+    playerAutoNextTimer = setInterval(() => {
+      playerAutoNextSeconds--;
+      $('#player-autonext-sec').textContent = String(playerAutoNextSeconds);
+      if (playerAutoNextSeconds <= 0) {
+        cancelAutoNext();
+        playerGoRelative(+1);
+      }
+    }, 1000);
+  }
+
+  function cancelAutoNext() {
+    if (playerAutoNextTimer) { clearInterval(playerAutoNextTimer); playerAutoNextTimer = null; }
+    const el = $('#player-autonext');
+    if (el) el.hidden = true;
   }
 
   function buildNotesGrid() {
@@ -1579,7 +1762,7 @@
     buildBankGrid();
     buildPresetsGrid();
     buildConversionTable();
-    buildLecturesList();
+    renderLectureGrid();
     buildNotesGrid();
 
     $('#btn-start-variant').addEventListener('click', () => {
@@ -1596,16 +1779,44 @@
     const btnLearnBack = $('#btn-learn-back');
     if (btnLearnBack) btnLearnBack.addEventListener('click', exitNote);
 
-    // табы в разделе Обучение
-    $$('.learn-tab').forEach((tab) => {
-      tab.addEventListener('click', () => {
-        const key = tab.getAttribute('data-tab');
-        $$('.learn-tab').forEach((t) => t.classList.toggle('active', t === tab));
-        $$('.learn-pane').forEach((p) => {
-          p.classList.toggle('active', p.id === 'learn-pane-' + key);
-        });
-      });
+    // фильтры раздела Обучение
+    $$('.learn-filter').forEach((b) => {
+      b.addEventListener('click', () => setLearnFilter(b.getAttribute('data-filter')));
     });
+
+    // поиск
+    const searchInput = $('#learn-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => handleLearnSearch(e.target.value));
+    }
+    const searchClear = $('#learn-search-clear');
+    if (searchClear) {
+      searchClear.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        handleLearnSearch('');
+        if (searchInput) searchInput.focus();
+      });
+    }
+
+    // плеер
+    const playerEl = $('#player');
+    if (playerEl) {
+      $('#player-close').addEventListener('click', closePlayer);
+      playerEl.addEventListener('click', (e) => {
+        if (e.target.hasAttribute('data-player-close')) closePlayer();
+      });
+      $('#player-prev').addEventListener('click', () => playerGoRelative(-1));
+      $('#player-next').addEventListener('click', () => playerGoRelative(+1));
+      $('#player-autonext-cancel').addEventListener('click', cancelAutoNext);
+      // окончание воспроизведения → автопереход
+      $('#player-video').addEventListener('ended', startAutoNext);
+      // отменять автопереход, если юзер начал снова воспроизводить / перематывать
+      $('#player-video').addEventListener('play', cancelAutoNext);
+      // Esc закрывает плеер
+      document.addEventListener('keydown', (e) => {
+        if (!playerEl.hidden && e.key === 'Escape') closePlayer();
+      });
+    }
     $('#btn-pre-back').addEventListener('click', () => {
       // если открыли инфо из пресета — возвращаем к списку пресетов, иначе домой
       if (pendingPreset) {

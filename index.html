@@ -194,17 +194,30 @@
       <div id="learn-overview">
         <header class="screen__header">
           <h1>Обучение и повторение</h1>
-          <p class="muted">Лекции курса и конспекты по каждому из 20 типов задач.</p>
+          <p class="muted">Видеолекции курса и конспекты по 20 типам задач. Видео воспроизводится прямо на сайте.</p>
         </header>
 
-        <div class="learn-tabs" role="tablist">
-          <button type="button" class="learn-tab active" data-tab="lectures">Лекции курса</button>
-          <button type="button" class="learn-tab" data-tab="notes">Конспекты по типам задач</button>
+        <!-- Поиск -->
+        <div class="learn-search">
+          <svg class="learn-search__icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="9" r="6" />
+            <path d="M13.5 13.5 L17.5 17.5" stroke-linecap="round" />
+          </svg>
+          <input type="text" id="learn-search-input" placeholder="Найти лекцию по названию…" autocomplete="off" />
+          <button type="button" class="learn-search__clear" id="learn-search-clear" hidden aria-label="Очистить">×</button>
+        </div>
+
+        <!-- Фильтры категории -->
+        <div class="learn-filters" role="tablist">
+          <button type="button" class="learn-filter active" data-filter="all">Все лекции <span class="learn-filter__count" id="count-all"></span></button>
+          <button type="button" class="learn-filter" data-filter="calculus">Матанализ <span class="learn-filter__count" id="count-calculus"></span></button>
+          <button type="button" class="learn-filter" data-filter="linalg">Линейная алгебра <span class="learn-filter__count" id="count-linalg"></span></button>
+          <button type="button" class="learn-filter" data-filter="notes">Конспекты <span class="learn-filter__count" id="count-notes"></span></button>
         </div>
 
         <div class="learn-pane active" id="learn-pane-lectures">
-          <p class="muted" style="margin-bottom:1rem;">Материалы курса — видео и конспекты лекций на Яндекс.Диске. Нажми на карточку, чтобы открыть ссылку.</p>
-          <div class="lectures-list" id="lectures-list"></div>
+          <div class="lectures-grid" id="lectures-grid"></div>
+          <p class="muted small learn-empty" id="learn-empty" hidden>По запросу ничего не найдено.</p>
         </div>
 
         <div class="learn-pane" id="learn-pane-notes">
@@ -356,6 +369,46 @@
       <a href="https://github.com/xWooshieL/reshu-mia" target="_blank" rel="noopener" class="muted small" id="github-link">GitHub →</a>
     </div>
   </footer>
+</div>
+
+<!-- ========== VIDEO PLAYER MODAL ========== -->
+<div class="player" id="player" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="player-title">
+  <div class="player__overlay" data-player-close></div>
+  <div class="player__dialog" role="document">
+    <header class="player__head">
+      <div class="player__head-info">
+        <div class="player__badges">
+          <span class="player__badge" id="player-category"></span>
+          <span class="player__badge player__badge--muted" id="player-semester"></span>
+          <span class="player__badge player__badge--muted" id="player-num"></span>
+        </div>
+        <h3 class="player__title math-content" id="player-title">Лекция</h3>
+      </div>
+      <button type="button" class="player__close" id="player-close" aria-label="Закрыть">×</button>
+    </header>
+
+    <div class="player__body">
+      <div class="player__loading" id="player-loading">
+        <div class="player__spinner"></div>
+        <p class="muted">Получение ссылки на видео с Яндекс.Диска…</p>
+      </div>
+      <video class="player__video" id="player-video" controls preload="metadata" hidden></video>
+      <div class="player__error" id="player-error" hidden>
+        <p>Не удалось загрузить видео :(</p>
+        <a href="#" id="player-fallback-link" target="_blank" rel="noopener" class="btn btn--primary">Открыть на Яндекс.Диске →</a>
+      </div>
+    </div>
+
+    <footer class="player__foot">
+      <button type="button" class="btn btn--ghost" id="player-prev">← Предыдущая</button>
+      <div class="player__foot-spacer"></div>
+      <div class="player__autonext" id="player-autonext" hidden>
+        Следующая через <strong id="player-autonext-sec">7</strong> с…
+        <button type="button" class="btn btn--small" id="player-autonext-cancel">Отмена</button>
+      </div>
+      <button type="button" class="btn btn--primary" id="player-next">Следующая →</button>
+    </footer>
+  </div>
 </div>
 
 <!-- ========== MODAL (custom confirm/alert) ========== -->
