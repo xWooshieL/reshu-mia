@@ -2067,21 +2067,23 @@
     } else {
       questionHtml = '<p>' + numSpan + rawQuestion + '</p>';
     }
-    const metaLine = [typeTitle, source].filter(Boolean).join(' · ');
+    // Метаданные под задачей: тип + «Источник: ...»
+    const metaParts = [];
+    if (typeTitle) metaParts.push(typeTitle);
+    if (source) metaParts.push('Источник: ' + source);
+    const metaLine = metaParts.join(' · ');
     return `
       <div class="print-task">
         <div class="print-task__body">${questionHtml}</div>
+        <div class="print-task__answer">Ответ:&nbsp;<span class="print-task__ans-line"></span>.</div>
         ${metaLine ? '<div class="print-task__src">' + metaLine + '</div>' : ''}
       </div>
     `;
   }
 
-  // Заголовок части теперь не выделяет отдельную секцию на всю ширину —
-  // он просто вставляется inline в поток 2-колоночной вёрстки и встаёт
-  // НАД первой задачей соответствующего балла.
   function printPartSection(scoreLabel, items) {
     if (!items.length) return '';
-    return '<h2 class="print-part-title">Задания на ' + scoreLabel + '</h2>'
+    return '<div class="print-part-title">Задания на ' + scoreLabel + '</div>'
       + items.map(({ slot, task }) => printTaskBlock(slot, task)).join('');
   }
 
@@ -2109,9 +2111,19 @@
 
       <h2 class="print-h2">Справочные материалы</h2>
       <p class="print-muted"><em>На экзамене справочные материалы не выдают — они приведены здесь только для удобства при подготовке.</em></p>
-      <p><strong>Тригонометрия:</strong> $\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha$, $\\cos 2\\alpha = \\cos^2\\alpha - \\sin^2\\alpha$; $\\sin(\\alpha\\pm\\beta) = \\sin\\alpha\\cos\\beta \\pm \\cos\\alpha\\sin\\beta$; $\\cos(\\alpha\\pm\\beta) = \\cos\\alpha\\cos\\beta \\mp \\sin\\alpha\\sin\\beta$; $\\sin^2\\alpha = \\tfrac{1-\\cos 2\\alpha}{2}$, $\\cos^2\\alpha = \\tfrac{1+\\cos 2\\alpha}{2}$.</p>
-      <p><strong>Интегрирование:</strong> $\\int u\\,dv = uv - \\int v\\,du$; $\\int_a^b f(x)\\,dx = F(b)-F(a)$.</p>
-      <p><strong>Линейная алгебра:</strong> $\\cos\\varphi = \\dfrac{\\langle \\vec{a},\\vec{b}\\rangle}{\\|\\vec{a}\\|\\,\\|\\vec{b}\\|}$; $\\mathrm{proj}_{\\vec{b}}\\,\\vec{a} = \\dfrac{\\langle\\vec{a},\\vec{b}\\rangle}{\\langle\\vec{b},\\vec{b}\\rangle}\\vec{b}$; $\\det(A - \\lambda I) = 0$ — характеристическое уравнение.</p>
+      <p class="print-ref-sub"><em>Тригонометрия:</em></p>
+      <p class="print-ref">$\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha$</p>
+      <p class="print-ref">$\\cos 2\\alpha = \\cos^2\\alpha - \\sin^2\\alpha$</p>
+      <p class="print-ref">$\\sin(\\alpha\\pm\\beta) = \\sin\\alpha\\cos\\beta \\pm \\cos\\alpha\\sin\\beta$</p>
+      <p class="print-ref">$\\cos(\\alpha\\pm\\beta) = \\cos\\alpha\\cos\\beta \\mp \\sin\\alpha\\sin\\beta$</p>
+      <p class="print-ref">$\\sin^2\\alpha = \\tfrac{1-\\cos 2\\alpha}{2}, \\quad \\cos^2\\alpha = \\tfrac{1+\\cos 2\\alpha}{2}$</p>
+      <p class="print-ref-sub"><em>Интегрирование:</em></p>
+      <p class="print-ref">$\\int u\\,dv = uv - \\int v\\,du$</p>
+      <p class="print-ref">$\\int_a^b f(x)\\,dx = F(b)-F(a)$</p>
+      <p class="print-ref-sub"><em>Линейная алгебра:</em></p>
+      <p class="print-ref">$\\cos\\varphi = \\dfrac{\\langle \\vec{a},\\vec{b}\\rangle}{\\|\\vec{a}\\|\\,\\|\\vec{b}\\|}$</p>
+      <p class="print-ref">$\\mathrm{proj}_{\\vec{b}}\\,\\vec{a} = \\dfrac{\\langle\\vec{a},\\vec{b}\\rangle}{\\langle\\vec{b},\\vec{b}\\rangle}\\vec{b}$</p>
+      <p class="print-ref">$\\det(A - \\lambda I) = 0$ — характеристическое уравнение</p>
     `;
   }
 
@@ -2214,14 +2226,16 @@
         background: #f2f2f2; padding: 0 2px; border-radius: 2px;
       }
 
-      /* Заголовок части — inline в потоке, не на всю ширину.
-         Благодаря column-span:none он просто встаёт над первой задачей. */
+      /* Заголовок части — внутри колонки (не на всю ширину!), по центру,
+         без подчёркивания. Принудительно column-span: none чтобы браузер
+         не растягивал заголовок на обе колонки. */
       .print-part-title {
-        column-span: none;
-        font-size: 10pt; font-weight: 700; text-align: left;
-        margin: 8pt 0 4pt;
-        padding-bottom: 2pt;
-        border-bottom: 0.5pt solid #000;
+        column-span: none !important;
+        -webkit-column-span: none !important;
+        display: block;
+        font-size: 10.5pt; font-weight: 700;
+        text-align: center;
+        margin: 10pt 0 6pt;
         break-after: avoid; page-break-after: avoid;
         break-inside: avoid;
       }
@@ -2229,23 +2243,21 @@
       /* Задача */
       .print-task {
         break-inside: avoid; page-break-inside: avoid;
-        margin: 0 0 7pt;
+        margin: 0 0 14pt;
       }
       .print-task__body {
         font-size: 9pt; line-height: 1.32;
         text-align: left;
       }
-      .print-task__body p {
-        margin: 0 0 2pt;
-      }
+      .print-task__body p { margin: 0 0 2pt; }
       .print-task__body p:last-child { margin-bottom: 0; }
       .print-task__num {
         display: inline-block;
-        min-width: 22pt;
+        min-width: 20pt;
         padding: 0.5pt 5pt;
         text-align: center;
         font-weight: 700; font-size: 9pt;
-        border: 0.7pt solid #000;
+        border: 0.35pt solid #000;
         background: #fff;
         margin-right: 5pt;
         vertical-align: baseline;
@@ -2253,9 +2265,37 @@
       }
       .print-task__body .katex { font-size: 9pt !important; }
       .print-task__body img, .print-task__body svg { max-width: 100%; height: auto; }
+
+      /* Поле «Ответ: _____» под задачей */
+      .print-task__answer {
+        font-size: 9pt;
+        margin: 4pt 0 2pt;
+      }
+      .print-task__ans-line {
+        display: inline-block;
+        width: 55mm;
+        border-bottom: 0.35pt solid #000;
+        height: 1em;
+        vertical-align: baseline;
+      }
+
+      /* Источник под задачей */
       .print-task__src {
-        font-size: 7pt; color: #777; font-style: italic;
+        font-size: 7.5pt; color: #666; font-style: italic;
         text-align: right; margin: 1pt 0 0;
+      }
+
+      /* Справочные формулы — каждая с новой строки, слегка индентированы */
+      .print-ref {
+        text-align: center;
+        margin: 1pt 0 !important;
+        line-height: 1.35;
+      }
+      .print-ref .katex { font-size: 9pt !important; }
+      .print-ref-sub {
+        margin: 4pt 0 2pt !important;
+        font-weight: 600;
+        text-align: left;
       }
 
       .print-foot { text-align: center; font-size: 7pt; color: #777;
