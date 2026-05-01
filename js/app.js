@@ -2358,43 +2358,27 @@
       + '.toolbar .hint { color: #bbb; font-size: 12.5px; margin-left: 14px; }'
       + '.print-doc { padding: 10mm 8mm; max-width: 297mm; margin: 0 auto; background: #fff; }'
 
-      /* КРИТИЧНО: усиляем тонкие линии KaTeX. Chrome при печати обрезает */
-      /* линии < 1px до нуля → vinculum знака √, дробные черты, overline */
-      /* просто исчезают в PDF. Ставим явный 0.75pt (= 1px при 96 DPI). */
-      + '.katex .sqrt > .sqrt-sign + .vlist-t,'
-      + '.katex .sqrt > .sqrt-sign + .vlist-t .vlist > span:first-child {'
-      +   ' border-top-width: 0.75pt !important;'
-      +   ' border-top-style: solid !important;'
-      +   ' border-top-color: currentColor !important;'
-      + ' }'
+      /* Только точечное усиление дробных черт и overline/underline.
+         Знак корня в KaTeX 0.16+ рендерится как SVG — он корректно
+         печатается сам. Sqrt-поля проблемы вероятно нет, а если есть —
+         см. обходной путь через увеличение math-размера ниже. */
       + '.katex .mfrac .frac-line,'
-      + '.katex .overline .overline-line,'
-      + '.katex .underline .underline-line {'
-      +   ' border-bottom-width: 0.75pt !important;'
+      + '.katex .overline-line,'
+      + '.katex .underline-line {'
+      +   ' border-bottom-width: 0.6pt !important;'
       +   ' border-bottom-style: solid !important;'
       +   ' border-bottom-color: currentColor !important;'
-      +   ' min-height: 0.75pt !important;'
       + ' }'
-      /* На всякий случай альтернативные селекторы некоторых версий KaTeX */
-      + '.katex .hide-tail {'
-      +   ' border-top: 0.75pt solid currentColor !important;'
-      + ' }'
+
+      /* Формулы чуть крупнее — так все тонкие детали KaTeX (включая
+         SVG-радикал) получат больший физический размер и надёжно
+         попадут в PDF независимо от print-оптимизаций браузера. */
+      + '.katex { font-size: 1.08em !important; }'
 
       + '@media print {'
       +   ' .toolbar { display: none !important; }'
       +   ' .print-doc { padding: 0; margin: 0; max-width: none; }'
       +   ' body { background: #fff; }'
-      +   /* В print-режиме усиливаем ещё сильнее (1pt = ~1.33px). */
-      +   ' .katex .sqrt > .sqrt-sign + .vlist-t,'
-      +   ' .katex .sqrt > .sqrt-sign + .vlist-t .vlist > span:first-child {'
-      +     ' border-top-width: 1pt !important;'
-      +   ' }'
-      +   ' .katex .mfrac .frac-line,'
-      +   ' .katex .overline .overline-line,'
-      +   ' .katex .underline .underline-line {'
-      +     ' border-bottom-width: 1pt !important;'
-      +     ' min-height: 1pt !important;'
-      +   ' }'
       + ' }'
 
       + style;
