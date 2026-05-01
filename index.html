@@ -294,6 +294,7 @@
           </div>
         </div>
         <div class="exam-head__actions">
+          <button type="button" class="btn btn--ghost" id="btn-pdf" title="Скачать вариант в PDF (альбомная ориентация, 2 колонки)">PDF</button>
           <button type="button" class="btn btn--danger" id="btn-finish">Завершить</button>
         </div>
       </div>
@@ -409,6 +410,9 @@
     </footer>
   </div>
 </div>
+
+<!-- ========== PRINT / PDF ROOT (виден только при печати) ========== -->
+<div id="print-root" class="print-root" aria-hidden="true"></div>
 
 <!-- ========== MODAL (custom confirm/alert) ========== -->
 <div class="modal" id="modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">

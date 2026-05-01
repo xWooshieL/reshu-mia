@@ -1723,9 +1723,86 @@ body.modal-open { overflow: hidden; }
 .player__error {
   text-align: center;
   color: white;
-  padding: 2rem 1rem;
+  padding: 0;
 }
-.player__error p { margin-bottom: 1rem; }
+.player__error p { margin-bottom: 0.5rem; }
+
+/* preview-плашка (когда встроенный плеер не справился) */
+.player__preview-wrap {
+  position: relative;
+  width: 100%;
+  background: #000;
+  aspect-ratio: 16 / 9;
+  max-height: 70vh;
+  overflow: hidden;
+}
+.player__preview {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+.player__preview--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 0.95rem;
+}
+.player__preview-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.45) 100%);
+  transition: background 0.2s ease;
+}
+.player__preview-overlay:hover {
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%);
+}
+.player__play-big {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  color: #111;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.15s ease;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+}
+.player__play-big:hover {
+  transform: scale(1.08);
+  background: #fff;
+}
+.player__play-big svg {
+  margin-left: 6px;
+}
+.player__fallback-msg {
+  padding: 1.25rem 1rem 0.5rem;
+  color: #f0f0f0;
+  text-align: center;
+}
+.player__fallback-msg p { margin: 0 0 0.4rem; }
+.player__fallback-msg .small { font-size: 0.85rem; color: #a8a8b0; max-width: 520px; margin: 0 auto 1rem; }
+.player__fallback-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .player__play-big { width: 72px; height: 72px; }
+  .player__play-big svg { width: 52px; height: 52px; }
+}
 
 .player__foot {
   padding: 0.75rem 1rem;
@@ -1972,3 +2049,259 @@ body.modal-open { overflow: hidden; }
   /* footer */
   .footer__inner { flex-direction: column; gap: 0.3rem; text-align: center; padding: 1rem 0.85rem; }
 }
+
+/* ============================================================
+   PDF / PRINT — стилизация под открытый вариант ЕГЭ
+   Пользователь выбирает «Сохранить как PDF» в диалоге печати.
+   ============================================================ */
+
+/* На обычном экране контейнер скрыт. */
+.print-root { display: none; }
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm 10mm 14mm 10mm;
+  }
+
+  /* скрываем всё приложение */
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  body > *:not(#print-root) { display: none !important; }
+  .print-root { display: block !important; }
+
+  /* базовая типографика документа */
+  .print-doc {
+    font-family: "Times New Roman", Times, Georgia, serif;
+    font-size: 10.5pt;
+    line-height: 1.3;
+    color: #000;
+  }
+  .print-doc p { margin: 0 0 4pt; }
+  .print-doc strong { font-weight: 700; }
+
+  /* Шапка: три колонки как в образце */
+  .print-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 8pt;
+    color: #000;
+    padding-bottom: 2pt;
+    border-bottom: 0.3pt solid #000;
+    margin-bottom: 8pt;
+    page-break-after: avoid;
+  }
+  .print-head__center {
+    font-size: 8pt;
+    text-transform: none;
+  }
+
+  .print-variant-title {
+    text-align: center;
+    font-size: 11pt;
+    font-weight: 700;
+    margin: 0 0 10pt;
+    font-style: italic;
+    page-break-after: avoid;
+  }
+
+  /* Инфо-страница (2 колонки, без разрыва) */
+  .print-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 12mm;
+    page-break-after: always;
+  }
+  .print-info__col { break-inside: avoid-column; }
+  .print-info__h1 {
+    text-align: center;
+    font-size: 14pt;
+    font-weight: 700;
+    margin: 0 0 10pt;
+    line-height: 1.3;
+  }
+  .print-info__sub {
+    text-align: center;
+    font-weight: 700;
+    font-size: 11pt;
+    margin: 0 0 10pt;
+  }
+  .print-info__body p { margin: 0 0 6pt; text-align: justify; }
+  .print-info__list { margin: 0 0 6pt 1.2em; padding: 0; }
+  .print-info__list li { margin: 0 0 3pt; }
+  .print-info__wish { text-align: center; margin-top: 10pt !important; }
+
+  .print-info__notice {
+    border: 0.6pt solid #000;
+    padding: 5pt 7pt;
+    font-style: italic;
+    font-size: 9.5pt;
+    margin-bottom: 8pt;
+    background: #fafafa;
+  }
+  .print-info__example {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 4pt 8pt;
+    margin-bottom: 10pt;
+    font-size: 9.5pt;
+  }
+  .print-info__example-label {
+    font-size: 8pt;
+    color: #555;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .print-info__example-label--right { text-align: right; }
+  .print-info__cells {
+    grid-column: 2;
+    display: flex;
+    gap: 0;
+  }
+  .print-info__cells span {
+    display: inline-block;
+    width: 5mm;
+    height: 5mm;
+    line-height: 5mm;
+    text-align: center;
+    border: 0.4pt solid #000;
+    margin-right: -0.4pt;
+    font-size: 9pt;
+  }
+
+  .print-info__h2 {
+    text-align: center;
+    font-size: 10.5pt;
+    font-weight: 700;
+    margin: 10pt 0 6pt;
+  }
+  .print-info__formulas p {
+    margin: 2pt 0;
+    text-align: center;
+  }
+  .print-info__formulas .katex { font-size: 10pt !important; }
+
+  /* Часть: заголовок + 2 колонки задач */
+  .print-part {
+    page-break-before: always;
+  }
+  .print-part__title {
+    text-align: center;
+    font-size: 12pt;
+    font-weight: 700;
+    margin: 0 0 8pt;
+    page-break-after: avoid;
+  }
+  .print-part__instruction {
+    border: 0.6pt solid #000;
+    padding: 5pt 8pt;
+    font-size: 9.5pt;
+    margin: 0 0 10pt;
+    background: #fafafa;
+    page-break-after: avoid;
+    column-span: all;
+    -webkit-column-span: all;
+  }
+  .print-part__columns {
+    column-count: 2;
+    column-gap: 8mm;
+    column-fill: balance;
+  }
+
+  /* Одно задание */
+  .print-task {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 10pt;
+    display: block;
+  }
+  .print-task__head {
+    display: flex;
+    align-items: center;
+    gap: 6pt;
+    margin-bottom: 3pt;
+    break-inside: avoid;
+  }
+  /* Номер в "двойной" рамке как на образце */
+  .print-task__num {
+    display: inline-block;
+    min-width: 18pt;
+    padding: 1pt 4pt;
+    text-align: center;
+    font-weight: 700;
+    font-size: 10pt;
+    border: 0.5pt solid #000;
+    outline: 0.5pt solid #000;
+    outline-offset: 1pt;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .print-task__meta {
+    font-size: 8pt;
+    color: #555;
+    font-style: italic;
+    line-height: 1.25;
+  }
+  .print-task__body {
+    text-align: justify;
+    font-size: 10pt;
+    margin-bottom: 6pt;
+  }
+  .print-task__body p { margin: 0 0 3pt; }
+  .print-task__body .katex { font-size: 10pt !important; }
+  .print-task__body img,
+  .print-task__body svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Ответ: _________________. */
+  .print-task__answer {
+    font-size: 10pt;
+    margin-top: 4pt;
+  }
+  .print-task__line {
+    display: inline-block;
+    width: 52mm;
+    border-bottom: 0.5pt solid #000;
+    vertical-align: baseline;
+    height: 1em;
+  }
+
+  /* Подвал (нумерация страниц через CSS @page — нативно) */
+  .print-foot {
+    position: running(footer);
+    text-align: center;
+    font-size: 8pt;
+    color: #333;
+    margin-top: 8pt;
+  }
+
+  /* Нумерация страниц внизу */
+  @page {
+    @bottom-center {
+      content: "© " counter(page) " / " counter(pages);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 8pt;
+      color: #555;
+    }
+  }
+
+  /* KaTeX корректно печатается, но подстрахуемся с цветом */
+  .katex, .katex * {
+    color: #000 !important;
+  }
+  /* Элементы интерфейса, которые могли попасть внутрь questionLatex */
+  .print-task button, .print-task .btn { display: none !important; }
+}
+
+/* Когда body.printing — показываем контейнер и на экране для отладки (опционально)
+   Сейчас ОТКЛЮЧЕНО: раскомментируйте для preview-режима.
+body.printing .print-root { display: block; background: #eee; padding: 20px; }
+body.printing .screen, body.printing .topbar, body.printing .footer { display: none; }
+*/
+
+

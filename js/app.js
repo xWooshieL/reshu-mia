@@ -42,7 +42,8 @@
     return Math.max(0, Math.min(10, raw));
   }
   function computeGrade100(totalPoints) {
-    return computeGrade(totalPoints) * 10;
+    // 100-балльная = 10-балльная × 10 (без дробей): 0,7 → 7, 3,7 → 37, 8,3 → 83
+    return Math.round(computeGrade(totalPoints) * 10);
   }
   function gradeLabel(g) {
     if (g >= 8) return { text: 'отлично', cls: 'ex' };
@@ -359,31 +360,55 @@
     else renderLectureGrid();
   }
 
-  // ------- Yandex.Disk — получение прямой ссылки на .mp4 -------
-  async function resolveYandexVideo(y) {
+  // ------- Yandex.Disk — получение прямой ссылки И preview-картинки -------
+  async function resolveYandexResources(y) {
     if (!y) throw new Error('Нет ссылки на Яндекс.Диск');
-    const api = new URL('https://cloud-api.yandex.net/v1/disk/public/resources/download');
-    if (y.url) {
-      api.searchParams.set('public_key', y.url);
-    } else if (y.folder) {
-      api.searchParams.set('public_key', y.folder);
-      if (y.path) api.searchParams.set('path', y.path);
-    } else {
-      throw new Error('Неверный формат ссылки на Яндекс.Диск');
+
+    // API /resources — для preview + имени файла
+    const infoApi = new URL('https://cloud-api.yandex.net/v1/disk/public/resources');
+    // API /download — для прямой ссылки на mp4
+    const dlApi = new URL('https://cloud-api.yandex.net/v1/disk/public/resources/download');
+
+    const publicKey = y.url || y.folder;
+    if (!publicKey) throw new Error('Неверный формат ссылки');
+
+    [infoApi, dlApi].forEach((u) => {
+      u.searchParams.set('public_key', publicKey);
+      if (y.path) u.searchParams.set('path', y.path);
+    });
+    infoApi.searchParams.set('preview_size', 'XL');
+    infoApi.searchParams.set('preview_crop', 'false');
+
+    console.log('[player] resources:', infoApi.toString());
+    console.log('[player] download:', dlApi.toString());
+
+    // параллельные запросы
+    const [infoRes, dlRes] = await Promise.all([
+      fetch(infoApi.toString()).catch((e) => ({ ok: false, err: e })),
+      fetch(dlApi.toString()).catch((e) => ({ ok: false, err: e })),
+    ]);
+
+    let previewUrl = null;
+    let name = null;
+    if (infoRes && infoRes.ok) {
+      try {
+        const info = await infoRes.json();
+        previewUrl = info.preview || null;
+        name = info.name || null;
+        console.log('[player] preview получен, name:', name);
+      } catch (_) { /* ignore */ }
     }
-    const apiUrl = api.toString();
-    console.log('[player] GET', apiUrl);
-    const res = await fetch(apiUrl);
-    if (!res.ok) {
-      throw new Error('Яндекс.Диск API вернул ' + res.status + ' ' + res.statusText);
+
+    let directUrl = null;
+    if (dlRes && dlRes.ok) {
+      try {
+        const dl = await dlRes.json();
+        directUrl = dl.href || null;
+        console.log('[player] directUrl получен, длина:', directUrl ? directUrl.length : 0);
+      } catch (_) { /* ignore */ }
     }
-    const data = await res.json();
-    console.log('[player] API ответ:', data);
-    if (!data.href) {
-      // Бывает для одиночных /i/… ссылок, когда Яндекс требует капчу
-      throw new Error('API Яндекс.Диска не вернул прямую ссылку (антибот-защита или приватный файл). Попробуй открыть в новой вкладке.');
-    }
-    return data.href;
+
+    return { directUrl, previewUrl, name };
   }
 
   function originalYandexUrl(y, lecture) {
@@ -399,20 +424,38 @@
   }
 
   // ------- Плеер -------
-  function showPlayerError(lec, message, directUrl) {
+  // Показываем красивую плашку: превью + кнопка "Смотреть на Яндекс.Диске"
+  // Работает потому что Я.Диск жёстко проставляет disposition=attachment в своей
+  // прямой ссылке, из-за чего Chrome отказывается играть видео (MediaError 4).
+  function showPlayerFallback(lec, previewUrl, reason) {
     const errorEl = $('#player-error');
     const loadingEl = $('#player-loading');
     const videoEl = $('#player-video');
     loadingEl.hidden = true;
     videoEl.hidden = true;
+    try { videoEl.pause(); } catch (_) {}
     errorEl.hidden = false;
+
     const yandexFallback = originalYandexUrl(lec.yandex, lec);
+    const posterHtml = previewUrl
+      ? `<img class="player__preview" src="${escapeHtml(previewUrl)}" alt="${escapeHtml(lec.title || 'Превью')}" loading="eager">`
+      : `<div class="player__preview player__preview--placeholder"><span>Превью недоступно</span></div>`;
+
     errorEl.innerHTML = `
-      <p><strong>Не удалось загрузить видео во встроенный плеер</strong></p>
-      <p class="muted small" style="margin:0.5rem 0 1.25rem; max-width:480px; margin-left:auto; margin-right:auto;">${escapeHtml(message || 'Неизвестная ошибка.')}</p>
-      <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
-        <a href="${escapeHtml(yandexFallback)}" target="_blank" rel="noopener" class="btn btn--primary">Открыть на Яндекс.Диске →</a>
-        ${directUrl ? `<a href="${escapeHtml(directUrl)}" target="_blank" rel="noopener" class="btn btn--ghost">Прямая ссылка на файл</a>` : ''}
+      <div class="player__preview-wrap">
+        ${posterHtml}
+        <div class="player__preview-overlay">
+          <a href="${escapeHtml(yandexFallback)}" target="_blank" rel="noopener" class="player__play-big" aria-label="Смотреть на Яндекс.Диске">
+            <svg xmlns="http://www.w3.org/2000/svg" focusable="false" fill="none" aria-hidden="true" width="72" height="72" viewBox="0 0 64 64"><path fill="currentColor" fill-rule="evenodd" d="M52.842 25.728c2.066 1.72 3.582 3.667 3.582 6.272s-1.516 4.55-3.582 6.271c-2.019 1.68-4.977 3.481-8.655 5.72l-10.86 6.61c-3.952 2.406-7.117 4.332-9.682 5.415-2.61 1.103-5.165 1.58-7.543.243-2.377-1.336-3.298-3.766-3.714-6.57-.409-2.754-.409-6.458-.409-11.084v-13.21c0-4.627 0-8.331.409-11.086.416-2.802 1.337-5.233 3.714-6.569 2.378-1.336 4.933-.86 7.543.243 2.565 1.083 5.73 3.01 9.681 5.415l10.861 6.61c3.678 2.24 6.636 4.04 8.655 5.72" clip-rule="evenodd"></path></svg>
+          </a>
+        </div>
+      </div>
+      <div class="player__fallback-msg">
+        <p><strong>Встроенный плеер не поддерживает формат Я.Диска</strong></p>
+        <p class="muted small">${escapeHtml(reason || 'Видео откроется на Яндекс.Диске в новой вкладке.')}</p>
+        <div class="player__fallback-actions">
+          <a href="${escapeHtml(yandexFallback)}" target="_blank" rel="noopener" class="btn btn--primary">Смотреть на Яндекс.Диске →</a>
+        </div>
       </div>
     `;
   }
@@ -445,8 +488,11 @@
     videoEl.hidden = true;
     try { videoEl.pause(); } catch (_) {}
     videoEl.removeAttribute('src');
+    videoEl.removeAttribute('poster');
+    videoEl.onerror = null;
     videoEl.load();
     errorEl.hidden = true;
+    errorEl.innerHTML = '';
     loadingEl.hidden = false;
 
     // Открываем модалку
@@ -457,63 +503,72 @@
     updatePlayerNav();
 
     let directUrl = null;
+    let previewUrl = null;
     try {
-      directUrl = await resolveYandexVideo(lec.yandex);
-      console.log('[player] Прямая ссылка получена, длина URL:', directUrl.length);
+      const res = await resolveYandexResources(lec.yandex);
+      directUrl = res.directUrl;
+      previewUrl = res.previewUrl;
     } catch (e) {
-      console.error('[player] Не удалось получить прямую ссылку:', e);
-      showPlayerError(lec, e.message, null);
+      console.error('[player] API ошибка:', e);
+      showPlayerFallback(lec, null, e.message);
       return;
     }
 
-    // Проверим, что текущая лекция ещё та же (пользователь мог переключиться)
     if (playerCurrentLectureId !== lectureId) return;
 
-    // Вешаем обработчик ошибок ДО установки src
-    const onVideoError = (ev) => {
-      const err = videoEl.error;
-      let msg = 'Браузер не смог воспроизвести видео.';
-      if (err) {
-        const codes = {
-          1: 'Загрузка прервана',
-          2: 'Ошибка сети',
-          3: 'Не удалось декодировать',
-          4: 'Формат не поддерживается браузером',
-        };
-        msg += ' Код: ' + err.code + ' (' + (codes[err.code] || 'неизвестно') + ').';
-      }
-      console.error('[player] <video> error:', err, ev);
-      showPlayerError(lec, msg, directUrl);
-    };
-    videoEl.onerror = onVideoError;
+    // Нет прямой ссылки — сразу fallback
+    if (!directUrl) {
+      showPlayerFallback(lec, previewUrl, 'Яндекс.Диск не вернул прямую ссылку (для /i/… ссылок часто требуется капча).');
+      return;
+    }
 
-    // Устанавливаем src и показываем
+    // Пробуем встроенный плеер. Ставим poster = preview.
+    if (previewUrl) videoEl.poster = previewUrl;
+
+    let canplayHit = false;
+    let fallbackFired = false;
+
+    const triggerFallback = (reason) => {
+      if (fallbackFired) return;
+      if (playerCurrentLectureId !== lectureId) return;
+      fallbackFired = true;
+      videoEl.onerror = null;
+      console.warn('[player] fallback:', reason);
+      showPlayerFallback(lec, previewUrl, reason);
+    };
+
+    videoEl.onerror = () => {
+      const err = videoEl.error;
+      const codes = { 1: 'Загрузка прервана', 2: 'Ошибка сети', 3: 'Не удалось декодировать', 4: 'Формат не поддерживается браузером' };
+      const code = err ? err.code : '?';
+      const codeName = err ? (codes[err.code] || 'неизвестно') : 'n/a';
+      triggerFallback(`MediaError ${code} — ${codeName}. Я.Диск отдаёт файл с заголовком disposition=attachment, который блокирует воспроизведение во встроенном плеере.`);
+    };
+
+    videoEl.addEventListener('canplay', function onCanPlay() {
+      canplayHit = true;
+      console.log('[player] canplay — видео играет!');
+      videoEl.removeEventListener('canplay', onCanPlay);
+    });
+
+    // Устанавливаем src
     loadingEl.hidden = true;
     videoEl.hidden = false;
     videoEl.src = directUrl;
     videoEl.load();
 
-    // Некоторые браузеры (Safari) не бросают `error`, если ответ 403 —
-    // проверим через canplay-таймер
-    let canplayHit = false;
-    const onCanPlay = () => {
-      canplayHit = true;
-      console.log('[player] canplay — видео готово к воспроизведению');
-      videoEl.removeEventListener('canplay', onCanPlay);
-    };
-    videoEl.addEventListener('canplay', onCanPlay);
+    // Таймер: если за 6 секунд ничего не произошло — fallback
     setTimeout(() => {
-      if (!canplayHit && !videoEl.error && playerCurrentLectureId === lectureId && !errorEl.hidden === false) {
-        // прошло 15 секунд, а canplay не случился — что-то не так
-        console.warn('[player] canplay не произошёл за 15 с, возможно проблемы с загрузкой');
+      if (!canplayHit && !fallbackFired && playerCurrentLectureId === lectureId) {
+        triggerFallback('Видео не начало загружаться за 6 секунд.');
       }
-    }, 15000);
+    }, 6000);
 
-    // Пробуем запустить (autoplay может быть заблокирован браузером — это нормально)
+    // Пробуем запустить
     const playPromise = videoEl.play();
     if (playPromise && playPromise.catch) {
       playPromise.catch((e) => {
-        console.log('[player] autoplay заблокирован, жди ручного клика:', e && e.message);
+        console.log('[player] autoplay заблокирован:', e && e.message);
       });
     }
   }
@@ -1833,6 +1888,174 @@
   }
 
   // ============================================================
+  // PDF (через window.print() + @media print)
+  // ============================================================
+
+  function scoreWord(n) {
+    if (n === 1) return '1 балл';
+    if (n === 2) return '2 балла';
+    if (n === 3) return '3 балла';
+    return n + ' балла';
+  }
+
+  function printTaskBlock(slot, task, withAnswer) {
+    const bank = (window.TASK_BANK && window.TASK_BANK[slot]) || {};
+    const typeTitle = bank.title ? escapeHtml(bank.title) : '';
+    const source = task && task.source ? escapeHtml(task.source) : '';
+    const question = (task && task.questionLatex) || '<p class="muted">Нет условия</p>';
+    const answerHtml = withAnswer
+      ? '<div class="print-task__answer">Ответ:&nbsp;<span class="print-task__line"></span>.</div>'
+      : '';
+    return `
+      <div class="print-task">
+        <div class="print-task__head">
+          <span class="print-task__num">${slot}</span>
+          <span class="print-task__meta">${[typeTitle, source].filter(Boolean).join(' · ')}</span>
+        </div>
+        <div class="print-task__body">${question}</div>
+        ${answerHtml}
+      </div>
+    `;
+  }
+
+  function printPartSection(scoreLabel, items, opts) {
+    if (!items.length) return '';
+    opts = opts || {};
+    const tasksHtml = items.map(({ slot, task }) =>
+      printTaskBlock(slot, task, !!opts.withAnswer)
+    ).join('');
+    const instruction = opts.instruction
+      ? `<div class="print-part__instruction">${opts.instruction}</div>`
+      : '';
+    return `
+      <section class="print-part">
+        <div class="print-part__title">Задания на ${scoreLabel}</div>
+        ${instruction}
+        <div class="print-part__columns">${tasksHtml}</div>
+      </section>
+    `;
+  }
+
+  function printInfoPage() {
+    return `
+      <section class="print-info">
+        <div class="print-info__col">
+          <h1 class="print-info__h1">Экзамен<br>по Основам математического анализа<br>и линейной алгебры</h1>
+          <p class="print-info__sub">Инструкция по выполнению работы</p>
+          <div class="print-info__body">
+            <p>Экзаменационная работа состоит из трёх частей, включающих в себя 20 заданий.</p>
+            <ul class="print-info__list">
+              <li><strong>Часть 1</strong> — 10 заданий на 1 балл каждое (базовый уровень).</li>
+              <li><strong>Часть 2</strong> — 6 заданий на 2 балла каждое (повышенный уровень).</li>
+              <li><strong>Часть 3</strong> — 4 задания на 3 балла каждое (высокий уровень).</li>
+            </ul>
+            <p>На выполнение работы отводится <strong>3 часа</strong> (180 минут).</p>
+            <p>Ответом к заданиям 1–10 является целое число или конечная десятичная дробь. Запишите число в поле ответа, затем перенесите его в бланк ответов № 1 справа от номера соответствующего задания.</p>
+            <p>При выполнении заданий 11–20 требуется записать полное обоснованное решение и ответ в бланке ответов № 2.</p>
+            <p>За выполнение различных заданий даются <strong>от 1 до 3 баллов</strong>. Баллы суммируются. Оценка по 10-балльной шкале вычисляется по формуле <span class="math">$\\min\\!\\bigl(10,\\,(x+2)/3\\bigr)$</span>, где $x$ — сумма ваших баллов.</p>
+            <p>Записи в черновике, а также в тексте работы <strong>не учитываются</strong> при оценивании.</p>
+            <p class="print-info__wish"><em>Желаем успеха!</em></p>
+          </div>
+        </div>
+        <div class="print-info__col">
+          <div class="print-info__notice">
+            <strong>Ответом к заданиям 1–10</strong> является целое число или конечная десятичная дробь. Во всех заданиях числа предполагаются действительными, если отдельно не указано иное. Запишите число в поле ответа в тексте работы, затем перенесите его в <strong>БЛАНК ОТВЕТОВ № 1</strong> справа от номера соответствующего задания. Каждую цифру, знак «минус» и запятую пишите в отдельной клеточке в соответствии с приведёнными в бланке образцами.
+          </div>
+          <div class="print-info__example">
+            <div class="print-info__example-label">КИМ</div>
+            <div>Ответ:&nbsp;<u>&nbsp;&minus;0,8&nbsp;</u></div>
+            <div class="print-info__cells">
+              <span>−</span><span>0</span><span>,</span><span>8</span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="print-info__example-label print-info__example-label--right">Бланк</div>
+          </div>
+          <h2 class="print-info__h2">Справочные материалы</h2>
+          <div class="print-info__formulas math-content">
+            <p>Тригонометрия:</p>
+            <p>$\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha$</p>
+            <p>$\\cos 2\\alpha = \\cos^2\\alpha - \\sin^2\\alpha$</p>
+            <p>$\\sin(\\alpha\\pm\\beta) = \\sin\\alpha\\cos\\beta \\pm \\cos\\alpha\\sin\\beta$</p>
+            <p>$\\cos(\\alpha\\pm\\beta) = \\cos\\alpha\\cos\\beta \\mp \\sin\\alpha\\sin\\beta$</p>
+            <p>$\\sin^2\\alpha = \\tfrac{1-\\cos 2\\alpha}{2}$, &nbsp; $\\cos^2\\alpha = \\tfrac{1+\\cos 2\\alpha}{2}$</p>
+            <p style="margin-top:6pt;">Интегрирование:</p>
+            <p>$\\int u\\,dv = uv - \\int v\\,du$</p>
+            <p>$\\displaystyle\\int_a^b f(x)\\,dx = F(b)-F(a)$</p>
+            <p>$\\displaystyle\\int_a^b f(x)\\,dx = \\lim_{n\\to\\infty}\\sum_{k=1}^{n} f(x_k)\\,\\Delta x$</p>
+            <p style="margin-top:6pt;">Линейная алгебра:</p>
+            <p>$\\cos\\varphi = \\dfrac{\\langle \\vec{a},\\vec{b}\\rangle}{\\|\\vec{a}\\|\\,\\|\\vec{b}\\|}$, &nbsp; $\\mathrm{proj}_{\\vec{b}}\\,\\vec{a} = \\dfrac{\\langle\\vec{a},\\vec{b}\\rangle}{\\langle\\vec{b},\\vec{b}\\rangle}\\vec{b}$</p>
+            <p>$\\det(A - \\lambda I) = 0$ &nbsp;— характеристическое уравнение</p>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function buildPrintPages() {
+    if (!currentVariant) return '';
+    const byScore = { 1: [], 2: [], 3: [] };
+    for (let s = 1; s <= TOTAL_SLOTS; s++) {
+      const task = currentVariant[s];
+      if (!task) continue;
+      const sc = SCORE_BY_SLOT[s] || 1;
+      byScore[sc].push({ slot: s, task });
+    }
+
+    const variantName = currentVariantMeta && currentVariantMeta.title
+      ? currentVariantMeta.title
+      : 'Случайный вариант';
+
+    return `
+      <article class="print-doc">
+        <header class="print-head">
+          <span class="print-head__left">Открытый вариант</span>
+          <span class="print-head__center">Основы математического анализа и линейной алгебры</span>
+          <span class="print-head__right">Открытый вариант</span>
+        </header>
+
+        <div class="print-variant-title">${escapeHtml(variantName)}</div>
+
+        ${printInfoPage()}
+
+        ${printPartSection('1 балл', byScore[1], { withAnswer: true })}
+        ${printPartSection('2 балла', byScore[2], {
+          withAnswer: false,
+          instruction: '<em>Для записи решений и ответов на задания этой части используйте <strong>БЛАНК ОТВЕТОВ № 2</strong>. Запишите сначала номер выполняемого задания, а затем полное обоснованное решение и ответ. Ответы записывайте чётко и разборчиво.</em>',
+        })}
+        ${printPartSection('3 балла', byScore[3], {
+          withAnswer: false,
+          instruction: '<em>Для записи решений и ответов на задания этой части используйте <strong>БЛАНК ОТВЕТОВ № 2</strong>. Запишите сначала номер выполняемого задания, а затем полное обоснованное решение и ответ.</em>',
+        })}
+
+        <footer class="print-foot">© ${new Date().getFullYear()} РешуМИА · <em>Копирование не допускается</em></footer>
+      </article>
+    `;
+  }
+
+  function openPrintView() {
+    if (!currentVariant) {
+      showAlert('Сначала начни вариант, тогда появится PDF.');
+      return;
+    }
+    const root = $('#print-root');
+    if (!root) return;
+    root.innerHTML = buildPrintPages();
+    // Рендерим все формулы через KaTeX
+    renderMath(root);
+    document.body.classList.add('printing');
+    // Даём браузеру отрисовать layout
+    setTimeout(() => {
+      window.print();
+      // После закрытия диалога — почистим
+      setTimeout(() => {
+        document.body.classList.remove('printing');
+        root.innerHTML = '';
+      }, 300);
+    }, 120);
+  }
+
+  // ============================================================
   // ИНИЦИАЛИЗАЦИЯ
   // ============================================================
 
@@ -1955,6 +2178,9 @@
     });
 
     $('#btn-finish').addEventListener('click', () => goToResults());
+
+    const pdfBtn = $('#btn-pdf');
+    if (pdfBtn) pdfBtn.addEventListener('click', () => openPrintView());
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') persist();
