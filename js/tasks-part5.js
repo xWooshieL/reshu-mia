@@ -48,8 +48,8 @@
 
         <p><strong>Шаг 6. Проверка.</strong> Остаток $\\vec{w}-\\vec{p} = \\bigl(\\tfrac{833}{165},\\,\\tfrac{196}{165},\\,-\\tfrac{245}{165}\\bigr).$</p>
         <ul>
-          <li>$(\\vec{w}-\\vec{p})\\cdot\\vec{u}_1 = \\tfrac{833 + 392 - 1225}{165} = 0$ ✓</li>
-          <li>$(\\vec{w}-\\vec{p})\\cdot\\vec{u}_2 = \\tfrac{833 - 588 - 245}{165} = 0$ ✓</li>
+          <li>$(\\vec{w}-\\vec{p})\\cdot\\vec{u}_1 = \\tfrac{833 + 392 - 1225}{165} = 0$</li>
+          <li>$(\\vec{w}-\\vec{p})\\cdot\\vec{u}_2 = \\tfrac{833 - 588 - 245}{165} = 0$</li>
         </ul>
 
         <hr>
@@ -91,7 +91,7 @@
         <p><strong>Шаг 5. Координаты.</strong></p>
         <p>$$\\vec{p} = \\bigl(\\tfrac{5}{2}-\\tfrac12,\\;\\tfrac{5}{2}+\\tfrac12,\\;\\tfrac{5}{2}-\\tfrac12,\\;\\tfrac{5}{2}+\\tfrac12\\bigr)^T = (2,\\,3,\\,2,\\,3)^T.$$</p>
 
-        <p><strong>Шаг 6. Проверка.</strong> Остаток $\\vec{w}-\\vec{p} = (-1,-1,1,1)^T.$ Скалярные произведения: $(\\vec{w}-\\vec{p})\\cdot\\vec{u}_1 = -1-1+1+1 = 0$ ✓ и $(\\vec{w}-\\vec{p})\\cdot\\vec{u}_2 = -1+0+1+0 = 0$ ✓.</p>
+        <p><strong>Шаг 6. Проверка.</strong> Остаток $\\vec{w}-\\vec{p} = (-1,-1,1,1)^T.$ Скалярные произведения: $(\\vec{w}-\\vec{p})\\cdot\\vec{u}_1 = -1-1+1+1 = 0$ и $(\\vec{w}-\\vec{p})\\cdot\\vec{u}_2 = -1+0+1+0 = 0$</p>
 
         <hr>
         <p><strong>Ответ:</strong> $\\vec{p} = (2,\\,3,\\,2,\\,3)^T.$</p>
@@ -130,7 +130,7 @@
         <p><strong>Шаг 5. Геометрический смысл нулевого коэффициента.</strong> $\\vec{w}$ оказался уже ортогональным к $\\vec{v}_2$, поэтому проекция «лежит» вдоль $\\vec{v}_1$: это просто среднее координат $\\vec{w}$, равное $\\tfrac{1+2+3+4}{4} = \\tfrac{5}{2}$.</p>
 
         <p><strong>Шаг 6. Проверка.</strong> Остаток $\\vec{w}-\\vec{p} = (-\\tfrac32,-\\tfrac12,\\tfrac12,\\tfrac32)^T.$
-        Скалярные произведения: с $\\vec{u}_1$: $-\\tfrac32-\\tfrac12+\\tfrac12+\\tfrac32 = 0$ ✓; с $\\vec{u}_2$: $0-\\tfrac12+\\tfrac12+0 = 0$ ✓.</p>
+        Скалярные произведения: с $\\vec{u}_1$: $-\\tfrac32-\\tfrac12+\\tfrac12+\\tfrac32 = 0$; с $\\vec{u}_2$: $0-\\tfrac12+\\tfrac12+0 = 0$</p>
 
         <hr>
         <p><strong>Ответ:</strong> $\\vec{p} = \\bigl(\\tfrac{5}{2},\\,\\tfrac{5}{2},\\,\\tfrac{5}{2},\\,\\tfrac{5}{2}\\bigr)^T.$</p>
@@ -165,7 +165,7 @@
         <p><strong>Шаг 5. Координаты.</strong> Общий знаменатель $6$:</p>
         <p>$$\\vec{p} = \\bigl(\\tfrac{2}{3},\\,-\\tfrac{2}{3}+\\tfrac{5}{2},\\,\\tfrac{2}{3}+\\tfrac{5}{2}\\bigr)^T = \\bigl(\\tfrac{4}{6},\\,\\tfrac{-4+15}{6},\\,\\tfrac{4+15}{6}\\bigr)^T = \\bigl(\\tfrac{2}{3},\\,\\tfrac{11}{6},\\,\\tfrac{19}{6}\\bigr)^T.$$</p>
 
-        <p><strong>Шаг 6. Проверка.</strong> Остаток $\\vec{w}-\\vec{p} = \\bigl(\\tfrac13,\\,\\tfrac16,\\,-\\tfrac16\\bigr)^T.$ Скалярные произведения: с $\\vec{u}_1$: $\\tfrac13 - \\tfrac16 - \\tfrac16 = 0$ ✓; с $\\vec{u}_2$: $\\tfrac13 + 0 - \\tfrac26 = 0$ ✓.</p>
+        <p><strong>Шаг 6. Проверка.</strong> Остаток $\\vec{w}-\\vec{p} = \\bigl(\\tfrac13,\\,\\tfrac16,\\,-\\tfrac16\\bigr)^T.$ Скалярные произведения: с $\\vec{u}_1$: $\\tfrac13 - \\tfrac16 - \\tfrac16 = 0$; с $\\vec{u}_2$: $\\tfrac13 + 0 - \\tfrac26 = 0$</p>
 
         <hr>
         <p><strong>Ответ:</strong> проекция точки на плоскость равна $\\vec{p} = \\bigl(\\tfrac{2}{3},\\,\\tfrac{11}{6},\\,\\tfrac{19}{6}\\bigr)^T.$</p>
@@ -297,7 +297,7 @@
         <p><strong>Шаг 4. Собираем матрицу.</strong></p>
         <p>$$A = \\begin{pmatrix} 2 & -2 & 3\\\\ -2 & 3 & -1\\\\ 3 & -1 & 5 \\end{pmatrix}.$$</p>
 
-        <p><strong>Проверка.</strong> $\\vec{x}^T A \\vec{x} = 2x^2 + 3y^2 + 5z^2 + 2(-2)xy + 2(3)xz + 2(-1)yz = 2x^2 + 3y^2 + 5z^2 - 4xy + 6xz - 2yz.$ ✓</p>
+        <p><strong>Проверка.</strong> $\\vec{x}^T A \\vec{x} = 2x^2 + 3y^2 + 5z^2 + 2(-2)xy + 2(3)xz + 2(-1)yz = 2x^2 + 3y^2 + 5z^2 - 4xy + 6xz - 2yz.$</p>
 
         <hr>
         <p><strong>Ответ:</strong> $A = \\begin{pmatrix} 2 & -2 & 3\\\\ -2 & 3 & -1\\\\ 3 & -1 & 5 \\end{pmatrix}.$</p>
@@ -323,7 +323,7 @@
         <p><strong>Шаг 4. Матрица.</strong></p>
         <p>$$A = \\begin{pmatrix} 3 & -1 & 2\\\\ -1 & 4 & -3\\\\ 2 & -3 & 2 \\end{pmatrix}.$$</p>
 
-        <p><strong>Проверка.</strong> $\\vec{x}^T A \\vec{x} = 3x^2 + 4y^2 + 2z^2 - 2xy + 4xz - 6yz.$ ✓</p>
+        <p><strong>Проверка.</strong> $\\vec{x}^T A \\vec{x} = 3x^2 + 4y^2 + 2z^2 - 2xy + 4xz - 6yz.$</p>
 
         <hr>
         <p><strong>Ответ:</strong> $A = \\begin{pmatrix} 3 & -1 & 2\\\\ -1 & 4 & -3\\\\ 2 & -3 & 2 \\end{pmatrix}.$</p>

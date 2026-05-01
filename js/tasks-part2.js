@@ -441,7 +441,7 @@
 
 <p>Из третьего: $c_1 = 1 + 2c_3 = 1 - \\tfrac{1}{3} = \\tfrac{2}{3}$.</p>
 
-<p><strong>Шаг 3. Проверка.</strong> $c_1 + c_2 + c_3 = \\tfrac{2}{3} + \\tfrac{5}{2} - \\tfrac{1}{6} = \\tfrac{4 + 15 - 1}{6} = \\tfrac{18}{6} = 3$ ✓.</p>
+<p><strong>Шаг 3. Проверка.</strong> $c_1 + c_2 + c_3 = \\tfrac{2}{3} + \\tfrac{5}{2} - \\tfrac{1}{6} = \\tfrac{4 + 15 - 1}{6} = \\tfrac{18}{6} = 3$</p>
 
 <p><strong>Шаг 4.</strong> Применяем матрицу:</p>
 <p>$$A\\vec{a} = c_1\\lambda_1\\vec{v}_1 + c_2\\lambda_2\\vec{v}_2 + c_3\\lambda_3\\vec{v}_3.$$</p>
@@ -470,7 +470,7 @@
 <p>Из третьего: $c_1 - 2c_3 = -1$. Вычтем его из $c_1 + c_3 = \\tfrac{5}{2}$:</p>
 <p>$$3c_3 = \\tfrac{7}{2} \\;\\Rightarrow\\; c_3 = \\tfrac{7}{6}, \\quad c_1 = \\tfrac{5}{2} - \\tfrac{7}{6} = \\tfrac{15 - 7}{6} = \\tfrac{4}{3}.$$</p>
 
-<p><strong>Шаг 3. Проверка.</strong> $c_1 + c_2 + c_3 = \\tfrac{4}{3} + \\tfrac{1}{2} + \\tfrac{7}{6} = \\tfrac{8+3+7}{6} = 3$ ✓.</p>
+<p><strong>Шаг 3. Проверка.</strong> $c_1 + c_2 + c_3 = \\tfrac{4}{3} + \\tfrac{1}{2} + \\tfrac{7}{6} = \\tfrac{8+3+7}{6} = 3$</p>
 
 <p><strong>Шаг 4.</strong> Применяем $A$:</p>
 <p>$$A\\vec{a} = c_1\\lambda_1\\vec{v}_1 + c_2\\lambda_2\\vec{v}_2 + c_3\\lambda_3\\vec{v}_3.$$</p>
@@ -543,7 +543,7 @@ $$B = \\begin{pmatrix}0 & 1 & 1 & 1 \\\\ 1 & 0 & 1 & 1 \\\\ 1 & 1 & 0 & 1 \\\\ 1
 
 <p><strong>Шаг 3.</strong> Аналогично можно убедиться, что $\\lambda_2 = \\lambda_3 = -1$ (проверка для $\\vec{v}_2,\\vec{v}_3$ даст $B\\vec{v}_i = -\\vec{v}_i$).</p>
 
-<p><strong>Шаг 4.</strong> Спектр $B$: $\\{-1,-1,-1,3\\}$. Это согласуется со следом: $\\operatorname{tr} B = 0 = -1-1-1+3$ ✓.</p>
+<p><strong>Шаг 4.</strong> Спектр $B$: $\\{-1,-1,-1,3\\}$. Это согласуется со следом: $\\operatorname{tr} B = 0 = -1-1-1+3$</p>
 
 <p>Наибольшее собственное значение — это значение, соответствующее «постоянному» собственному вектору $\\vec{v}_4$.</p>
 
@@ -584,7 +584,7 @@ $$B = \\begin{pmatrix}1 & 1 & 1 & 0 \\\\ 1 & 1 & 0 & 1 \\\\ 1 & 0 & 1 & 1 \\\\ 0
 
 <p><strong>Шаг 4.</strong> Аналогично для $\\vec{v}_3 = (-1;\\,0;\\,0;\\,1)$ получится $\\lambda_3 = 1$.</p>
 
-<p><strong>Шаг 5.</strong> Спектр $B$: $\\{-1,\\,1,\\,1,\\,3\\}$ (проверка по следу: $\\operatorname{tr} B = 4$ и $-1+1+1+3 = 4$ ✓). Максимум — $3$.</p>
+<p><strong>Шаг 5.</strong> Спектр $B$: $\\{-1,\\,1,\\,1,\\,3\\}$ (проверка по следу: $\\operatorname{tr} B = 4$ и $-1+1+1+3 = 4$). Максимум — $3$.</p>
 
 <hr>
 <p><strong>Ответ:</strong> $\\lambda_{\\max} = 3$.</p>
@@ -613,7 +613,7 @@ $$B = \\begin{pmatrix}1 & 1 & 1 & 0 \\\\ 1 & 1 & 0 & 1 \\\\ 1 & 0 & 1 & 1 \\\\ 0
 <p><strong>Шаг 4. Обратная подстановка.</strong> Возвращаем $u = x^2$:</p>
 <p>$$\\int x\\sin(x^2)\\,dx = -\\tfrac{1}{2}\\cos(x^2) + C.$$</p>
 
-<p><strong>Проверка.</strong> $\\dfrac{d}{dx}\\left[-\\tfrac{1}{2}\\cos(x^2)\\right] = -\\tfrac{1}{2}\\cdot(-\\sin(x^2))\\cdot 2x = x\\sin(x^2)$ ✓.</p>
+<p><strong>Проверка.</strong> $\\dfrac{d}{dx}\\left[-\\tfrac{1}{2}\\cos(x^2)\\right] = -\\tfrac{1}{2}\\cdot(-\\sin(x^2))\\cdot 2x = x\\sin(x^2)$</p>
 
 <hr>
 <p><strong>Ответ:</strong> $-\\dfrac{1}{2}\\cos(x^2) + C$.</p>
@@ -637,7 +637,7 @@ $$B = \\begin{pmatrix}1 & 1 & 1 & 0 \\\\ 1 & 1 & 0 & 1 \\\\ 1 & 0 & 1 & 1 \\\\ 0
 <p><strong>Шаг 4. Обратная подстановка.</strong></p>
 <p>$$\\int \\frac{(\\ln x)^3}{x}\\,dx = \\dfrac{(\\ln x)^4}{4} + C.$$</p>
 
-<p><strong>Проверка.</strong> $\\dfrac{d}{dx}\\left[\\dfrac{(\\ln x)^4}{4}\\right] = \\dfrac{4(\\ln x)^3}{4}\\cdot \\dfrac{1}{x} = \\dfrac{(\\ln x)^3}{x}$ ✓.</p>
+<p><strong>Проверка.</strong> $\\dfrac{d}{dx}\\left[\\dfrac{(\\ln x)^4}{4}\\right] = \\dfrac{4(\\ln x)^3}{4}\\cdot \\dfrac{1}{x} = \\dfrac{(\\ln x)^3}{x}$</p>
 
 <hr>
 <p><strong>Ответ:</strong> $\\dfrac{(\\ln x)^4}{4} + C$.</p>
@@ -660,7 +660,7 @@ $$B = \\begin{pmatrix}1 & 1 & 1 & 0 \\\\ 1 & 1 & 0 & 1 \\\\ 1 & 0 & 1 & 1 \\\\ 0
 <p><strong>Шаг 4. Обратная подстановка.</strong></p>
 <p>$$\\int \\dfrac{dx}{x\\,(\\ln x)^2} = -\\dfrac{1}{\\ln x} + C.$$</p>
 
-<p><strong>Проверка.</strong> $\\dfrac{d}{dx}\\left[-\\dfrac{1}{\\ln x}\\right] = \\dfrac{1}{(\\ln x)^2}\\cdot \\dfrac{1}{x} = \\dfrac{1}{x(\\ln x)^2}$ ✓.</p>
+<p><strong>Проверка.</strong> $\\dfrac{d}{dx}\\left[-\\dfrac{1}{\\ln x}\\right] = \\dfrac{1}{(\\ln x)^2}\\cdot \\dfrac{1}{x} = \\dfrac{1}{x(\\ln x)^2}$</p>
 
 <hr>
 <p><strong>Ответ:</strong> $-\\dfrac{1}{\\ln x} + C$.</p>
@@ -684,7 +684,7 @@ $$B = \\begin{pmatrix}1 & 1 & 1 & 0 \\\\ 1 & 1 & 0 & 1 \\\\ 1 & 0 & 1 & 1 \\\\ 0
 <p><strong>Шаг 4. Обратная подстановка.</strong></p>
 <p>$$\\int \\dfrac{x}{1 + x^2}\\,dx = \\tfrac{1}{2}\\ln(1+x^2) + C.$$</p>
 
-<p><strong>Проверка.</strong> $\\dfrac{d}{dx}\\left[\\tfrac{1}{2}\\ln(1+x^2)\\right] = \\tfrac{1}{2}\\cdot \\dfrac{2x}{1+x^2} = \\dfrac{x}{1+x^2}$ ✓.</p>
+<p><strong>Проверка.</strong> $\\dfrac{d}{dx}\\left[\\tfrac{1}{2}\\ln(1+x^2)\\right] = \\tfrac{1}{2}\\cdot \\dfrac{2x}{1+x^2} = \\dfrac{x}{1+x^2}$</p>
 
 <hr>
 <p><strong>Ответ:</strong> $\\dfrac{1}{2}\\ln(1+x^2) + C$.</p>

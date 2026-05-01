@@ -171,7 +171,7 @@
         <p><strong>Шаг 4.</strong> Выносим общий множитель $-e^{-x}$:</p>
         <p>$$\\int x^2 e^{-x}\\,dx = -(x^2 + 2x + 2)\\,e^{-x} + C.$$</p>
         <p><strong>Проверка дифференцированием.</strong>
-        $\\dfrac{d}{dx}\\!\\left[-(x^2 + 2x + 2)e^{-x}\\right] = -(2x+2)e^{-x} + (x^2+2x+2)e^{-x} = (x^2 - 0\\cdot x + 0)\\,e^{-x} \\cdot\\!\\!$ — после раскрытия получаем $x^2 e^{-x}$. ✓</p>
+        $\\dfrac{d}{dx}\\!\\left[-(x^2 + 2x + 2)e^{-x}\\right] = -(2x+2)e^{-x} + (x^2+2x+2)e^{-x} = (x^2 - 0\\cdot x + 0)\\,e^{-x} \\cdot\\!\\!$ — после раскрытия получаем $x^2 e^{-x}$.</p>
         <hr>
         <p><strong>Ответ:</strong> $\\displaystyle\\int x^2 e^{-x}\\,dx = -(x^2 + 2x + 2)\\,e^{-x} + C$.</p>
       `,
@@ -192,8 +192,7 @@
         <p>$$\\int x^2 \\sin(2x)\\,dx = -\\frac{x^2\\cos(2x)}{2} + \\frac{x\\sin(2x)}{2} + \\frac{\\cos(2x)}{4} + C.$$</p>
         <p><strong>Проверка.</strong> Производная даёт</p>
         <p>$$-x\\cos(2x) + x^2\\sin(2x) + \\frac{\\sin(2x)}{2} + x\\cos(2x) - \\frac{\\sin(2x)}{2} = x^2 \\sin(2x).$$</p>
-        <p style="color:var(--success);">✓ верно</p>
-        <hr>
+                <hr>
         <p><strong>Ответ:</strong> $\\displaystyle\\int x^2 \\sin(2x)\\,dx = -\\dfrac{x^2\\cos(2x)}{2} + \\dfrac{x\\sin(2x)}{2} + \\dfrac{\\cos(2x)}{4} + C$.</p>
       `,
     },
@@ -212,7 +211,7 @@
         <p><strong>Шаг 3.</strong> Подставляем:</p>
         <p>$$\\int x^2\\cos(2x)\\,dx = \\frac{x^2 \\sin(2x)}{2} - \\!\\left(-\\frac{x\\cos(2x)}{2} + \\frac{\\sin(2x)}{4}\\right) + C.$$</p>
         <p>$$ = \\frac{x^2 \\sin(2x)}{2} + \\frac{x\\cos(2x)}{2} - \\frac{\\sin(2x)}{4} + C.$$</p>
-        <p><strong>Проверка.</strong> Производная: $x\\sin(2x) + x^2\\cos(2x) + \\tfrac{\\cos(2x)}{2} - x\\sin(2x) - \\tfrac{\\cos(2x)}{2} = x^2 \\cos(2x).$ <span style="color:var(--success);">✓</span></p>
+        <p><strong>Проверка.</strong> Производная: $x\\sin(2x) + x^2\\cos(2x) + \\tfrac{\\cos(2x)}{2} - x\\sin(2x) - \\tfrac{\\cos(2x)}{2} = x^2 \\cos(2x).$</p>
         <hr>
         <p><strong>Ответ:</strong> $\\displaystyle\\int x^2 \\cos(2x)\\,dx = \\dfrac{x^2 \\sin(2x)}{2} + \\dfrac{x\\cos(2x)}{2} - \\dfrac{\\sin(2x)}{4} + C$.</p>
       `,
@@ -463,7 +462,7 @@
         <p>На отрезке $[0;\\,1]$ функция $f(x) = x e^{2x} \\geq 0$, что согласуется с формулой объёма (модуль не нужен).</p>
         <p><strong>Шаг 3. Опишем область.</strong> Область ограничена сверху графиком $y = x e^{2x}$, снизу — осью $OX$ ($y = 0$), слева — прямой $x = 0$ (но при $x=0$ кривая сама обращается в ноль), справа — прямой $x = 1$. То есть это криволинейная трапеция $\\{0 \\leq x \\leq 1,\\;0 \\leq y \\leq x e^{2x}\\}$.</p>
         <p><strong>Шаг 4. Ось вращения.</strong> Поскольку радиус оболочки равен $x$ (расстояние от точки до оси), вращение происходит <em>вокруг оси $OY$</em>.</p>
-        <p><strong>Краткая проверка формулы.</strong> $V = 2\\pi \\int_0^1 x \\cdot \\underbrace{(x e^{2x})}_{=\\,f(x)}\\,dx = 2\\pi \\int_0^1 x^2 e^{2x}\\,dx$. ✓</p>
+        <p><strong>Краткая проверка формулы.</strong> $V = 2\\pi \\int_0^1 x \\cdot \\underbrace{(x e^{2x})}_{=\\,f(x)}\\,dx = 2\\pi \\int_0^1 x^2 e^{2x}\\,dx$.</p>
         <hr>
         <p><strong>Ответ:</strong> область — криволинейная трапеция под графиком $y = x\\,e^{2x}$ на $[0;\\,1]$ (то есть $0 \\leq y \\leq x e^{2x}$); ось вращения — $OY$. Использован метод цилиндрических оболочек.</p>
       `,

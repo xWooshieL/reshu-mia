@@ -41,11 +41,127 @@
     const raw = (totalPoints + 2) / 3;
     return Math.max(0, Math.min(10, raw));
   }
+  function computeGrade100(totalPoints) {
+    return computeGrade(totalPoints) * 10;
+  }
   function gradeLabel(g) {
     if (g >= 8) return { text: 'отлично', cls: 'ex' };
     if (g >= 6) return { text: 'хорошо', cls: 'good' };
     if (g >= 4) return { text: 'удовлетворительно', cls: 'sat' };
     return { text: 'неудовлетворительно', cls: 'fail' };
+  }
+
+  /**
+   * Парсит criteriaHtml в массив пунктов с баллами.
+   * Извлекает все <li> и в каждом ищет в начале число вида +0,3 или −0,1.
+   * Возвращает [{points: ±Number, text: String}] или null если парсинг не удался.
+   */
+  function parseCriteria(html) {
+    if (!html || typeof html !== 'string') return null;
+    // убираем HTML-комментарии
+    const cleaned = html.replace(/<!--[\s\S]*?-->/g, '');
+    const items = [];
+    const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+    let match;
+    while ((match = liRegex.exec(cleaned)) !== null) {
+      // текст внутри <li>, без вложенных тегов (оставляем для отображения)
+      const inner = match[1].trim();
+      // удаляем HTML-теги для поиска числа, но сохраняем для текста
+      const plainInner = inner.replace(/<[^>]+>/g, '').trim();
+      // ищем знак (+ / − / -) и число
+      const pm = plainInner.match(/^\s*([+\u2212\-])\s*(\d+(?:[,.]\d+)?)\s*(.*)$/);
+      if (!pm) return null;
+      const sign = (pm[1] === '+') ? 1 : -1;
+      const num = parseFloat(pm[2].replace(',', '.'));
+      if (isNaN(num)) return null;
+      let text = pm[3].trim();
+      // убираем предлог "за " в начале
+      text = text.replace(/^за\s+/i, '');
+      items.push({ points: sign * num, text: text });
+    }
+    if (!items.length) return null;
+    return items;
+  }
+
+  /**
+   * Клампим сумму баллов в допустимый диапазон [0, maxS].
+   */
+  function clampScore(sum, maxS) {
+    return Math.max(0, Math.min(maxS, sum));
+  }
+
+  /**
+   * Рендер блока «Решение» с поддержкой альтернативных методов.
+   * Если у задачи есть task.altSolutions — добавляем табы «Основное / Метод 2 / ...».
+   *
+   * container — элемент, куда вставить блок целиком
+   * task — объект задачи
+   * blockId — уникальный суффикс для id (чтобы несколько блоков не конфликтовали)
+   */
+  function renderSolutionBlock(container, task, blockId) {
+    if (!task || !container) return;
+    const alts = Array.isArray(task.altSolutions) ? task.altSolutions : [];
+    const solutions = [
+      { title: 'Решение', html: task.solutionHtml || '<p class="muted">Решение пока не загружено.</p>' },
+      ...alts.map((a, i) => ({
+        title: a.title || ('Метод ' + (i + 2)),
+        html: a.html || '<p class="muted">—</p>'
+      }))
+    ];
+
+    if (solutions.length === 1) {
+      // одно решение — как было
+      const block = document.createElement('div');
+      block.className = 'solution-block math-content';
+      block.innerHTML = `<h4>Решение</h4><div class="sol-content">${solutions[0].html}</div>`;
+      container.appendChild(block);
+      renderMath(block.querySelector('.sol-content'));
+      return;
+    }
+
+    // несколько решений — табы
+    const block = document.createElement('div');
+    block.className = 'solution-block solution-block--tabbed math-content';
+    const tabsHtml = solutions.map((s, i) => `
+      <button type="button" class="sol-tab ${i === 0 ? 'active' : ''}" data-idx="${i}" data-blockid="${blockId}">${escapeHtml(s.title)}</button>
+    `).join('');
+    const panesHtml = solutions.map((s, i) => `
+      <div class="sol-pane ${i === 0 ? 'active' : ''}" data-idx="${i}" data-blockid="${blockId}">${s.html}</div>
+    `).join('');
+
+    block.innerHTML = `
+      <h4 style="margin-bottom:0.6rem;">Решение</h4>
+      <div class="sol-tabs" data-blockid="${blockId}">${tabsHtml}</div>
+      <div class="sol-panes" data-blockid="${blockId}">${panesHtml}</div>
+    `;
+    container.appendChild(block);
+
+    // рендер math для всех
+    block.querySelectorAll('.sol-pane').forEach(renderMath);
+
+    // табы
+    block.querySelectorAll('.sol-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const idx = parseInt(tab.dataset.idx, 10);
+        block.querySelectorAll('.sol-tab').forEach((t) => t.classList.toggle('active', parseInt(t.dataset.idx, 10) === idx));
+        block.querySelectorAll('.sol-pane').forEach((p) => p.classList.toggle('active', parseInt(p.dataset.idx, 10) === idx));
+      });
+    });
+  }
+
+  // Заполняет таблицу перевода на инфо-экране
+  function buildConversionTable() {
+    const tbody = $('#conv-table-body');
+    if (!tbody) return;
+    const maxPoints = totalMaxScore();
+    let rows = '';
+    for (let p = 0; p <= maxPoints; p++) {
+      const g10 = computeGrade(p);
+      const g100 = computeGrade100(p);
+      const lbl = gradeLabel(g10);
+      rows += `<tr class="conv-row--${lbl.cls}"><td><strong>${p}</strong></td><td>${formatScore(g10)}</td><td>${formatScore(g100)}</td></tr>`;
+    }
+    tbody.innerHTML = rows;
   }
 
   // ============================================================
@@ -56,6 +172,7 @@
   let drafts = {};           // { slot: текст черновика }
   let solved = {};           // { slot: true/false }
   let selfGrades = {};       // { slot: число баллов }
+  let selfCriteria = {};     // { slot: [bool, bool, ...] — отмеченные критерии (чекбоксы) }
   let timerSec = TIMER_DEFAULT_SEC;
   let timerId = null;
   let timerPaused = false;
@@ -272,6 +389,7 @@
       drafts,
       solved,
       selfGrades,
+      selfCriteria,
       timerSec,
       timerPaused,
       activeSlot,
@@ -301,6 +419,7 @@
     drafts = (data.drafts && typeof data.drafts === 'object') ? data.drafts : {};
     solved = (data.solved && typeof data.solved === 'object') ? data.solved : {};
     selfGrades = (data.selfGrades && typeof data.selfGrades === 'object') ? data.selfGrades : {};
+    selfCriteria = (data.selfCriteria && typeof data.selfCriteria === 'object') ? data.selfCriteria : {};
     timerSec = typeof data.timerSec === 'number' ? Math.max(0, data.timerSec) : TIMER_DEFAULT_SEC;
     timerPaused = !!data.timerPaused;
     activeSlot = (typeof data.activeSlot === 'number' && data.activeSlot >= 1 && data.activeSlot <= TOTAL_SLOTS)
@@ -410,6 +529,7 @@
     drafts = {};
     solved = {};
     selfGrades = {};
+    selfCriteria = {};
     timerSec = TIMER_DEFAULT_SEC;
     timerPaused = false;
     activeSlot = 1;
@@ -596,15 +716,29 @@
       <div id="grade-output"></div>
       <div class="results__formula math-content">
         <strong>Формула:</strong>
-        <p class="formula-display" style="margin-top:0.5rem;">$$\\text{оценка} = \\min\\!\\left(10,\\ \\dfrac{\\text{твои баллы} + 2}{3}\\right)$$</p>
+        <p class="formula-display" style="margin-top:0.5rem;">$$\\text{оценка}_{10} = \\min\\!\\left(10,\\ \\dfrac{\\text{твои баллы} + 2}{3}\\right),\\quad \\text{оценка}_{100} = \\text{оценка}_{10}\\cdot 10$$</p>
         <p class="muted small" style="margin-top:0.4rem;">Максимум за вариант: <strong>${totalMaxScore()}</strong> баллов.</p>
       </div>
       <div style="display:flex; gap:0.5rem; margin-top:1rem; flex-wrap:wrap;">
         <button type="button" class="btn btn--primary" id="btn-recompute">Пересчитать оценку</button>
+        <button type="button" class="btn btn--ghost" id="btn-show-final">Показать итоговую таблицу</button>
         <button type="button" class="btn btn--ghost" id="btn-new-variant">Сгенерировать новый вариант</button>
       </div>
     `;
     renderMath(summary);
+
+    // sticky-плашка с текущей оценкой — появляется сверху при скролле
+    const oldSticky = $('#grade-sticky');
+    if (oldSticky) oldSticky.remove();
+    const stickyEl = document.createElement('div');
+    stickyEl.className = 'grade-sticky';
+    stickyEl.id = 'grade-sticky';
+    stickyEl.innerHTML = `
+      <div class="grade-sticky__title">Текущая оценка</div>
+      <div class="grade-sticky__value" id="grade-sticky-value">—</div>
+      <div class="grade-sticky__bar-wrap"><div class="grade-sticky__bar" id="grade-sticky-bar" style="width:0%"></div></div>
+    `;
+    summary.after(stickyEl);
 
     detail.innerHTML = '';
 
@@ -613,17 +747,18 @@
       const maxS = maxScoreOfSlot(slot);
       const slotMeta = (window.TASK_BANK && window.TASK_BANK[slot]) || { title: '', criteriaHtml: '' };
       const draft = drafts[slot] || '';
-      const userGrade = selfGrades[slot] != null ? selfGrades[slot] : 0;
 
-      const optsHtml = gradingOptionsFor(maxS).map((v) => {
-        const isOn = (Math.abs(userGrade - v) < 1e-9);
-        return `
-          <label class="self-grade__opt ${isOn ? 'checked' : ''}">
-            <input type="radio" name="grade-${slot}" value="${v}" ${isOn ? 'checked' : ''} />
-            <span>${formatScore(v)}</span>
-          </label>
-        `;
-      }).join('');
+      // какие критерии показывать
+      const critSourceHtml = task.criteriaHtml || slotMeta.criteriaHtml || '';
+      const critIsOwn = !!task.criteriaHtml;
+      const parsedCriteria = parseCriteria(critSourceHtml);
+
+      // Состояние чекбоксов. Если длина не совпадает с распарсенным числом — сбрасываем.
+      let critState = Array.isArray(selfCriteria[slot]) ? selfCriteria[slot] : null;
+      if (parsedCriteria && (!critState || critState.length !== parsedCriteria.length)) {
+        critState = parsedCriteria.map(() => false);
+        selfCriteria[slot] = critState;
+      }
 
       const card = document.createElement('div');
       card.className = 'task-card';
@@ -645,24 +780,71 @@
             <textarea readonly>${escapeHtml(draft)}</textarea>
           </div>
         ` : ''}
+      `;
 
-        <div class="solution-block math-content">
-          <h4>Решение</h4>
-          <div class="sol-content"></div>
-        </div>
+      // блок «Решение» (с возможными альтернативами)
+      renderSolutionBlock(card, task, 'results-' + slot);
 
-        ${(task.criteriaHtml || slotMeta.criteriaHtml) ? `
-          <div class="criteria-block math-content">
-            <h4>${task.criteriaHtml ? 'Критерии для этой задачи' : 'Общие критерии типа'}</h4>
-            <div class="crit-content">${task.criteriaHtml || slotMeta.criteriaHtml}</div>
+      // Блок с критериями + самооценкой (разный UI в зависимости от parseCriteria)
+      if (parsedCriteria) {
+        // ---------- чекбокс-режим ----------
+        const rowsHtml = parsedCriteria.map((c, idx) => {
+          const checked = critState[idx] ? 'checked' : '';
+          const clsSign = c.points >= 0 ? 'criteria-row--plus' : 'criteria-row--minus';
+          const pts = (c.points > 0 ? '+' : '') + formatScore(c.points);
+          return `
+            <label class="criteria-row ${clsSign} ${critState[idx] ? 'is-on' : ''}" data-idx="${idx}">
+              <input type="checkbox" data-idx="${idx}" ${checked} />
+              <span class="criteria-points">${pts}</span>
+              <span class="criteria-text">${escapeHtml(c.text)}</span>
+            </label>
+          `;
+        }).join('');
+
+        const block = document.createElement('div');
+        block.className = 'self-grade-v2';
+        block.innerHTML = `
+          <h4 class="self-grade-v2__title">${critIsOwn ? 'Критерии для этой задачи' : 'Общие критерии типа'} <span class="muted small">— отметь всё, что сделал(а)</span></h4>
+          <div class="criteria-list">${rowsHtml}</div>
+          <div class="self-grade-v2__sum">
+            <span class="muted small">Сумма баллов за задачу:</span>
+            <strong class="self-grade-v2__sum-value" data-slot="${slot}">—</strong>
+            <span class="muted small">/ ${maxS}</span>
           </div>
-        ` : ''}
+        `;
+        card.appendChild(block);
 
-        <div class="self-grade">
+      } else {
+        // ---------- fallback: критерии в HTML + radio-buttons ----------
+        const userGrade = selfGrades[slot] != null ? selfGrades[slot] : 0;
+        const optsHtml = gradingOptionsFor(maxS).map((v) => {
+          const isOn = (Math.abs(userGrade - v) < 1e-9);
+          return `
+            <label class="self-grade__opt ${isOn ? 'checked' : ''}">
+              <input type="radio" name="grade-${slot}" value="${v}" ${isOn ? 'checked' : ''} />
+              <span>${formatScore(v)}</span>
+            </label>
+          `;
+        }).join('');
+
+        const critBlock = document.createElement('div');
+        if (critSourceHtml) {
+          critBlock.className = 'criteria-block math-content';
+          critBlock.innerHTML = `
+            <h4>${critIsOwn ? 'Критерии для этой задачи' : 'Общие критерии типа'}</h4>
+            <div class="crit-content">${critSourceHtml}</div>
+          `;
+          card.appendChild(critBlock);
+        }
+
+        const selfGradeBlock = document.createElement('div');
+        selfGradeBlock.className = 'self-grade';
+        selfGradeBlock.innerHTML = `
           <div class="self-grade__title">Поставь себе балл (макс. ${maxS}):</div>
           <div class="self-grade__options">${optsHtml}</div>
-        </div>
-      `;
+        `;
+        card.appendChild(selfGradeBlock);
+      }
 
       const condEl = card.querySelector('.task-card__head + .muted + .math-content');
       if (condEl) {
@@ -670,30 +852,57 @@
         renderMath(condEl);
       }
 
-      const solEl = card.querySelector('.sol-content');
-      if (solEl) {
-        solEl.innerHTML = task.solutionHtml || '<p class="muted">Решение пока не загружено.</p>';
-        renderMath(solEl);
-      }
-      const critEl = card.querySelector('.crit-content');
-      if (critEl) renderMath(critEl);
+      const critContentEl = card.querySelector('.crit-content');
+      if (critContentEl) renderMath(critContentEl);
 
-      // обработчики radio
-      card.querySelectorAll(`input[name="grade-${slot}"]`).forEach((r) => {
-        r.addEventListener('change', (e) => {
-          const v = parseFloat(e.target.value);
-          if (!isNaN(v)) {
-            selfGrades[slot] = v;
-            // визуально обновим
-            card.querySelectorAll('.self-grade__opt').forEach((opt) => {
-              const inp = opt.querySelector('input');
-              if (inp) opt.classList.toggle('checked', inp.checked);
-            });
+      // Обработчики
+      if (parsedCriteria) {
+        // --- чекбоксы ---
+        const sumEl = card.querySelector('.self-grade-v2__sum-value');
+        const recalcSum = () => {
+          let s = 0;
+          parsedCriteria.forEach((c, i) => { if (critState[i]) s += c.points; });
+          const clamped = clampScore(s, maxS);
+          selfGrades[slot] = clamped;
+          if (sumEl) {
+            sumEl.textContent = formatScore(clamped);
+            // если исходная сумма вышла за границы — покажем отметку
+            sumEl.classList.toggle('clamped', Math.abs(s - clamped) > 1e-9);
+            sumEl.title = (Math.abs(s - clamped) > 1e-9)
+              ? `Сырая сумма: ${formatScore(s)}, ограничено до ${formatScore(clamped)}`
+              : '';
+          }
+        };
+        recalcSum();
+
+        card.querySelectorAll('.criteria-list input[type=checkbox]').forEach((cb) => {
+          cb.addEventListener('change', (e) => {
+            const idx = parseInt(cb.dataset.idx, 10);
+            critState[idx] = cb.checked;
+            const row = cb.closest('.criteria-row');
+            if (row) row.classList.toggle('is-on', cb.checked);
+            recalcSum();
             updateGradeOutput();
             schedulePersist();
-          }
+          });
         });
-      });
+      } else {
+        // --- radio ---
+        card.querySelectorAll(`input[name="grade-${slot}"]`).forEach((r) => {
+          r.addEventListener('change', (e) => {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v)) {
+              selfGrades[slot] = v;
+              card.querySelectorAll('.self-grade__opt').forEach((opt) => {
+                const inp = opt.querySelector('input');
+                if (inp) opt.classList.toggle('checked', inp.checked);
+              });
+              updateGradeOutput();
+              schedulePersist();
+            }
+          });
+        });
+      }
 
       detail.appendChild(card);
     }
@@ -738,6 +947,10 @@
 
     // кнопки наверху
     $('#btn-recompute').addEventListener('click', updateGradeOutput);
+    $('#btn-show-final').addEventListener('click', () => {
+      renderFinalPage();
+      showScreen('final');
+    });
     $('#btn-new-variant').addEventListener('click', async () => {
       const ok = await showModal({
         title: 'Сгенерировать новый вариант?',
@@ -750,7 +963,7 @@
       if (!ok) return;
       phase = 'idle';
       currentVariant = null;
-      drafts = {}; solved = {}; selfGrades = {};
+      drafts = {}; solved = {}; selfGrades = {}; selfCriteria = {};
       try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
       $('#nav-exam').disabled = true;
       $('#nav-results').disabled = true;
@@ -772,13 +985,17 @@
       total += (selfGrades[s] || 0);
     }
     const grade = computeGrade(total);
+    const grade100 = computeGrade100(total);
     const gl = gradeLabel(grade);
     const out = $('#grade-output');
     if (!out) return;
     const breakdown = perSlotBreakdownHtml();
     out.innerHTML = `
       <div class="muted small">Твоя итоговая оценка</div>
-      <div class="results__score">${formatScore(grade)}</div>
+      <div class="results__score-row">
+        <div class="results__score">${formatScore(grade)}<span class="results__score-scale">/10</span></div>
+        <div class="results__score results__score--small">${formatScore(grade100)}<span class="results__score-scale">/100</span></div>
+      </div>
       <span class="results__score-label results__score-label--${gl.cls}">${gl.text}</span>
       <div class="results__breakdown">
         <div class="results__breakdown-item">
@@ -801,7 +1018,94 @@
     // дублируем оценку в нижнюю плашку (если есть)
     const bottom = $('#grade-output-bottom');
     if (bottom) {
-      bottom.textContent = formatScore(grade) + ' / 10';
+      bottom.textContent = formatScore(grade) + ' / 10  ·  ' + formatScore(grade100) + ' / 100';
+    }
+    // и в sticky плашку справа
+    const sticky = $('#grade-sticky-value');
+    if (sticky) {
+      sticky.innerHTML = `<strong>${formatScore(grade)}</strong><span class="muted small">/10</span>  &middot;  <strong>${formatScore(grade100)}</strong><span class="muted small">/100</span>`;
+    }
+    const stickyBar = $('#grade-sticky-bar');
+    if (stickyBar) stickyBar.style.width = (grade * 10) + '%';
+  }
+
+  // ============================================================
+  // FINAL PAGE — итоговая табличка
+  // ============================================================
+
+  function renderFinalPage() {
+    if (!currentVariant) return;
+    let total = 0;
+    const maxTotal = totalMaxScore();
+
+    // строки таблицы
+    const rows = [];
+    for (let slot = 1; slot <= TOTAL_SLOTS; slot++) {
+      const task = currentVariant[slot];
+      const maxS = maxScoreOfSlot(slot);
+      const my = selfGrades[slot] || 0;
+      total += my;
+      const pct = Math.round((my / maxS) * 100);
+      const slotMeta = (window.TASK_BANK && window.TASK_BANK[slot]) || { title: '' };
+      let rowCls = 'final-row--none';
+      if (my >= maxS) rowCls = 'final-row--full';
+      else if (my >= maxS * 0.5) rowCls = 'final-row--part';
+      else if (my > 0) rowCls = 'final-row--some';
+
+      rows.push(`
+        <tr class="${rowCls}">
+          <td><strong>${slot}</strong></td>
+          <td>${escapeHtml(slotMeta.title || '')}</td>
+          <td class="muted small">${escapeHtml(task.source || '')}</td>
+          <td class="tal-right"><strong>${formatScore(my)}</strong></td>
+          <td class="tal-right muted">${maxS}</td>
+          <td class="tal-right muted">${pct}%</td>
+        </tr>
+      `);
+    }
+
+    const body = $('#final-table-body');
+    if (body) body.innerHTML = rows.join('');
+
+    const foot = $('#final-table-foot');
+    if (foot) {
+      foot.innerHTML = `
+        <tr class="grade-table__total">
+          <td colspan="3"><strong>ИТОГО</strong></td>
+          <td class="tal-right"><strong>${formatScore(total)}</strong></td>
+          <td class="tal-right"><strong>${maxTotal}</strong></td>
+          <td class="tal-right"><strong>${Math.round((total/maxTotal)*100)}%</strong></td>
+        </tr>
+      `;
+    }
+
+    // hero с крупной оценкой
+    const grade = computeGrade(total);
+    const grade100 = computeGrade100(total);
+    const gl = gradeLabel(grade);
+    const hero = $('#final-hero');
+    if (hero) {
+      hero.innerHTML = `
+        <div class="final-hero__grades">
+          <div class="final-hero__grade">
+            <div class="muted small">Оценка</div>
+            <div class="final-hero__num">${formatScore(grade)}<span class="muted">/10</span></div>
+          </div>
+          <div class="final-hero__divider"></div>
+          <div class="final-hero__grade">
+            <div class="muted small">100-балльная шкала</div>
+            <div class="final-hero__num final-hero__num--small">${formatScore(grade100)}<span class="muted">/100</span></div>
+          </div>
+          <div class="final-hero__divider"></div>
+          <div class="final-hero__grade">
+            <div class="muted small">Сумма баллов</div>
+            <div class="final-hero__num final-hero__num--small">${formatScore(total)}<span class="muted">/${maxTotal}</span></div>
+          </div>
+        </div>
+        <div class="final-hero__label">
+          <span class="results__score-label results__score-label--${gl.cls}">${gl.text}</span>
+        </div>
+      `;
     }
   }
 
@@ -997,10 +1301,7 @@
         <button type="button" class="btn btn--ghost" id="bank-toggle-sol">Показать разбор</button>
       </div>
 
-      <div class="solution-block math-content" id="bank-sol" hidden>
-        <h4>Решение</h4>
-        <div class="bank-sol-content"></div>
-      </div>
+      <div id="bank-sol-host" hidden></div>
 
       ${critHtml ? `
         <div class="criteria-block math-content" id="bank-crit" hidden>
@@ -1021,19 +1322,20 @@
     $('#bank-prev').addEventListener('click', () => { if (hasPrev) selectBankTask(idx - 1); });
     $('#bank-next').addEventListener('click', () => { if (hasNext) selectBankTask(idx + 1); });
 
-    const solEl = $('#bank-sol');
+    const solHost = $('#bank-sol-host');
     const critEl = $('#bank-crit');
     const btn = $('#bank-toggle-sol');
+    let solLoaded = false;
     btn.addEventListener('click', () => {
-      const isHidden = solEl.hidden;
-      solEl.hidden = !isHidden;
+      const isHidden = solHost.hidden;
+      solHost.hidden = !isHidden;
       if (critEl) critEl.hidden = !isHidden;
       btn.textContent = isHidden ? 'Скрыть разбор' : 'Показать разбор';
-      if (isHidden) {
-        const sc = solEl.querySelector('.bank-sol-content');
-        sc.innerHTML = task.solutionHtml || '<p class="muted">Решение пока не добавлено.</p>';
-        renderMath(sc);
+      if (isHidden && !solLoaded) {
+        solHost.innerHTML = '';
+        renderSolutionBlock(solHost, task, 'bank-' + (task.id || 'x'));
         if (critEl) renderMath(critEl);
+        solLoaded = true;
       }
     });
   }
@@ -1044,6 +1346,7 @@
 
   function init() {
     buildBankGrid();
+    buildConversionTable();
 
     $('#btn-start-variant').addEventListener('click', () => {
       // показываем экран с правилами перед стартом
@@ -1053,6 +1356,29 @@
     $('#btn-pre-back').addEventListener('click', () => showScreen('home'));
     $('#btn-pre-start').addEventListener('click', startNewVariant);
     $('#btn-bank-back').addEventListener('click', exitBankDetail);
+
+    // финальная страница
+    $('#btn-final-back').addEventListener('click', () => showScreen('results'));
+    $('#btn-final-back-2').addEventListener('click', () => showScreen('results'));
+    $('#btn-final-new').addEventListener('click', async () => {
+      const ok = await showModal({
+        title: 'Сгенерировать новый вариант?',
+        message: 'Текущие результаты, черновики и самооценки будут потеряны.',
+        confirmText: 'Да, сгенерировать',
+        cancelText: 'Оставить как есть',
+        variant: 'danger',
+        icon: '↻',
+      });
+      if (!ok) return;
+      phase = 'idle';
+      currentVariant = null;
+      drafts = {}; solved = {}; selfGrades = {}; selfCriteria = {};
+      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      $('#nav-exam').disabled = true;
+      $('#nav-results').disabled = true;
+      showScreen('home');
+      updateTopbarStatus();
+    });
 
     // навигация в шапке
     $$('.nav__item, .brand').forEach((b) => {

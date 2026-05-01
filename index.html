@@ -11,6 +11,11 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" />
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous" />
+
+  <!-- TikZJax (для графиков с TikZ внутри решений — вкл. векторы, линии уровня, интегралы).
+       Используется через <script type="text/tikz">\begin{tikzpicture}...</script> -->
+  <link rel="stylesheet" type="text/css" href="https://tikzjax.com/v1/fonts.css" />
+
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -150,7 +155,24 @@
           </table>
           <p class="muted">Итоговая оценка по формуле:</p>
           <p class="formula-display">$$\text{оценка} = \min\!\left(10,\ \dfrac{\text{твои баллы} + 2}{3}\right)$$</p>
+          <p class="muted">Также на сайте показывается 100-балльная шкала: $\text{оценка}_{100} = \text{оценка}_{10}\cdot 10$.</p>
         </div>
+
+        <details class="info-block info-card-collapsible" id="conv-table-wrap">
+          <summary>
+            <strong>Таблица перевода баллов в оценку</strong>
+            <span class="muted small">(нажми, чтобы развернуть)</span>
+          </summary>
+          <p class="muted" style="margin-top:0.75rem;">Первичные баллы — это сумма твоих баллов по всем задачам (от 0 до 34). По ним вычисляются вторичные оценки: 10-балльная и 100-балльная.</p>
+          <div class="conv-table-scroll">
+            <table class="grade-table conv-table" id="conv-table">
+              <thead>
+                <tr><th>Первичные баллы</th><th>Оценка (из 10)</th><th>Оценка (из 100)</th></tr>
+              </thead>
+              <tbody id="conv-table-body"><!-- заполнится JS --></tbody>
+            </table>
+          </div>
+        </details>
 
         <div class="pre-exam__actions">
           <button type="button" class="btn btn--ghost" id="btn-pre-back">← Вернуться</button>
@@ -232,6 +254,43 @@
       </div>
     </section>
 
+    <!-- ====== SCREEN: FINAL (табличка с результатами) ====== -->
+    <section class="screen" id="screen-final">
+      <div class="final-page">
+        <button type="button" class="btn btn--ghost" id="btn-final-back" style="margin-bottom:1rem;">← Назад к разборам</button>
+        <header class="screen__header">
+          <h1>Итоговая сводка</h1>
+          <p class="muted">Твои баллы по каждой задаче и итоговые оценки.</p>
+        </header>
+
+        <div class="final-hero" id="final-hero">
+          <!-- заполняется JS -->
+        </div>
+
+        <div class="final-table-wrap">
+          <table class="grade-table final-table">
+            <thead>
+              <tr>
+                <th>№</th>
+                <th>Тема</th>
+                <th>Источник</th>
+                <th class="tal-right">Твой балл</th>
+                <th class="tal-right">Макс</th>
+                <th class="tal-right">%</th>
+              </tr>
+            </thead>
+            <tbody id="final-table-body"></tbody>
+            <tfoot id="final-table-foot"></tfoot>
+          </table>
+        </div>
+
+        <div class="final-actions">
+          <button type="button" class="btn btn--ghost" id="btn-final-back-2">← Назад к разборам</button>
+          <button type="button" class="btn btn--danger" id="btn-final-new">Сгенерировать новый вариант</button>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <footer class="footer">
@@ -256,6 +315,9 @@
 <!-- KaTeX (рендер LaTeX) -->
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
+<!-- TikZJax — рендер TikZ графиков (лениво, поскольку большой) -->
+<script defer src="https://tikzjax.com/v1/tikzjax.js"></script>
 
 <!-- Банк задач (заглушки + 5 файлов с решениями) -->
 <script src="js/tasks.js" defer></script>

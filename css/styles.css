@@ -566,6 +566,64 @@ hr {
   flex-wrap: wrap;
 }
 
+/* таблица перевода первичных в оценку */
+.conv-table-scroll { overflow-x: auto; margin-top: 0.75rem; }
+.conv-table {
+  width: 100%;
+  font-size: 0.92rem;
+}
+.conv-table tbody tr { transition: background 0.15s; }
+.conv-table tbody tr:hover { background: var(--accent-soft); }
+.conv-table tr.conv-row--ex td:first-child { border-left: 3px solid var(--success); }
+.conv-table tr.conv-row--good td:first-child { border-left: 3px solid var(--info); }
+.conv-table tr.conv-row--sat td:first-child { border-left: 3px solid var(--warning); }
+.conv-table tr.conv-row--fail td:first-child { border-left: 3px solid var(--danger); }
+
+/* sticky плашка с оценкой справа сверху на странице результатов */
+.grade-sticky {
+  position: sticky;
+  top: 75px;
+  z-index: 40;
+  background: var(--bg-card);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 0.85rem 1.2rem;
+  margin: 0 0 1rem auto;
+  max-width: 420px;
+  box-shadow: var(--shadow-md);
+}
+.grade-sticky__title {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.grade-sticky__value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  gap: 0.3rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.grade-sticky__value strong { font-size: 1.6rem; }
+.grade-sticky__bar-wrap {
+  margin-top: 0.5rem;
+  height: 4px;
+  background: var(--accent-soft);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.grade-sticky__bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
+  border-radius: 100px;
+  transition: width 0.3s ease;
+}
+
 /* свёртываемая «общая» критериальная плашка */
 .info-card-collapsible {
   background: var(--bg-card);
@@ -841,7 +899,124 @@ hr {
 }
 .criteria-block { border-left-color: var(--info); }
 
-/* ---------- Self-grade ---------- */
+/* табы для альтернативных решений */
+.solution-block--tabbed { padding: 1rem 1.25rem 1.1rem; }
+.sol-tabs {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.5rem;
+}
+.sol-tab {
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 500;
+  font-size: 0.88rem;
+  cursor: pointer;
+  color: var(--ink-2);
+  transition: background 0.15s, border-color 0.15s;
+}
+.sol-tab:hover { border-color: var(--ink); }
+.sol-tab.active {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+.sol-pane { display: none; }
+.sol-pane.active { display: block; }
+
+/* TikZJax SVG обёртка — по центру и с ограниченной шириной */
+.solution-block svg[id^="tikzjax"], .math-content svg[id^="tikzjax"] {
+  display: block;
+  margin: 0.8em auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------- Self-grade v2 (чекбоксы критериев) ---------- */
+.self-grade-v2 {
+  background: var(--bg-card-2);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.2rem;
+  margin-top: 1rem;
+}
+.self-grade-v2__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.criteria-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+.criteria-row {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.6rem 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.criteria-row:hover { border-color: var(--ink); }
+.criteria-row input[type=checkbox] {
+  margin-top: 0.15rem;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ink);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.criteria-row.is-on { background: var(--accent-soft); border-color: var(--ink); }
+.criteria-points {
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 3.2em;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.criteria-row--plus .criteria-points { color: var(--success); }
+.criteria-row--minus .criteria-points { color: var(--danger); }
+.criteria-row.is-on.criteria-row--plus { background: var(--success-soft); border-color: var(--success); }
+.criteria-row.is-on.criteria-row--minus { background: var(--danger-soft); border-color: var(--danger); }
+.criteria-text { line-height: 1.45; flex: 1; }
+
+.self-grade-v2__sum {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.55rem 0.85rem;
+  background: var(--ink);
+  color: white;
+  border-radius: 8px;
+  justify-content: flex-end;
+}
+.self-grade-v2__sum .muted { color: rgba(255,255,255,0.65) !important; }
+.self-grade-v2__sum-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.01em;
+}
+.self-grade-v2__sum-value.clamped { color: var(--warning); }
+.self-grade-v2__sum-value.clamped::after {
+  content: ' *';
+  color: var(--warning);
+}
+
+/* ---------- Self-grade (старый radio-режим, fallback) ---------- */
 .self-grade {
   background: var(--accent-soft);
   border-radius: var(--radius-sm);
@@ -887,12 +1062,26 @@ hr {
   padding: 1.75rem 2rem;
   margin-bottom: 1.5rem;
 }
+.results__score-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin: 0.5rem 0;
+}
 .results__score {
   font-size: 4rem;
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
-  margin: 0.5rem 0;
+}
+.results__score--small { font-size: 2.6rem; color: var(--muted); }
+.results__score-scale {
+  font-size: 0.4em;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0;
+  margin-left: 0.1em;
 }
 .results__score-label {
   display: inline-block;
@@ -1080,6 +1269,77 @@ hr {
 body.modal-open { overflow: hidden; }
 
 /* ---------- Адаптивность ---------- */
+/* ---------- Final page (итоговая табличка) ---------- */
+.final-page { max-width: 880px; margin: 0 auto; }
+
+.final-hero {
+  background: var(--bg-card);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 2rem 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+.final-hero__grades {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.final-hero__divider {
+  width: 1px;
+  height: 44px;
+  background: var(--line);
+}
+.final-hero__grade {
+  flex: 1;
+  min-width: 120px;
+}
+.final-hero__num {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.final-hero__num .muted {
+  font-size: 0.5em;
+  font-weight: 600;
+  margin-left: 0.15em;
+}
+.final-hero__num--small { font-size: 2rem; }
+.final-hero__label { margin-top: 1rem; }
+
+.final-table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+.final-table {
+  width: 100%;
+  font-size: 0.95rem;
+}
+.final-table td, .final-table th {
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+.final-table th { background: var(--bg-card-2); }
+.final-table .tal-right { text-align: right; }
+.final-table tr.final-row--full td:first-child { border-left: 3px solid var(--success); }
+.final-table tr.final-row--part td:first-child { border-left: 3px solid var(--info); }
+.final-table tr.final-row--some td:first-child { border-left: 3px solid var(--warning); }
+.final-table tr.final-row--none td:first-child { border-left: 3px solid var(--danger); }
+
+.final-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
 @media (max-width: 920px) {
   .exam-layout { grid-template-columns: 1fr; }
   .exam-nav {
@@ -1090,16 +1350,129 @@ body.modal-open { overflow: hidden; }
     grid-template-columns: repeat(10, 1fr);
   }
   .bank-detail__layout { grid-template-columns: 1fr; }
-  .bank-tasks-list { position: static; max-height: 320px; }
+  .bank-tasks-list { position: static; max-height: 300px; }
+  .final-hero__grades { flex-direction: column; align-items: stretch; gap: 1rem; }
+  .final-hero__divider { display: none; }
+  .final-hero__grade { text-align: center; }
+  .grade-sticky { max-width: none; margin: 0 0 1rem; }
 }
+
 @media (max-width: 640px) {
-  .topbar__inner { flex-wrap: wrap; gap: 1rem; }
-  .nav { width: 100%; overflow-x: auto; padding-bottom: 4px; }
-  .hero { padding: 2.5rem 0.5rem 2rem; }
-  .hero__meta { gap: 1.5rem; }
-  .exam-head { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+  /* глобально: поменьше отступы */
+  .main { padding: 1rem 0.85rem 2.5rem; }
+  body { font-size: 15px; }
+
+  /* topbar + nav */
+  .topbar__inner { flex-wrap: wrap; gap: 0.6rem; padding: 0.6rem 0.85rem; }
+  .brand { font-size: 0.95rem; }
+  .brand__mark { width: 28px; height: 28px; font-size: 0.95rem; }
+  .nav {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .nav__item {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .topbar__actions { margin-left: auto; font-size: 0.8rem; }
+
+  /* hero */
+  .hero { padding: 1.75rem 0.25rem 1.5rem; margin-bottom: 2rem; }
+  .hero__badge { font-size: 0.8rem; }
+  .hero__title { font-size: 1.8rem; }
+  .hero__lead { font-size: 1rem; }
+  .hero__actions .btn { width: 100%; justify-content: center; }
+  .hero__meta { gap: 1rem; }
+  .hero__meta-item strong { font-size: 1.4rem; }
+
+  /* features */
+  .features { grid-template-columns: 1fr; gap: 0.75rem; }
+  .feature { padding: 1.2rem; }
+
+  /* pre-exam */
+  .pre-exam__title { font-size: 1.4rem; }
+  .info-block { padding: 1.2rem 1rem; }
+  .info-block h2 { font-size: 1rem; }
+  .info-block__big { font-size: 1.8rem; }
+  .grade-table { font-size: 0.85rem; }
+  .grade-table th, .grade-table td { padding: 0.4rem 0.3rem; }
+  .pre-exam__actions { flex-direction: column-reverse; gap: 0.5rem; }
+  .pre-exam__actions .btn { width: 100%; justify-content: center; }
+
+  /* bank grid */
+  .bank-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  .bank-card { padding: 0.9rem 0.85rem; }
+  .bank-card__num { font-size: 1.8rem; }
+  .bank-card__title { font-size: 0.88rem; }
+  .bank-card__score { font-size: 0.72rem; padding: 0.18rem 0.45rem; }
+
+  /* bank detail */
+  .bank-detail__layout { gap: 0.85rem; }
+  .bank-task-view { padding: 1.1rem 0.85rem; }
+  .bank-task-nav { gap: 0.4rem; }
+  .bank-task-nav .btn { font-size: 0.8rem; padding: 0.3rem 0.55rem; }
+
+  /* exam */
+  .exam-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+    padding: 0.75rem 0.9rem;
+    top: 58px;
+  }
+  .exam-head__timer { justify-content: space-between; }
+  .exam-head__timer-value { font-size: 1.2rem; min-width: auto; }
   .exam-head__progress { max-width: none; }
-  .features { grid-template-columns: 1fr; }
-  .task-card { padding: 1.25rem 1rem; }
-  .main { padding: 1.5rem 1rem 3rem; }
+  .exam-head__actions .btn { width: 100%; justify-content: center; }
+
+  .exam-nav { padding: 0.8rem; top: auto; }
+  .exam-nav__grid { grid-template-columns: repeat(10, 1fr); gap: 0.25rem; }
+  .exam-nav__btn { padding: 0.4rem 0; font-size: 0.85rem; }
+
+  /* task card */
+  .task-card { padding: 1.1rem 0.9rem; }
+  .task-card__head { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+  .task-card__heading { flex-wrap: wrap; gap: 0.5rem; }
+  .task-card__num { font-size: 1rem; }
+  .task-card__actions { gap: 0.4rem; }
+  .task-card__actions .btn { flex: 1 1 auto; justify-content: center; }
+  .task-card__actions .spacer { display: none; }
+  .task-card__draft textarea { font-size: 0.85rem; min-height: 110px; }
+
+  /* solution/criteria */
+  .solution-block, .criteria-block { padding: 0.85rem 1rem; }
+
+  /* self-grade v2 */
+  .criteria-row { padding: 0.5rem 0.7rem; gap: 0.5rem; }
+  .criteria-points { min-width: 2.8em; font-size: 0.85rem; }
+  .criteria-text { font-size: 0.9rem; }
+  .self-grade-v2__sum-value { font-size: 1.2rem; }
+
+  /* results */
+  .results__summary { padding: 1.25rem 1rem; }
+  .results__score { font-size: 3rem; }
+  .results__score--small { font-size: 2rem; }
+  .results__score-row { gap: 1rem; }
+  .results__breakdown { grid-template-columns: 1fr 1fr; }
+
+  /* final page */
+  .final-hero { padding: 1.4rem 1rem; }
+  .final-hero__num { font-size: 2.2rem; }
+  .final-hero__num--small { font-size: 1.5rem; }
+  .final-table { font-size: 0.85rem; }
+  .final-table td, .final-table th { padding: 0.5rem 0.5rem; }
+  .final-actions .btn { flex: 1; justify-content: center; }
+
+  /* modal */
+  .modal__dialog { padding: 1.5rem 1.1rem 1.1rem; }
+  .modal__actions { flex-direction: column-reverse; }
+  .modal__actions .btn { width: 100%; justify-content: center; }
+
+  /* footer */
+  .footer__inner { flex-direction: column; gap: 0.3rem; text-align: center; padding: 1rem 0.85rem; }
 }
