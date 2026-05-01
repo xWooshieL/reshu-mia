@@ -2184,11 +2184,12 @@
                    font-size: 9pt; line-height: 1.28; }
       .print-doc { padding: 0; }
 
+      /* Шапка страницы: «Открытый вариант» / название / «Открытый вариант» —
+         БЕЗ горизонтальной линии под ней. */
       .print-head { display: flex; justify-content: space-between; align-items: baseline;
-                    font-size: 7pt; color: #333; padding-bottom: 2pt;
-                    border-bottom: 0.3pt solid #666; margin-bottom: 4pt; }
+                    font-size: 7pt; color: #333; margin-bottom: 3pt; }
       .print-variant-title { text-align: center; font-size: 9pt; font-weight: 700;
-                             font-style: italic; margin: 0 0 6pt; }
+                             font-style: italic; margin: 0 0 4pt; }
 
       /* ЕДИНЫЙ двухколоночный поток. Никаких вертикальных линий. */
       .print-flow {
@@ -2198,28 +2199,39 @@
         column-rule: none;
       }
 
-      /* Типографика инфо-блока */
+      /* Типографика инфо-блока — стиль ЕГЭ:
+         красная строка, ПЛОТНЫЕ абзацы без межстрочного интервала. */
       .print-flow h1.print-h1 {
-        font-size: 12pt; font-weight: 700; line-height: 1.25;
-        text-align: center; margin: 0 0 4pt;
+        font-size: 13pt; font-weight: 700; line-height: 1.25;
+        text-align: center; margin: 0 0 6pt;
         break-after: avoid; page-break-after: avoid;
       }
       .print-flow p.print-sub {
-        text-align: center; font-weight: 700; font-size: 9pt;
-        margin: 0 0 5pt; break-after: avoid; page-break-after: avoid;
+        text-align: center; font-weight: 700; font-size: 10pt;
+        margin: 4pt 0; break-after: avoid; page-break-after: avoid;
       }
       .print-flow h2.print-h2 {
-        font-size: 9.5pt; font-weight: 700; text-align: center;
+        font-size: 10pt; font-weight: 700; text-align: center;
         margin: 6pt 0 3pt;
         break-after: avoid; page-break-after: avoid;
         break-inside: avoid;
       }
+      /* Обычные параграфы инфо — с красной строкой, text-align: justify,
+         БЕЗ margin (вертикальный интервал даётся только line-height). */
       .print-flow p {
-        margin: 0 0 3pt; text-align: justify;
+        margin: 0;
+        text-indent: 1.3em;
+        text-align: justify;
         orphans: 3; widows: 3;
       }
-      .print-flow .print-wish { text-align: center; font-size: 9pt; margin: 4pt 0 6pt !important; }
-      .print-flow .print-muted { font-size: 8pt; color: #555; text-align: center; margin: 0 0 3pt; }
+      .print-flow .print-wish {
+        text-align: center; font-style: italic; font-weight: 600;
+        margin: 4pt 0 !important; text-indent: 0 !important;
+      }
+      .print-flow .print-muted {
+        font-size: 8pt; color: #555; text-align: center;
+        margin: 0 !important; text-indent: 0 !important;
+      }
       .print-flow ol.print-ol { margin: 2pt 0 4pt 1.2em; padding: 0; }
       .print-flow ol.print-ol li { margin: 0 0 2pt; }
       .print-flow ol.print-ol code {
@@ -2250,7 +2262,11 @@
         font-size: 9pt; line-height: 1.32;
         text-align: left;
       }
-      .print-task__body p { margin: 0 0 2pt; }
+      .print-task__body p {
+        margin: 0 0 2pt;
+        text-indent: 0;
+        text-align: left;
+      }
       .print-task__body p:last-child { margin-bottom: 0; }
       .print-task__num {
         display: inline-block;
@@ -2286,17 +2302,20 @@
         text-align: right; margin: 1pt 0 0;
       }
 
-      /* Справочные формулы — каждая с новой строки, слегка индентированы */
+      /* Справочные формулы — ПО ЦЕНТРУ колонки, каждая с новой строки */
       .print-ref {
-        text-align: center;
-        margin: 1pt 0 !important;
-        line-height: 1.35;
+        text-align: center !important;
+        text-indent: 0 !important;
+        margin: 0 !important;
+        line-height: 1.4;
       }
       .print-ref .katex { font-size: 9pt !important; }
+      /* Подзаголовки "Тригонометрия:", "Интегрирование:", "Линейная алгебра:" — тоже по центру */
       .print-ref-sub {
+        text-align: center !important;
+        text-indent: 0 !important;
+        font-weight: 700;
         margin: 4pt 0 2pt !important;
-        font-weight: 600;
-        text-align: left;
       }
 
       .print-foot { text-align: center; font-size: 7pt; color: #777;
