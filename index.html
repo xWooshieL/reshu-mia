@@ -134,11 +134,21 @@
         <div class="info-block">
           <h2>Правила экзамена</h2>
           <ol class="rules">
-            <li>На экзамене не разрешается пользоваться никакой дополнительной информацией: чит-листы и телефоны запрещены.</li>
-            <li>За каждый правильный шаг начисляются баллы. Лучше расписывать решение поэтапно. Если ответ недостаточно обоснован, оценка снижается.</li>
-            <li>Если используешь теорему или лемму &mdash; напиши какую.</li>
-            <li>Если решение неверное &mdash; зачеркни и напиши новое. Оценивается только первое.</li>
-            <li>Можно завершить работу досрочно.</li>
+            <li>Запрещено пользоваться любой дополнительной информацией и электронными устройствами. Если нарушишь это требование, работу <strong>аннулируют</strong> и её нельзя будет переписать.</li>
+            <li>Аккуратно оформляй развёрнутые решения каждой задачи. При нехватке места на бланке обратись к организаторам в аудитории — они выдадут дополнительные листы.</li>
+            <li>Если решишь задачу, а потом поймёшь, что решение неверное — зачеркни его и напиши новое. Если в работе приведены два разных решения, оцениваться будет только <strong>первое</strong>.</li>
+            <li>Выходить из аудитории можно, только окончательно сдав работу.</li>
+            <li>Завершить работу можно досрочно.</li>
+            <li>За каждый правильный шаг начисляются баллы. Если используешь теорему или лемму — напиши какую.</li>
+          </ol>
+        </div>
+
+        <div class="info-block">
+          <h2>Загрузка работы в LMS</h2>
+          <ol class="rules">
+            <li>Сфотографируй решение и сохрани в&nbsp;PDF-файл (на&nbsp;iPhone это можно сделать в&nbsp;Заметках, на&nbsp;Android&nbsp;— в&nbsp;приложении Adobe&nbsp;Scan).</li>
+            <li>Назови PDF-файл в&nbsp;формате <code>ФамилияИмя_Экзамен.pdf</code>.</li>
+            <li>До&nbsp;выхода из&nbsp;аудитории загрузи файл в&nbsp;<strong>LMS&nbsp;&rarr;&nbsp;Основы математического анализа и&nbsp;линейной алгебры&nbsp;2&nbsp;&rarr;&nbsp;Экзамен</strong>.</li>
           </ol>
         </div>
 
@@ -411,8 +421,17 @@
   </div>
 </div>
 
-<!-- ========== PRINT / PDF ROOT (виден только при печати) ========== -->
-<div id="print-root" class="print-root" aria-hidden="true"></div>
+<!-- ========== SCREEN: PDF PREVIEW (отдельный экран с превью варианта) ========== -->
+<section class="screen" id="screen-pdf">
+  <div class="pdf-toolbar">
+    <button type="button" class="btn btn--ghost" id="btn-pdf-back">← Назад к варианту</button>
+    <div class="pdf-toolbar__title">Превью варианта · можно скачать как PDF</div>
+    <button type="button" class="btn btn--primary" id="btn-pdf-download">⬇ Скачать PDF</button>
+  </div>
+  <div class="pdf-preview-wrap">
+    <div id="print-root" class="print-root print-root--preview"></div>
+  </div>
+</section>
 
 <!-- ========== MODAL (custom confirm/alert) ========== -->
 <div class="modal" id="modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">

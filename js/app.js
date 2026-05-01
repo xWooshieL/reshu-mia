@@ -1903,14 +1903,11 @@
     return n + ' балла';
   }
 
-  function printTaskBlock(slot, task, withAnswer) {
+  function printTaskBlock(slot, task) {
     const bank = (window.TASK_BANK && window.TASK_BANK[slot]) || {};
     const typeTitle = bank.title ? escapeHtml(bank.title) : '';
     const source = task && task.source ? escapeHtml(task.source) : '';
     const question = (task && task.questionLatex) || '<p class="muted">Нет условия</p>';
-    const answerHtml = withAnswer
-      ? '<div class="print-task__answer">Ответ:&nbsp;<span class="print-task__line"></span>.</div>'
-      : '';
     return `
       <div class="print-task">
         <div class="print-task__head">
@@ -1918,24 +1915,16 @@
           <span class="print-task__meta">${[typeTitle, source].filter(Boolean).join(' · ')}</span>
         </div>
         <div class="print-task__body">${question}</div>
-        ${answerHtml}
       </div>
     `;
   }
 
-  function printPartSection(scoreLabel, items, opts) {
+  function printPartSection(scoreLabel, items) {
     if (!items.length) return '';
-    opts = opts || {};
-    const tasksHtml = items.map(({ slot, task }) =>
-      printTaskBlock(slot, task, !!opts.withAnswer)
-    ).join('');
-    const instruction = opts.instruction
-      ? `<div class="print-part__instruction">${opts.instruction}</div>`
-      : '';
+    const tasksHtml = items.map(({ slot, task }) => printTaskBlock(slot, task)).join('');
     return `
       <section class="print-part">
         <div class="print-part__title">Задания на ${scoreLabel}</div>
-        ${instruction}
         <div class="print-part__columns">${tasksHtml}</div>
       </section>
     `;
@@ -1948,48 +1937,36 @@
           <h1 class="print-info__h1">Экзамен<br>по Основам математического анализа<br>и линейной алгебры</h1>
           <p class="print-info__sub">Инструкция по выполнению работы</p>
           <div class="print-info__body">
-            <p>Экзаменационная работа состоит из трёх частей, включающих в себя 20 заданий.</p>
-            <ul class="print-info__list">
-              <li><strong>Часть 1</strong> — 10 заданий на 1 балл каждое (базовый уровень).</li>
-              <li><strong>Часть 2</strong> — 6 заданий на 2 балла каждое (повышенный уровень).</li>
-              <li><strong>Часть 3</strong> — 4 задания на 3 балла каждое (высокий уровень).</li>
-            </ul>
+            <p>Экзаменационная работа состоит из трёх частей, включающих в себя 20 заданий: <strong>10 заданий</strong> на 1 балл, <strong>6 заданий</strong> на 2 балла и <strong>4 задания</strong> на 3 балла.</p>
             <p>На выполнение работы отводится <strong>3 часа</strong> (180 минут).</p>
-            <p>Ответом к заданиям 1–10 является целое число или конечная десятичная дробь. Запишите число в поле ответа, затем перенесите его в бланк ответов № 1 справа от номера соответствующего задания.</p>
-            <p>При выполнении заданий 11–20 требуется записать полное обоснованное решение и ответ в бланке ответов № 2.</p>
-            <p>За выполнение различных заданий даются <strong>от 1 до 3 баллов</strong>. Баллы суммируются. Оценка по 10-балльной шкале вычисляется по формуле <span class="math">$\\min\\!\\bigl(10,\\,(x+2)/3\\bigr)$</span>, где $x$ — сумма ваших баллов.</p>
-            <p>Записи в черновике, а также в тексте работы <strong>не учитываются</strong> при оценивании.</p>
+            <p><strong>Все задачи</strong> (включая № 1–10) решаются на бланке с развёрнутым решением. Перед каждой задачей сначала запиши её <strong>номер</strong>, затем аккуратно оформи полное решение.</p>
+            <p>При нехватке места обратись к организаторам — они выдадут дополнительные листы.</p>
+            <p>Если решишь задачу, а потом поймёшь, что решение неверное — зачеркни его и напиши новое. Если в работе приведены два разных решения, оцениваться будет только <strong>первое</strong>.</p>
+            <p>За выполнение различных заданий даются <strong>от 1 до 3 баллов</strong>. Баллы суммируются. Оценка по 10-балльной шкале вычисляется по формуле <span class="math">$\\min\\!\\bigl(10,\\,(x+2)/3\\bigr)$</span>, где $x$ — сумма баллов.</p>
             <p class="print-info__wish"><em>Желаем успеха!</em></p>
           </div>
         </div>
+
         <div class="print-info__col">
-          <div class="print-info__notice">
-            <strong>Ответом к заданиям 1–10</strong> является целое число или конечная десятичная дробь. Во всех заданиях числа предполагаются действительными, если отдельно не указано иное. Запишите число в поле ответа в тексте работы, затем перенесите его в <strong>БЛАНК ОТВЕТОВ № 1</strong> справа от номера соответствующего задания. Каждую цифру, знак «минус» и запятую пишите в отдельной клеточке в соответствии с приведёнными в бланке образцами.
-          </div>
-          <div class="print-info__example">
-            <div class="print-info__example-label">КИМ</div>
-            <div>Ответ:&nbsp;<u>&nbsp;&minus;0,8&nbsp;</u></div>
-            <div class="print-info__cells">
-              <span>−</span><span>0</span><span>,</span><span>8</span>
-              <span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span>
-            </div>
-            <div class="print-info__example-label print-info__example-label--right">Бланк</div>
-          </div>
+          <h2 class="print-info__h2">Загрузка работы в LMS</h2>
+          <ol class="print-info__ol">
+            <li>Сфотографируй решение и сохрани в PDF-файл (на iPhone — через Заметки, на Android — через приложение Adobe&nbsp;Scan).</li>
+            <li>Назови PDF-файл в формате <code>ФамилияИмя_Экзамен.pdf</code>.</li>
+            <li>До выхода из аудитории загрузи файл в <strong>LMS &rarr; Основы математического анализа и линейной алгебры&nbsp;2 &rarr; Экзамен</strong>.</li>
+          </ol>
+
           <h2 class="print-info__h2">Справочные материалы</h2>
+          <p class="print-info__notice-small"><em>На экзамене справочных материалов не выдают — они приведены здесь только для удобства при подготовке.</em></p>
           <div class="print-info__formulas math-content">
-            <p>Тригонометрия:</p>
-            <p>$\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha$</p>
-            <p>$\\cos 2\\alpha = \\cos^2\\alpha - \\sin^2\\alpha$</p>
+            <p><strong>Тригонометрия:</strong></p>
+            <p>$\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha, \\quad \\cos 2\\alpha = \\cos^2\\alpha - \\sin^2\\alpha$</p>
             <p>$\\sin(\\alpha\\pm\\beta) = \\sin\\alpha\\cos\\beta \\pm \\cos\\alpha\\sin\\beta$</p>
             <p>$\\cos(\\alpha\\pm\\beta) = \\cos\\alpha\\cos\\beta \\mp \\sin\\alpha\\sin\\beta$</p>
-            <p>$\\sin^2\\alpha = \\tfrac{1-\\cos 2\\alpha}{2}$, &nbsp; $\\cos^2\\alpha = \\tfrac{1+\\cos 2\\alpha}{2}$</p>
-            <p style="margin-top:6pt;">Интегрирование:</p>
-            <p>$\\int u\\,dv = uv - \\int v\\,du$</p>
-            <p>$\\displaystyle\\int_a^b f(x)\\,dx = F(b)-F(a)$</p>
-            <p>$\\displaystyle\\int_a^b f(x)\\,dx = \\lim_{n\\to\\infty}\\sum_{k=1}^{n} f(x_k)\\,\\Delta x$</p>
-            <p style="margin-top:6pt;">Линейная алгебра:</p>
-            <p>$\\cos\\varphi = \\dfrac{\\langle \\vec{a},\\vec{b}\\rangle}{\\|\\vec{a}\\|\\,\\|\\vec{b}\\|}$, &nbsp; $\\mathrm{proj}_{\\vec{b}}\\,\\vec{a} = \\dfrac{\\langle\\vec{a},\\vec{b}\\rangle}{\\langle\\vec{b},\\vec{b}\\rangle}\\vec{b}$</p>
+            <p>$\\sin^2\\alpha = \\tfrac{1-\\cos 2\\alpha}{2}, \\quad \\cos^2\\alpha = \\tfrac{1+\\cos 2\\alpha}{2}$</p>
+            <p style="margin-top:4pt;"><strong>Интегрирование:</strong></p>
+            <p>$\\int u\\,dv = uv - \\int v\\,du, \\quad \\int_a^b f(x)\\,dx = F(b)-F(a)$</p>
+            <p style="margin-top:4pt;"><strong>Линейная алгебра:</strong></p>
+            <p>$\\cos\\varphi = \\dfrac{\\langle \\vec{a},\\vec{b}\\rangle}{\\|\\vec{a}\\|\\,\\|\\vec{b}\\|}, \\quad \\mathrm{proj}_{\\vec{b}}\\,\\vec{a} = \\dfrac{\\langle\\vec{a},\\vec{b}\\rangle}{\\langle\\vec{b},\\vec{b}\\rangle}\\vec{b}$</p>
             <p>$\\det(A - \\lambda I) = 0$ &nbsp;— характеристическое уравнение</p>
           </div>
         </div>
@@ -2023,20 +2000,17 @@
 
         ${printInfoPage()}
 
-        ${printPartSection('1 балл', byScore[1], { withAnswer: true })}
-        ${printPartSection('2 балла', byScore[2], {
-          withAnswer: false,
-          instruction: '<em>Для записи решений и ответов на задания этой части используйте <strong>БЛАНК ОТВЕТОВ № 2</strong>. Запишите сначала номер выполняемого задания, а затем полное обоснованное решение и ответ. Ответы записывайте чётко и разборчиво.</em>',
-        })}
-        ${printPartSection('3 балла', byScore[3], {
-          withAnswer: false,
-          instruction: '<em>Для записи решений и ответов на задания этой части используйте <strong>БЛАНК ОТВЕТОВ № 2</strong>. Запишите сначала номер выполняемого задания, а затем полное обоснованное решение и ответ.</em>',
-        })}
+        ${printPartSection('1 балл', byScore[1])}
+        ${printPartSection('2 балла', byScore[2])}
+        ${printPartSection('3 балла', byScore[3])}
 
         <footer class="print-foot">© ${new Date().getFullYear()} РешуМИА · <em>Копирование не допускается</em></footer>
       </article>
     `;
   }
+
+  // Где мы были до PDF-превью (чтобы «← Назад» возвращал туда)
+  let pdfReturnScreen = 'exam';
 
   function openPrintView() {
     if (!currentVariant) {
@@ -2045,19 +2019,25 @@
     }
     const root = $('#print-root');
     if (!root) return;
+    // Запоминаем откуда пришли
+    pdfReturnScreen = (phase === 'results') ? 'results' : 'exam';
     root.innerHTML = buildPrintPages();
-    // Рендерим все формулы через KaTeX
     renderMath(root);
+    showScreen('pdf');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function closePrintView() {
+    showScreen(pdfReturnScreen);
+  }
+
+  function triggerPrintDialog() {
+    // Класс для управления @media print (скрывает всё кроме #print-root)
     document.body.classList.add('printing');
-    // Даём браузеру отрисовать layout
     setTimeout(() => {
       window.print();
-      // После закрытия диалога — почистим
-      setTimeout(() => {
-        document.body.classList.remove('printing');
-        root.innerHTML = '';
-      }, 300);
-    }, 120);
+      setTimeout(() => document.body.classList.remove('printing'), 300);
+    }, 60);
   }
 
   // ============================================================
@@ -2186,6 +2166,12 @@
 
     const pdfBtn = $('#btn-pdf');
     if (pdfBtn) pdfBtn.addEventListener('click', () => openPrintView());
+
+    const pdfBackBtn = $('#btn-pdf-back');
+    if (pdfBackBtn) pdfBackBtn.addEventListener('click', () => closePrintView());
+
+    const pdfDownloadBtn = $('#btn-pdf-download');
+    if (pdfDownloadBtn) pdfDownloadBtn.addEventListener('click', () => triggerPrintDialog());
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') persist();

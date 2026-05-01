@@ -2305,8 +2305,201 @@ body.modal-open { overflow: hidden; }
    Пользователь выбирает «Сохранить как PDF» в диалоге печати.
    ============================================================ */
 
-/* На обычном экране контейнер скрыт. */
+/* На обычном экране контейнер скрыт, но в режиме preview — показываем. */
 .print-root { display: none; }
+.print-root--preview { display: block; }
+
+/* ============================================================
+   ЭКРАН PDF-ПРЕВЬЮ (screen-pdf)
+   ============================================================ */
+#screen-pdf {
+  padding: 0;
+  background: #e8e9ed;
+  min-height: 100vh;
+}
+
+.pdf-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1.25rem;
+  background: #fff;
+  border-bottom: 1px solid #e4e4e9;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.pdf-toolbar__title {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #222;
+}
+
+.pdf-preview-wrap {
+  padding: 2rem 1.25rem 3rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* Имитация страницы A4 landscape: 297×210 мм ≈ 1123×794 px @ 96 dpi,
+   масштабируем через max-width */
+.print-root--preview {
+  width: 100%;
+  max-width: 1100px;
+}
+.print-root--preview .print-doc {
+  background: #fff;
+  padding: 18mm 14mm;
+  box-shadow: 0 2px 18px rgba(0,0,0,0.08);
+  font-family: "Times New Roman", Times, Georgia, serif;
+  font-size: 11pt;
+  line-height: 1.35;
+  color: #111;
+}
+
+.print-root--preview .print-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9pt;
+  padding-bottom: 4pt;
+  border-bottom: 0.5pt solid #000;
+  margin-bottom: 10pt;
+}
+.print-root--preview .print-variant-title {
+  text-align: center;
+  font-style: italic;
+  font-weight: 700;
+  margin: 0 0 14pt;
+  font-size: 11pt;
+}
+.print-root--preview .print-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14mm;
+  padding-bottom: 14pt;
+  border-bottom: 1px dashed #cfcfd4;
+  margin-bottom: 18pt;
+}
+.print-root--preview .print-info__h1 {
+  text-align: center;
+  font-size: 14pt;
+  font-weight: 700;
+  margin: 0 0 10pt;
+  line-height: 1.3;
+}
+.print-root--preview .print-info__sub {
+  text-align: center;
+  font-weight: 700;
+  margin: 0 0 10pt;
+}
+.print-root--preview .print-info__body p {
+  margin: 0 0 5pt;
+  text-align: justify;
+}
+.print-root--preview .print-info__wish {
+  text-align: center;
+  margin-top: 10pt !important;
+}
+.print-root--preview .print-info__ol {
+  margin: 4pt 0 10pt 1.3em;
+  padding: 0;
+}
+.print-root--preview .print-info__ol li { margin: 0 0 5pt; }
+.print-root--preview .print-info__ol code {
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.92em;
+  background: #f2f2f2;
+  padding: 0 3px;
+  border-radius: 2px;
+}
+.print-root--preview .print-info__notice-small {
+  font-size: 9.5pt;
+  color: #555;
+  text-align: center;
+  margin: 0 0 4pt;
+}
+.print-root--preview .print-info__h2 {
+  text-align: center;
+  font-size: 11.5pt;
+  font-weight: 700;
+  margin: 10pt 0 5pt;
+}
+.print-root--preview .print-info__col > .print-info__h2:first-child { margin-top: 0; }
+.print-root--preview .print-info__formulas p {
+  margin: 2pt 0;
+  text-align: center;
+}
+
+.print-root--preview .print-part {
+  padding-top: 10pt;
+}
+.print-root--preview .print-part__title {
+  text-align: center;
+  font-size: 13pt;
+  font-weight: 700;
+  margin: 0 0 12pt;
+}
+.print-root--preview .print-part__columns {
+  columns: 2;
+  column-gap: 10mm;
+}
+
+.print-root--preview .print-task {
+  break-inside: avoid;
+  margin-bottom: 14pt;
+  display: block;
+}
+.print-root--preview .print-task__head {
+  display: flex;
+  align-items: center;
+  gap: 8pt;
+  margin-bottom: 4pt;
+}
+.print-root--preview .print-task__num {
+  display: inline-block;
+  min-width: 36pt;
+  padding: 3pt 10pt;
+  text-align: center;
+  font-weight: 700;
+  font-size: 12pt;
+  border: 1px solid #111;
+  background: #fff;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+.print-root--preview .print-task__meta {
+  font-size: 9pt;
+  color: #666;
+  font-style: italic;
+}
+.print-root--preview .print-task__body {
+  font-size: 10.5pt;
+  text-align: justify;
+}
+.print-root--preview .print-task__body p { margin: 0 0 4pt; }
+.print-root--preview .print-task__body .katex { font-size: 10.5pt !important; }
+.print-root--preview .print-task__body img,
+.print-root--preview .print-task__body svg { max-width: 100%; height: auto; }
+.print-root--preview .print-foot {
+  text-align: center;
+  font-size: 9pt;
+  color: #666;
+  margin-top: 14pt;
+  padding-top: 8pt;
+  border-top: 1px dashed #cfcfd4;
+}
+
+@media (max-width: 920px) {
+  .pdf-toolbar { padding: 0.7rem 0.8rem; gap: 0.6rem; }
+  .pdf-toolbar__title { font-size: 0.85rem; }
+  .pdf-preview-wrap { padding: 1rem 0.6rem 2rem; }
+  .print-root--preview .print-doc { padding: 12mm 7mm; font-size: 10pt; }
+  .print-root--preview .print-info { grid-template-columns: 1fr; gap: 0; }
+  .print-root--preview .print-part__columns { columns: 1; }
+}
 
 @media print {
   @page {
@@ -2319,15 +2512,32 @@ body.modal-open { overflow: hidden; }
     background: #fff !important;
     color: #000 !important;
   }
-  body > *:not(#print-root) { display: none !important; }
-  .print-root { display: block !important; }
-
-  /* базовая типографика документа */
-  .print-doc {
-    font-family: "Times New Roman", Times, Georgia, serif;
-    font-size: 10.5pt;
-    line-height: 1.3;
-    color: #000;
+  /* Классический приём: прячем всё через visibility, кроме документа. */
+  body * { visibility: hidden !important; }
+  #print-root,
+  #print-root * { visibility: visible !important; }
+  #print-root {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    display: block !important;
+  }
+  /* Preview-стили (коробка, тень, padding) нужно погасить при печати */
+  #print-root .print-doc {
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-family: "Times New Roman", Times, Georgia, serif !important;
+    font-size: 10.5pt !important;
+    line-height: 1.3 !important;
+    color: #000 !important;
   }
   .print-doc p { margin: 0 0 4pt; }
   .print-doc strong { font-weight: 700; }
@@ -2384,55 +2594,39 @@ body.modal-open { overflow: hidden; }
   .print-info__list li { margin: 0 0 3pt; }
   .print-info__wish { text-align: center; margin-top: 10pt !important; }
 
-  .print-info__notice {
-    border: 0.6pt solid #000;
-    padding: 5pt 7pt;
-    font-style: italic;
+  .print-info__ol {
+    margin: 4pt 0 8pt 1.3em;
+    padding: 0;
+    font-size: 10pt;
+  }
+  .print-info__ol li { margin: 0 0 4pt; }
+  .print-info__ol code {
+    font-family: "Consolas", "Courier New", monospace;
     font-size: 9.5pt;
-    margin-bottom: 8pt;
-    background: #fafafa;
+    background: #f2f2f2;
+    padding: 0 2pt;
+    border-radius: 2pt;
   }
-  .print-info__example {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 4pt 8pt;
-    margin-bottom: 10pt;
-    font-size: 9.5pt;
-  }
-  .print-info__example-label {
-    font-size: 8pt;
-    color: #555;
-    font-family: Arial, Helvetica, sans-serif;
-  }
-  .print-info__example-label--right { text-align: right; }
-  .print-info__cells {
-    grid-column: 2;
-    display: flex;
-    gap: 0;
-  }
-  .print-info__cells span {
-    display: inline-block;
-    width: 5mm;
-    height: 5mm;
-    line-height: 5mm;
-    text-align: center;
-    border: 0.4pt solid #000;
-    margin-right: -0.4pt;
+
+  .print-info__notice-small {
     font-size: 9pt;
+    color: #555;
+    margin: 0 0 4pt;
+    text-align: center;
   }
 
   .print-info__h2 {
     text-align: center;
-    font-size: 10.5pt;
+    font-size: 11pt;
     font-weight: 700;
-    margin: 10pt 0 6pt;
+    margin: 8pt 0 4pt;
   }
+  .print-info__col > .print-info__h2:first-child { margin-top: 0; }
   .print-info__formulas p {
     margin: 2pt 0;
     text-align: center;
   }
-  .print-info__formulas .katex { font-size: 10pt !important; }
+  .print-info__formulas .katex { font-size: 9.5pt !important; }
 
   /* Часть: заголовок + 2 колонки задач */
   .print-part {
@@ -2475,19 +2669,18 @@ body.modal-open { overflow: hidden; }
     margin-bottom: 3pt;
     break-inside: avoid;
   }
-  /* Номер в "двойной" рамке как на образце */
+  /* Номер в прямоугольной рамке (одна полоса, пошире) */
   .print-task__num {
     display: inline-block;
-    min-width: 18pt;
-    padding: 1pt 4pt;
+    min-width: 32pt;
+    padding: 2pt 8pt;
     text-align: center;
     font-weight: 700;
-    font-size: 10pt;
-    border: 0.5pt solid #000;
-    outline: 0.5pt solid #000;
-    outline-offset: 1pt;
+    font-size: 11pt;
+    border: 0.8pt solid #000;
     background: #fff;
     flex-shrink: 0;
+    letter-spacing: 0.02em;
   }
   .print-task__meta {
     font-size: 8pt;
