@@ -2333,11 +2333,12 @@
     // В окне показываем loader, рендерим документ в скрытом div,
     // затем через html2pdf.js делаем настоящий PDF blob и переходим
     // на его URL — браузер откроет встроенный PDF-просмотрщик.
-    // Простой и надёжный подход: HTML + window.print().
-    // Открывается мгновенно, формулы KaTeX рендерятся через сам браузер
-    // (настоящие шрифты, без канвас-проблем). Пользователь в диалоге
-    // печати выбирает «Сохранить как PDF» → получает настоящий PDF.
-    // Тулбар сверху с кнопками, скрывается в print-режиме.
+    // HTML + window.print() с MathJax SVG-рендером формул.
+    // MathJax в SVG-режиме вместо KaTeX — потому что KaTeX использует
+    // комбинацию HTML+SVG для знака корня, и браузер при печати
+    // периодически обрезает/теряет vinculum. MathJax SVG даёт каждую
+    // формулу как цельный <svg> с <path> элементами — 100% печатается.
+    // При этом шрифты не нужны (все глифы как paths), загрузка ~2-3 сек.
     const printStyle = ''
       + '@page { size: A4 landscape; margin: 9mm 8mm; }'
       + '* { box-sizing: border-box;'
@@ -2386,34 +2387,50 @@
     const fullHtml = '<!doctype html>\n<html lang="ru"><head>'
       + '<meta charset="UTF-8">'
       + '<title>РешуМИА — ' + escapeHtml(variantName) + '</title>'
-      + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">'
-      + '<style>' + printStyle + '</style>'
+      + '<style>' + printStyle
+      +   /* MathJax inline/display стили */
+      +   ' mjx-container[jax="SVG"] { display: inline-block; vertical-align: middle; }'
+      +   ' mjx-container[jax="SVG"][display="true"] { display: block; margin: 3pt auto; text-align: center; }'
+      +   ' mjx-container[jax="SVG"] svg { vertical-align: middle; }'
+      + '</style>'
+      + '<script>'
+      +   'window.MathJax = {'
+      +     'tex: {'
+      +       'inlineMath: [["$","$"],["\\\\(","\\\\)"]],'
+      +       'displayMath: [["$$","$$"],["\\\\[","\\\\]"]],'
+      +       'processEscapes: true'
+      +     '},'
+      +     'svg: { fontCache: "none", scale: 1.05 },'
+      +     'startup: { typeset: false }'
+      +   '};'
+      + '<\/script>'
       + '</head><body>'
       + '<div class="toolbar">'
       +   '<button type="button" onclick="window.print()">⬇ Сохранить как PDF</button>'
       +   '<button type="button" onclick="window.close()">Закрыть</button>'
-      +   '<span class="hint">В диалоге печати выбери «Сохранить как PDF»</span>'
+      +   '<span class="hint" id="th">Загрузка MathJax для рендера формул…</span>'
       + '</div>'
       + contentHtml
-      + '<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"><\/script>'
-      + '<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"><\/script>'
+      + '<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"><\/script>'
       + '<script>'
+      +   'function setHint(t){ var e=document.getElementById("th"); if(e) e.textContent=t; }'
       +   'window.addEventListener("load", function(){'
       +     'var tries=0;'
       +     'function go(){'
       +       'tries++;'
-      +       'if (window.renderMathInElement){'
-      +         'renderMathInElement(document.body, {'
-      +           'delimiters: ['
-      +             '{left:"$$",right:"$$",display:true},'
-      +             '{left:"$",right:"$",display:false},'
-      +             '{left:"\\\\[",right:"\\\\]",display:true},'
-      +             '{left:"\\\\(",right:"\\\\)",display:false}'
-      +           '], throwOnError:false'
+      +       'if (window.MathJax && window.MathJax.typesetPromise){'
+      +         'setHint("Рендер формул (SVG)…");'
+      +         'window.MathJax.typesetPromise([document.body]).then(function(){'
+      +           'setHint("Готово! Диалог печати откроется сам. В нём выбери «Сохранить как PDF».");'
+      +           'setTimeout(function(){ window.print(); }, 300);'
+      +         '}).catch(function(e){'
+      +           'console.error("MathJax error:", e);'
+      +           'setHint("Ошибка рендера: " + e.message);'
       +         '});'
-      +         'setTimeout(function(){ window.print(); }, 400);'
-      +       '} else if (tries < 200) {'
+      +       '} else if (tries < 400) {'
       +         'setTimeout(go, 80);'
+      +       '} else {'
+      +         'setHint("MathJax не загрузился. Проверь интернет.");'
       +       '}'
       +     '}'
       +     'go();'
