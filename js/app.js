@@ -2173,6 +2173,7 @@
       ? currentVariantMeta.title
       : 'Случайный вариант';
     const contentHtml = buildPrintPages();
+    const fileName = 'РешуМИА — ' + variantName + '.pdf';
 
     // Компактный CSS. Landscape, один двухколоночный поток, без page-breaks.
     const style = `
@@ -2300,42 +2301,64 @@
 
       .print-foot { text-align: center; font-size: 7pt; color: #777;
                     margin-top: 6pt; padding-top: 3pt; border-top: 0.3pt dashed #bbb; }
-
-      /* Тулбар — скрывается при печати */
-      .toolbar { position: fixed; top: 0; left: 0; right: 0;
-                 display: flex; gap: 0.6rem; align-items: center; justify-content: center;
-                 background: #222; color: #fff; padding: 8px 12px; z-index: 10000;
-                 font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 14px; }
-      .toolbar button { padding: 6px 14px; font-size: 14px; cursor: pointer;
-                        background: #fff; color: #111; border: 0; border-radius: 4px;
-                        font-weight: 600; }
-      .toolbar button:hover { background: #f0f0f0; }
-      body { padding-top: 48px; }
-
-      @media print {
-        .toolbar { display: none !important; }
-        body { padding-top: 0; }
-      }
     `;
 
+    // Сразу открываем новое окно (до async-работы) — иначе popup blocker
+    const w = window.open('', '_blank');
+    if (!w) {
+      showAlert('Не удалось открыть новое окно. Разреши всплывающие окна для сайта и попробуй ещё раз.');
+      return;
+    }
+
+    // В окне показываем loader, рендерим документ в скрытом div,
+    // затем через html2pdf.js делаем настоящий PDF blob и переходим
+    // на его URL — браузер откроет встроенный PDF-просмотрщик.
     const fullHtml = '<!doctype html>\n<html lang="ru"><head>'
       + '<meta charset="UTF-8">'
       + '<title>РешуМИА — ' + escapeHtml(variantName) + '</title>'
       + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">'
-      + '<style>' + style + '</style>'
+      + '<style>'
+      +   '* { box-sizing: border-box; }'
+      +   'html, body { margin: 0; padding: 0; background: #f4f4f6; '
+      +     'font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }'
+      +   '#loader { position: fixed; inset: 0; display: flex; flex-direction: column; '
+      +     'align-items: center; justify-content: center; gap: 18px; background: #f4f4f6; z-index: 9999; }'
+      +   '.spinner { width: 48px; height: 48px; border: 4px solid #dcdce0; '
+      +     'border-top-color: #222; border-radius: 50%; animation: sp 1s linear infinite; }'
+      +   '@keyframes sp { to { transform: rotate(360deg); } }'
+      +   '#loader-text { color: #333; font-size: 15px; font-weight: 500; }'
+      +   '#loader-sub  { color: #777; font-size: 12.5px; max-width: 360px; text-align: center; line-height: 1.5; }'
+      +   /* скрытый контейнер документа — рендерим его для html2canvas */
+      +   '#doc-root { position: absolute; left: -99999px; top: 0; width: 281mm; '
+      +     'padding: 9mm 8mm; background: #fff; }'
+      +   style
+      + '</style>'
       + '</head><body>'
-      + '<div class="toolbar">'
-      +   '<button type="button" onclick="window.print()">⬇ Скачать / распечатать PDF</button>'
-      +   '<button type="button" onclick="window.close()">Закрыть</button>'
+      + '<div id="loader">'
+      +   '<div class="spinner"></div>'
+      +   '<div id="loader-text">Подготовка PDF…</div>'
+      +   '<div id="loader-sub">Не закрывай эту вкладку. Загрузка KaTeX, рендер формул, сборка файла — обычно 4–8 сек.</div>'
       + '</div>'
-      + contentHtml
+      + '<div id="doc-root">' + contentHtml + '</div>'
       + '<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"><\/script>'
       + '<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"><\/script>'
+      + '<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js" crossorigin="anonymous"><\/script>'
       + '<script>'
-      +   'window.addEventListener("load", function(){'
-      +     'function go(){'
+      +   'function setStep(t){ var e=document.getElementById("loader-text"); if(e) e.textContent=t; }'
+      +   'function waitAssets(){ return new Promise(function(r){'
+      +     'var tries=0; (function p(){ tries++;'
+      +       'if (window.renderMathInElement && window.html2pdf){ r(); return; }'
+      +       'if (tries>200){ r(); return; }'
+      +       'setTimeout(p,80);'
+      +     '})(); }); }'
+      +   'function delay(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }'
+      +   'window.addEventListener("load", async function(){'
+      +     'try{'
+      +       'setStep("Загрузка KaTeX…");'
+      +       'await waitAssets();'
+      +       'setStep("Рендер формул…");'
       +       'if (window.renderMathInElement){'
-      +         'renderMathInElement(document.body, {'
+      +         'renderMathInElement(document.getElementById("doc-root"), {'
       +           'delimiters: ['
       +             '{left:"$$",right:"$$",display:true},'
       +             '{left:"$",right:"$",display:false},'
@@ -2343,19 +2366,32 @@
       +             '{left:"\\\\(",right:"\\\\)",display:false}'
       +           '], throwOnError:false'
       +         '});'
-      +         'setTimeout(function(){ window.print(); }, 350);'
-      +       '} else { setTimeout(go, 120); }'
+      +       '}'
+      +       'await delay(600);' // шрифты и мат-символы подгружаются
+      +       'setStep("Создание PDF…");'
+      +       'var opt = {'
+      +         'margin: 0,'
+      +         'filename: ' + JSON.stringify(fileName) + ','
+      +         'image: { type: "jpeg", quality: 0.96 },'
+      +         'html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false, backgroundColor: "#ffffff" },'
+      +         'jsPDF: { unit: "mm", format: "a4", orientation: "landscape", compress: true },'
+      +         'pagebreak: { mode: ["css","legacy"], avoid: [".print-task", ".print-part-title"] }'
+      +       '};'
+      +       'var pdfBlob = await html2pdf().set(opt).from(document.getElementById("doc-root")).outputPdf("blob");'
+      +       'var blobUrl = URL.createObjectURL(pdfBlob);'
+      +       /* Заменяем текущую страницу на PDF — браузер откроет встроенный viewer */
+      +       'document.title = ' + JSON.stringify(fileName) + ';'
+      +       'window.location.replace(blobUrl);'
+      +     '}catch(err){'
+      +       'console.error("PDF generation failed:", err);'
+      +       'setStep("Ошибка при создании PDF");'
+      +       'var sub = document.getElementById("loader-sub");'
+      +       'if (sub){ sub.textContent = (err && err.message) || String(err); sub.style.color = "#b00"; }'
       +     '}'
-      +     'go();'
       +   '});'
       + '<\/script>'
       + '</body></html>';
 
-    const w = window.open('', '_blank');
-    if (!w) {
-      showAlert('Не удалось открыть новое окно. Разреши всплывающие окна для сайта и попробуй ещё раз.');
-      return;
-    }
     w.document.open();
     w.document.write(fullHtml);
     w.document.close();
