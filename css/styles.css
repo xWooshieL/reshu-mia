@@ -433,6 +433,183 @@ hr {
   margin-top: 2rem;
 }
 
+/* ---------- Learn (лекции + конспекты) ---------- */
+.learn-tabs {
+  display: flex;
+  gap: 0.3rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1.5rem;
+}
+.learn-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 0.65rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+.learn-tab:hover { color: var(--ink); }
+.learn-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.learn-pane { display: none; }
+.learn-pane.active { display: block; }
+
+/* --- список лекций --- */
+.lectures-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.lecture-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.3rem;
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.lecture-card:hover { border-color: var(--ink); box-shadow: var(--shadow-sm); }
+.lecture-card--empty { opacity: 0.75; }
+.lecture-card__head {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 250px;
+}
+.lecture-card__week {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 84px;
+  padding: 0.4rem 0.7rem;
+  background: var(--accent-soft);
+  color: var(--ink);
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+.lecture-card__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.lecture-tags {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.lecture-tag {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  background: var(--bg-card-2);
+  border-radius: 100px;
+  font-size: 0.78rem;
+  color: var(--ink-2);
+}
+.lecture-card__links {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.lecture-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  background: var(--ink);
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.88rem;
+  transition: background 0.15s;
+}
+.lecture-link:hover { background: #2b2b30; }
+.lecture-link__icon { font-size: 1rem; line-height: 1; }
+
+/* --- конспекты: сетка --- */
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.note-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
+}
+.note-card:hover { border-color: var(--ink); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.note-card:active { transform: translateY(0); }
+.note-card--empty { opacity: 0.65; }
+.note-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.note-card__num {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.note-card__title {
+  margin: 0 0 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.note-card__status {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+/* --- страница конспекта --- */
+.learn-article {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.75rem 2rem;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+.learn-article h2, .learn-article h3, .learn-article h4 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.learn-article h2 { font-size: 1.3rem; }
+.learn-article h3 { font-size: 1.1rem; }
+.learn-article > *:first-child { margin-top: 0; }
+
+@media (max-width: 640px) {
+  .lecture-card { padding: 0.9rem 1rem; }
+  .lecture-card__head { gap: 0.5rem; }
+  .lecture-card__week { min-width: auto; }
+  .learn-article { padding: 1.1rem 1rem; }
+}
+
 /* ---------- Presets (готовые варианты) ---------- */
 .presets-grid {
   display: grid;

@@ -32,6 +32,7 @@
       </a>
       <nav class="nav">
         <button type="button" class="nav__item active" data-screen="home">Главная</button>
+        <button type="button" class="nav__item" data-screen="learn">Обучение</button>
         <button type="button" class="nav__item" data-screen="presets">Готовые варианты</button>
         <button type="button" class="nav__item" data-screen="bank">Банк по типам</button>
         <button type="button" class="nav__item" data-screen="exam" disabled id="nav-exam">Текущий вариант</button>
@@ -63,6 +64,9 @@
           </button>
           <button type="button" class="btn btn--ghost btn--lg" id="btn-go-bank">
             Прорешать по типам
+          </button>
+          <button type="button" class="btn btn--ghost btn--lg" id="btn-go-learn">
+            Лекции и конспекты
           </button>
         </div>
         <div class="hero__meta">
@@ -182,6 +186,40 @@
           <button type="button" class="btn btn--ghost" id="btn-pre-back">← Вернуться</button>
           <button type="button" class="btn btn--primary btn--lg" id="btn-pre-start">Начать вариант →</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ====== SCREEN: LEARN (лекции + конспекты) ====== -->
+    <section class="screen" id="screen-learn">
+      <div id="learn-overview">
+        <header class="screen__header">
+          <h1>Обучение и повторение</h1>
+          <p class="muted">Лекции курса и конспекты по каждому из 20 типов задач.</p>
+        </header>
+
+        <div class="learn-tabs" role="tablist">
+          <button type="button" class="learn-tab active" data-tab="lectures">Лекции курса</button>
+          <button type="button" class="learn-tab" data-tab="notes">Конспекты по типам задач</button>
+        </div>
+
+        <div class="learn-pane active" id="learn-pane-lectures">
+          <p class="muted" style="margin-bottom:1rem;">Материалы курса — видео и конспекты лекций на Яндекс.Диске. Нажми на карточку, чтобы открыть ссылку.</p>
+          <div class="lectures-list" id="lectures-list"></div>
+        </div>
+
+        <div class="learn-pane" id="learn-pane-notes">
+          <p class="muted" style="margin-bottom:1rem;">Для каждого типа задачи — краткий разбор теории и алгоритма решения.</p>
+          <div class="notes-grid" id="notes-grid"></div>
+        </div>
+      </div>
+
+      <div id="learn-detail" hidden>
+        <button type="button" class="btn btn--ghost" id="btn-learn-back">← К списку конспектов</button>
+        <header class="screen__header" style="margin-top:1rem;">
+          <h1 id="learn-detail-title">Конспект</h1>
+          <p id="learn-detail-subtitle" class="muted"></p>
+        </header>
+        <article class="learn-article math-content" id="learn-detail-body"></article>
       </div>
     </section>
 
@@ -345,6 +383,9 @@
 <script src="js/tasks-part3.js" defer></script>
 <script src="js/tasks-part4.js" defer></script>
 <script src="js/tasks-part5.js" defer></script>
+
+<!-- Материалы для раздела «Обучение» -->
+<script src="js/learn.js" defer></script>
 
 <!-- Логика приложения -->
 <script src="js/app.js" defer></script>

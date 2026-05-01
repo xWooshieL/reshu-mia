@@ -266,6 +266,121 @@
     });
   }
 
+  // ============================================================
+  // LEARN — лекции и конспекты
+  // ============================================================
+
+  function buildLecturesList() {
+    const list = $('#lectures-list');
+    if (!list) return;
+    const data = (window.LEARN_DATA && window.LEARN_DATA.lectures) || [];
+    if (!data.length) {
+      list.innerHTML = '<p class="muted">Лекции пока не добавлены. Впиши их в <code>site/js/learn.js</code>.</p>';
+      return;
+    }
+    list.innerHTML = '';
+    data.forEach((lec, idx) => {
+      const hasLinks = Array.isArray(lec.links) && lec.links.length > 0;
+      const card = document.createElement('div');
+      card.className = 'lecture-card' + (hasLinks ? '' : ' lecture-card--empty');
+
+      const topicsHtml = (lec.topics || []).map((t) => `<span class="lecture-tag">${escapeHtml(t)}</span>`).join('');
+
+      const linksHtml = hasLinks
+        ? lec.links.map((l) => {
+            const icon = linkIcon(l.type);
+            return `<a class="lecture-link" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">${icon}<span>${escapeHtml(l.label || l.type || 'Открыть')}</span></a>`;
+          }).join('')
+        : '<span class="muted small">Ссылка ещё не добавлена</span>';
+
+      card.innerHTML = `
+        <div class="lecture-card__head">
+          <div class="lecture-card__week">Неделя ${lec.week || '?'}</div>
+          <div class="lecture-card__title-wrap">
+            <h3 class="lecture-card__title math-content">${lec.title || 'Без названия'}</h3>
+            ${topicsHtml ? `<div class="lecture-tags">${topicsHtml}</div>` : ''}
+          </div>
+        </div>
+        <div class="lecture-card__links">${linksHtml}</div>
+      `;
+      list.appendChild(card);
+    });
+    list.querySelectorAll('.math-content').forEach(renderMath);
+  }
+
+  function linkIcon(type) {
+    const icons = {
+      video: '▶',
+      notes: '≡',
+      slides: '▣',
+      pdf: '⎙',
+      yadisk: '☁',
+    };
+    return `<span class="lecture-link__icon">${icons[type] || '→'}</span>`;
+  }
+
+  function buildNotesGrid() {
+    const grid = $('#notes-grid');
+    if (!grid) return;
+    const bank = window.TASK_BANK || {};
+    const notes = (window.LEARN_DATA && window.LEARN_DATA.notes) || {};
+    grid.innerHTML = '';
+    for (let s = 1; s <= TOTAL_SLOTS; s++) {
+      const meta = bank[s] || { title: '' };
+      const note = notes[s] || { html: '' };
+      const hasContent = !!(note.html && note.html.trim());
+      const score = maxScoreOfSlot(s);
+
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'note-card' + (hasContent ? '' : ' note-card--empty');
+      card.innerHTML = `
+        <div class="note-card__top">
+          <span class="note-card__num">${s}</span>
+          <span class="bank-card__score bank-card__score--${score}">${score} ${pluralBall(score)}</span>
+        </div>
+        <p class="note-card__title">${escapeHtml(meta.title || '...')}</p>
+        <p class="note-card__status">${hasContent ? 'Конспект готов →' : '<span class="muted small">конспекта пока нет</span>'}</p>
+      `;
+      card.addEventListener('click', () => openNote(s));
+      grid.appendChild(card);
+    }
+  }
+
+  function openNote(slot) {
+    const bank = window.TASK_BANK || {};
+    const meta = bank[slot] || { title: '' };
+    const note = ((window.LEARN_DATA && window.LEARN_DATA.notes) || {})[slot] || { html: '' };
+    $('#learn-overview').hidden = true;
+    $('#learn-detail').hidden = false;
+
+    const title = $('#learn-detail-title');
+    const subtitle = $('#learn-detail-subtitle');
+    const body = $('#learn-detail-body');
+    if (title) title.innerHTML = `Тип №${slot} <span class="muted">&middot; ${maxScoreOfSlot(slot)} ${pluralBall(maxScoreOfSlot(slot))}</span>`;
+    if (subtitle) subtitle.textContent = meta.title || '';
+    if (body) {
+      if (note.html && note.html.trim()) {
+        body.innerHTML = note.html;
+      } else {
+        body.innerHTML = `
+          <div class="info-card">
+            <h2>Конспекта пока нет</h2>
+            <p class="muted">Добавь его в <code>site/js/learn.js</code>, в объект <code>notes[${slot}].html</code>.</p>
+            <p class="muted">Внутри html можно использовать LaTeX через <code>$...$</code> и <code>$$...$$</code>, а также HTML-теги для разметки.</p>
+          </div>
+        `;
+      }
+      renderMath(body);
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function exitNote() {
+    $('#learn-overview').hidden = false;
+    $('#learn-detail').hidden = true;
+  }
+
   function openPresetInfo(presetKey) {
     const p = PRESETS.find((x) => x.key === presetKey);
     if (!p) return;
@@ -318,6 +433,10 @@
 
   function showScreen(name) {
     if (name !== 'bank') exitBankDetail();
+    if (name !== 'learn') {
+      const ov = $('#learn-overview'); if (ov) ov.hidden = false;
+      const dt = $('#learn-detail'); if (dt) dt.hidden = true;
+    }
     $$('.screen').forEach((s) => s.classList.remove('screen--active'));
     const el = $('#screen-' + name);
     if (el) el.classList.add('screen--active');
@@ -1460,6 +1579,8 @@
     buildBankGrid();
     buildPresetsGrid();
     buildConversionTable();
+    buildLecturesList();
+    buildNotesGrid();
 
     $('#btn-start-variant').addEventListener('click', () => {
       pendingPreset = null;
@@ -1470,6 +1591,21 @@
     });
     $('#btn-go-bank').addEventListener('click', () => showScreen('bank'));
     $('#btn-go-presets').addEventListener('click', () => showScreen('presets'));
+    const btnLearn = $('#btn-go-learn');
+    if (btnLearn) btnLearn.addEventListener('click', () => showScreen('learn'));
+    const btnLearnBack = $('#btn-learn-back');
+    if (btnLearnBack) btnLearnBack.addEventListener('click', exitNote);
+
+    // табы в разделе Обучение
+    $$('.learn-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const key = tab.getAttribute('data-tab');
+        $$('.learn-tab').forEach((t) => t.classList.toggle('active', t === tab));
+        $$('.learn-pane').forEach((p) => {
+          p.classList.toggle('active', p.id === 'learn-pane-' + key);
+        });
+      });
+    });
     $('#btn-pre-back').addEventListener('click', () => {
       // если открыли инфо из пресета — возвращаем к списку пресетов, иначе домой
       if (pendingPreset) {
