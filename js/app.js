@@ -2057,70 +2057,61 @@
     const bank = (window.TASK_BANK && window.TASK_BANK[slot]) || {};
     const typeTitle = bank.title ? escapeHtml(bank.title) : '';
     const source = task && task.source ? escapeHtml(task.source) : '';
-    const question = (task && task.questionLatex) || '<p class="muted">Нет условия</p>';
+    const rawQuestion = String((task && task.questionLatex) || 'Нет условия');
+    // Вставляем номер ВНУТРЬ первого <p>, чтобы текст условия шёл сразу справа
+    // от бокса с номером, а не с новой строки.
+    const numSpan = '<span class="print-task__num">' + slot + '</span>';
+    let questionHtml;
+    if (/^\s*<p[^>]*>/i.test(rawQuestion)) {
+      questionHtml = rawQuestion.replace(/^\s*(<p[^>]*>)/i, '$1' + numSpan);
+    } else {
+      questionHtml = '<p>' + numSpan + rawQuestion + '</p>';
+    }
+    const metaLine = [typeTitle, source].filter(Boolean).join(' · ');
     return `
       <div class="print-task">
-        <div class="print-task__head">
-          <span class="print-task__num">${slot}</span>
-          <span class="print-task__meta">${[typeTitle, source].filter(Boolean).join(' · ')}</span>
-        </div>
-        <div class="print-task__body">${question}</div>
+        <div class="print-task__body">${questionHtml}</div>
+        ${metaLine ? '<div class="print-task__src">' + metaLine + '</div>' : ''}
       </div>
     `;
   }
 
+  // Заголовок части теперь не выделяет отдельную секцию на всю ширину —
+  // он просто вставляется inline в поток 2-колоночной вёрстки и встаёт
+  // НАД первой задачей соответствующего балла.
   function printPartSection(scoreLabel, items) {
     if (!items.length) return '';
-    const tasksHtml = items.map(({ slot, task }) => printTaskBlock(slot, task)).join('');
-    return `
-      <section class="print-part">
-        <div class="print-part__title">Задания на ${scoreLabel}</div>
-        <div class="print-part__columns">${tasksHtml}</div>
-      </section>
-    `;
+    return '<h2 class="print-part-title">Задания на ' + scoreLabel + '</h2>'
+      + items.map(({ slot, task }) => printTaskBlock(slot, task)).join('');
   }
 
   function printInfoPage() {
+    // Вся инфо идёт одним потоком — попадает в первую колонку
+    // двухколоночной вёрстки документа. Во вторую колонку уже перетекут
+    // «Задания на 1 балл» и задачи.
     return `
-      <section class="print-info">
-        <div class="print-info__col">
-          <h1 class="print-info__h1">Экзамен<br>по Основам математического анализа<br>и линейной алгебры</h1>
-          <p class="print-info__sub">Инструкция по выполнению работы</p>
-          <div class="print-info__body">
-            <p>Экзаменационная работа состоит из трёх частей, включающих в себя 20 заданий: <strong>10 заданий</strong> на 1 балл, <strong>6 заданий</strong> на 2 балла и <strong>4 задания</strong> на 3 балла.</p>
-            <p>На выполнение работы отводится <strong>3 часа</strong> (180 минут).</p>
-            <p><strong>Все задачи</strong> (включая № 1–10) решаются на бланке с развёрнутым решением. Перед каждой задачей сначала запиши её <strong>номер</strong>, затем аккуратно оформи полное решение.</p>
-            <p>При нехватке места обратись к организаторам — они выдадут дополнительные листы.</p>
-            <p>Если решишь задачу, а потом поймёшь, что решение неверное — зачеркни его и напиши новое. Если в работе приведены два разных решения, оцениваться будет только <strong>первое</strong>.</p>
-            <p>За выполнение различных заданий даются <strong>от 1 до 3 баллов</strong>. Баллы суммируются. Оценка по 10-балльной шкале вычисляется по формуле <span class="math">$\\min\\!\\bigl(10,\\,(x+2)/3\\bigr)$</span>, где $x$ — сумма баллов.</p>
-            <p class="print-info__wish"><em>Желаем успеха!</em></p>
-          </div>
-        </div>
+      <h1 class="print-h1">Экзамен по Основам математического анализа и линейной алгебры</h1>
+      <p class="print-sub">Инструкция по выполнению работы</p>
+      <p>Экзаменационная работа состоит из трёх частей, включающих 20 заданий: <strong>10</strong> — на 1 балл, <strong>6</strong> — на 2 балла и <strong>4</strong> — на 3 балла.</p>
+      <p>На выполнение работы отводится <strong>3 часа</strong> (180 минут).</p>
+      <p><strong>Все задачи</strong> (включая № 1–10) решаются на бланке с развёрнутым решением. Перед каждой задачей сначала запиши её <strong>номер</strong>, затем аккуратно оформи полное решение.</p>
+      <p>При нехватке места обратись к организаторам — они выдадут дополнительные листы.</p>
+      <p>Если решишь задачу, а потом поймёшь, что решение неверное — зачеркни его и напиши новое. Если в работе приведены два разных решения, оценивается только <strong>первое</strong>.</p>
+      <p>Оценка по 10-балльной шкале: $\\min\\!\\bigl(10,\\,(x+2)/3\\bigr)$, где $x$ — сумма баллов.</p>
+      <p class="print-wish"><em>Желаем успеха!</em></p>
 
-        <div class="print-info__col">
-          <h2 class="print-info__h2">Загрузка работы в LMS</h2>
-          <ol class="print-info__ol">
-            <li>Сфотографируй решение и сохрани в PDF-файл (на iPhone — через Заметки, на Android — через приложение Adobe&nbsp;Scan).</li>
-            <li>Назови PDF-файл в формате <code>ФамилияИмя_Экзамен.pdf</code>.</li>
-            <li>До выхода из аудитории загрузи файл в <strong>LMS &rarr; Основы математического анализа и линейной алгебры&nbsp;2 &rarr; Экзамен</strong>.</li>
-          </ol>
+      <h2 class="print-h2">Загрузка работы в LMS</h2>
+      <ol class="print-ol">
+        <li>Сфотографируй решение и сохрани в PDF-файл (на iPhone — через Заметки, на Android — через приложение Adobe&nbsp;Scan).</li>
+        <li>Назови PDF-файл в формате <code>ФамилияИмя_Экзамен.pdf</code>.</li>
+        <li>До выхода из аудитории загрузи файл в <strong>LMS &rarr; Основы математического анализа и линейной алгебры&nbsp;2 &rarr; Экзамен</strong>.</li>
+      </ol>
 
-          <h2 class="print-info__h2">Справочные материалы</h2>
-          <p class="print-info__notice-small"><em>На экзамене справочных материалов не выдают — они приведены здесь только для удобства при подготовке.</em></p>
-          <div class="print-info__formulas math-content">
-            <p><strong>Тригонометрия:</strong></p>
-            <p>$\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha, \\quad \\cos 2\\alpha = \\cos^2\\alpha - \\sin^2\\alpha$</p>
-            <p>$\\sin(\\alpha\\pm\\beta) = \\sin\\alpha\\cos\\beta \\pm \\cos\\alpha\\sin\\beta$</p>
-            <p>$\\cos(\\alpha\\pm\\beta) = \\cos\\alpha\\cos\\beta \\mp \\sin\\alpha\\sin\\beta$</p>
-            <p>$\\sin^2\\alpha = \\tfrac{1-\\cos 2\\alpha}{2}, \\quad \\cos^2\\alpha = \\tfrac{1+\\cos 2\\alpha}{2}$</p>
-            <p style="margin-top:4pt;"><strong>Интегрирование:</strong></p>
-            <p>$\\int u\\,dv = uv - \\int v\\,du, \\quad \\int_a^b f(x)\\,dx = F(b)-F(a)$</p>
-            <p style="margin-top:4pt;"><strong>Линейная алгебра:</strong></p>
-            <p>$\\cos\\varphi = \\dfrac{\\langle \\vec{a},\\vec{b}\\rangle}{\\|\\vec{a}\\|\\,\\|\\vec{b}\\|}, \\quad \\mathrm{proj}_{\\vec{b}}\\,\\vec{a} = \\dfrac{\\langle\\vec{a},\\vec{b}\\rangle}{\\langle\\vec{b},\\vec{b}\\rangle}\\vec{b}$</p>
-            <p>$\\det(A - \\lambda I) = 0$ &nbsp;— характеристическое уравнение</p>
-          </div>
-        </div>
-      </section>
+      <h2 class="print-h2">Справочные материалы</h2>
+      <p class="print-muted"><em>На экзамене справочные материалы не выдают — они приведены здесь только для удобства при подготовке.</em></p>
+      <p><strong>Тригонометрия:</strong> $\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha$, $\\cos 2\\alpha = \\cos^2\\alpha - \\sin^2\\alpha$; $\\sin(\\alpha\\pm\\beta) = \\sin\\alpha\\cos\\beta \\pm \\cos\\alpha\\sin\\beta$; $\\cos(\\alpha\\pm\\beta) = \\cos\\alpha\\cos\\beta \\mp \\sin\\alpha\\sin\\beta$; $\\sin^2\\alpha = \\tfrac{1-\\cos 2\\alpha}{2}$, $\\cos^2\\alpha = \\tfrac{1+\\cos 2\\alpha}{2}$.</p>
+      <p><strong>Интегрирование:</strong> $\\int u\\,dv = uv - \\int v\\,du$; $\\int_a^b f(x)\\,dx = F(b)-F(a)$.</p>
+      <p><strong>Линейная алгебра:</strong> $\\cos\\varphi = \\dfrac{\\langle \\vec{a},\\vec{b}\\rangle}{\\|\\vec{a}\\|\\,\\|\\vec{b}\\|}$; $\\mathrm{proj}_{\\vec{b}}\\,\\vec{a} = \\dfrac{\\langle\\vec{a},\\vec{b}\\rangle}{\\langle\\vec{b},\\vec{b}\\rangle}\\vec{b}$; $\\det(A - \\lambda I) = 0$ — характеристическое уравнение.</p>
     `;
   }
 
@@ -2141,18 +2132,19 @@
     return `
       <article class="print-doc">
         <header class="print-head">
-          <span class="print-head__left">Открытый вариант</span>
-          <span class="print-head__center">Основы математического анализа и линейной алгебры</span>
-          <span class="print-head__right">Открытый вариант</span>
+          <span>Открытый вариант</span>
+          <span>Основы математического анализа и линейной алгебры</span>
+          <span>Открытый вариант</span>
         </header>
 
         <div class="print-variant-title">${escapeHtml(variantName)}</div>
 
-        ${printInfoPage()}
-
-        ${printPartSection('1 балл', byScore[1])}
-        ${printPartSection('2 балла', byScore[2])}
-        ${printPartSection('3 балла', byScore[3])}
+        <div class="print-flow">
+          ${printInfoPage()}
+          ${printPartSection('1 балл', byScore[1])}
+          ${printPartSection('2 балла', byScore[2])}
+          ${printPartSection('3 балла', byScore[3])}
+        </div>
 
         <footer class="print-foot">© ${new Date().getFullYear()} РешуМИА · <em>Копирование не допускается</em></footer>
       </article>
@@ -2170,70 +2162,106 @@
       : 'Случайный вариант';
     const contentHtml = buildPrintPages();
 
-    // CSS для нового окна — компактный, landscape, без page-breaks между частями
+    // Компактный CSS. Landscape, один двухколоночный поток, без page-breaks.
     const style = `
-      @page { size: A4 landscape; margin: 10mm 9mm; }
+      @page { size: A4 landscape; margin: 9mm 8mm; }
       * { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; background: #fff; color: #000;
                    font-family: "Times New Roman", Times, Georgia, serif;
-                   font-size: 10.5pt; line-height: 1.32; }
+                   font-size: 9pt; line-height: 1.28; }
       .print-doc { padding: 0; }
 
       .print-head { display: flex; justify-content: space-between; align-items: baseline;
-                    font-size: 8.5pt; color: #000; padding-bottom: 3pt;
-                    border-bottom: 0.4pt solid #000; margin-bottom: 8pt; }
+                    font-size: 7pt; color: #333; padding-bottom: 2pt;
+                    border-bottom: 0.3pt solid #666; margin-bottom: 4pt; }
+      .print-variant-title { text-align: center; font-size: 9pt; font-weight: 700;
+                             font-style: italic; margin: 0 0 6pt; }
 
-      .print-variant-title { text-align: center; font-size: 11pt; font-weight: 700;
-                             font-style: italic; margin: 0 0 10pt; }
+      /* ЕДИНЫЙ двухколоночный поток. Никаких вертикальных линий. */
+      .print-flow {
+        columns: 2;
+        column-gap: 8mm;
+        column-fill: auto;
+        column-rule: none;
+      }
 
-      /* Инфо-страница — 2 колонки, на первой странице */
-      .print-info { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10mm;
-                    padding-bottom: 10pt; border-bottom: 0.4pt solid #999;
-                    margin-bottom: 12pt; break-after: page; page-break-after: always; }
-      .print-info__h1 { text-align: center; font-size: 13pt; font-weight: 700;
-                        margin: 0 0 8pt; line-height: 1.3; }
-      .print-info__sub { text-align: center; font-weight: 700; margin: 0 0 8pt; }
-      .print-info__body p { margin: 0 0 5pt; text-align: justify; }
-      .print-info__wish { text-align: center; margin-top: 8pt !important; }
-      .print-info__ol { margin: 3pt 0 8pt 1.3em; padding: 0; }
-      .print-info__ol li { margin: 0 0 4pt; }
-      .print-info__ol code { font-family: "Consolas", "Courier New", monospace;
-                             font-size: 9.5pt; background: #f2f2f2;
-                             padding: 0 3px; border-radius: 2px; }
-      .print-info__notice-small { font-size: 9pt; color: #555;
-                                  text-align: center; margin: 0 0 4pt; }
-      .print-info__h2 { text-align: center; font-size: 11pt; font-weight: 700;
-                        margin: 8pt 0 4pt; }
-      .print-info__col > .print-info__h2:first-child { margin-top: 0; }
-      .print-info__formulas p { margin: 2pt 0; text-align: center; }
-      .print-info__formulas .katex { font-size: 9.5pt !important; }
+      /* Типографика инфо-блока */
+      .print-flow h1.print-h1 {
+        font-size: 12pt; font-weight: 700; line-height: 1.25;
+        text-align: center; margin: 0 0 4pt;
+        break-after: avoid; page-break-after: avoid;
+      }
+      .print-flow p.print-sub {
+        text-align: center; font-weight: 700; font-size: 9pt;
+        margin: 0 0 5pt; break-after: avoid; page-break-after: avoid;
+      }
+      .print-flow h2.print-h2 {
+        font-size: 9.5pt; font-weight: 700; text-align: center;
+        margin: 6pt 0 3pt;
+        break-after: avoid; page-break-after: avoid;
+        break-inside: avoid;
+      }
+      .print-flow p {
+        margin: 0 0 3pt; text-align: justify;
+        orphans: 3; widows: 3;
+      }
+      .print-flow .print-wish { text-align: center; font-size: 9pt; margin: 4pt 0 6pt !important; }
+      .print-flow .print-muted { font-size: 8pt; color: #555; text-align: center; margin: 0 0 3pt; }
+      .print-flow ol.print-ol { margin: 2pt 0 4pt 1.2em; padding: 0; }
+      .print-flow ol.print-ol li { margin: 0 0 2pt; }
+      .print-flow ol.print-ol code {
+        font-family: "Consolas", "Courier New", monospace; font-size: 8.5pt;
+        background: #f2f2f2; padding: 0 2px; border-radius: 2px;
+      }
 
-      /* Части подряд, БЕЗ разрыва страниц между ними */
-      .print-part { break-before: avoid; page-break-before: avoid; }
-      .print-part + .print-part { margin-top: 10pt; }
-      .print-part__title { text-align: center; font-size: 12pt; font-weight: 700;
-                           margin: 0 0 8pt; break-after: avoid; page-break-after: avoid; }
-      .print-part__columns { columns: 2; column-gap: 8mm; column-fill: balance; }
+      /* Заголовок части — inline в потоке, не на всю ширину.
+         Благодаря column-span:none он просто встаёт над первой задачей. */
+      .print-part-title {
+        column-span: none;
+        font-size: 10pt; font-weight: 700; text-align: left;
+        margin: 8pt 0 4pt;
+        padding-bottom: 2pt;
+        border-bottom: 0.5pt solid #000;
+        break-after: avoid; page-break-after: avoid;
+        break-inside: avoid;
+      }
 
       /* Задача */
-      .print-task { break-inside: avoid; page-break-inside: avoid;
-                    margin-bottom: 10pt; display: block; }
-      .print-task__head { display: flex; align-items: center; gap: 6pt;
-                          margin-bottom: 3pt; break-inside: avoid; }
-      .print-task__num { display: inline-block; min-width: 32pt; padding: 2pt 8pt;
-                         text-align: center; font-weight: 700; font-size: 11pt;
-                         border: 0.8pt solid #000; background: #fff;
-                         flex-shrink: 0; letter-spacing: 0.02em; }
-      .print-task__meta { font-size: 8pt; color: #555; font-style: italic; line-height: 1.25; }
-      .print-task__body { text-align: justify; font-size: 10pt; }
-      .print-task__body p { margin: 0 0 3pt; }
-      .print-task__body .katex { font-size: 10pt !important; }
+      .print-task {
+        break-inside: avoid; page-break-inside: avoid;
+        margin: 0 0 7pt;
+      }
+      .print-task__body {
+        font-size: 9pt; line-height: 1.32;
+        text-align: left;
+      }
+      .print-task__body p {
+        margin: 0 0 2pt;
+      }
+      .print-task__body p:last-child { margin-bottom: 0; }
+      .print-task__num {
+        display: inline-block;
+        min-width: 22pt;
+        padding: 0.5pt 5pt;
+        text-align: center;
+        font-weight: 700; font-size: 9pt;
+        border: 0.7pt solid #000;
+        background: #fff;
+        margin-right: 5pt;
+        vertical-align: baseline;
+        line-height: 1.15;
+      }
+      .print-task__body .katex { font-size: 9pt !important; }
       .print-task__body img, .print-task__body svg { max-width: 100%; height: auto; }
+      .print-task__src {
+        font-size: 7pt; color: #777; font-style: italic;
+        text-align: right; margin: 1pt 0 0;
+      }
 
-      .print-foot { text-align: center; font-size: 8pt; color: #555;
-                    margin-top: 10pt; padding-top: 6pt; border-top: 0.4pt dashed #aaa; }
+      .print-foot { text-align: center; font-size: 7pt; color: #777;
+                    margin-top: 6pt; padding-top: 3pt; border-top: 0.3pt dashed #bbb; }
 
-      /* Тулбар для предпросмотра (скрывается при печати) */
+      /* Тулбар — скрывается при печати */
       .toolbar { position: fixed; top: 0; left: 0; right: 0;
                  display: flex; gap: 0.6rem; align-items: center; justify-content: center;
                  background: #222; color: #fff; padding: 8px 12px; z-index: 10000;
