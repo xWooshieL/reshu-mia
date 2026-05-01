@@ -2100,7 +2100,6 @@
       <p>При нехватке места обратись к организаторам — они выдадут дополнительные листы.</p>
       <p>Если решишь задачу, а потом поймёшь, что решение неверное — зачеркни его и напиши новое. Если в работе приведены два разных решения, оценивается только <strong>первое</strong>.</p>
       <p>Оценка по 10-балльной шкале: $\\min\\!\\bigl(10,\\,(x+2)/3\\bigr)$, где $x$ — сумма баллов.</p>
-      <p class="print-wish"><em>Желаем успеха!</em></p>
 
       <h2 class="print-h2">Загрузка работы в LMS</h2>
       <ol class="print-ol">
@@ -2124,6 +2123,7 @@
       <p class="print-ref">$\\cos\\varphi = \\dfrac{\\langle \\vec{a},\\vec{b}\\rangle}{\\|\\vec{a}\\|\\,\\|\\vec{b}\\|}$</p>
       <p class="print-ref">$\\mathrm{proj}_{\\vec{b}}\\,\\vec{a} = \\dfrac{\\langle\\vec{a},\\vec{b}\\rangle}{\\langle\\vec{b},\\vec{b}\\rangle}\\vec{b}$</p>
       <p class="print-ref">$\\det(A - \\lambda I) = 0$ — характеристическое уравнение</p>
+      <p class="print-wish"><em>Желаем успеха!</em></p>
     `;
   }
 
@@ -2226,7 +2226,8 @@
       }
       .print-flow .print-wish {
         text-align: center; font-style: italic; font-weight: 600;
-        margin: 4pt 0 !important; text-indent: 0 !important;
+        margin: 10pt 0 4pt !important; text-indent: 0 !important;
+        font-size: 10pt;
       }
       .print-flow .print-muted {
         font-size: 8pt; color: #555; text-align: center;
@@ -2256,7 +2257,7 @@
       /* Задача */
       .print-task {
         break-inside: avoid; page-break-inside: avoid;
-        margin: 0 0 14pt;
+        margin: 0 0 24pt;
       }
       .print-task__body {
         font-size: 9pt; line-height: 1.32;
@@ -2270,15 +2271,15 @@
       .print-task__body p:last-child { margin-bottom: 0; }
       .print-task__num {
         display: inline-block;
-        min-width: 20pt;
-        padding: 0.5pt 5pt;
+        min-width: 34pt;
+        padding: 0pt 10pt;
         text-align: center;
         font-weight: 700; font-size: 9pt;
         border: 0.35pt solid #000;
         background: #fff;
-        margin-right: 5pt;
+        margin-right: 6pt;
         vertical-align: baseline;
-        line-height: 1.15;
+        line-height: 1.35;
       }
       .print-task__body .katex { font-size: 9pt !important; }
       .print-task__body img, .print-task__body svg { max-width: 100%; height: auto; }
