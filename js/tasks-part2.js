@@ -589,6 +589,77 @@ $$B = \\begin{pmatrix}1 & 1 & 1 & 0 \\\\ 1 & 1 & 0 & 1 \\\\ 1 & 0 & 1 & 1 \\\\ 0
 <hr>
 <p><strong>Ответ:</strong> $\\lambda_{\\max} = 3$.</p>
       `
+    },
+    {
+      id: 'kr2-s2-25-26-q7-slau-rank-ker',
+      source: 'КР №2, 2 сем. 2025–2026, 1 балл',
+      questionLatex: `<p>Реши систему линейных уравнений $A\\vec{x} = \\vec{b}$, где</p>
+<p>$$A = \\begin{pmatrix} 1 & 1 & 2 & 3 \\\\ 2 & 3 & 5 & 7 \\\\ 3 & 4 & 7 & 10 \\end{pmatrix}, \\qquad \\vec{b} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}.$$</p>
+<p>Найди ранг и ядро матрицы $A$.</p>`,
+      solutionHtml: `
+<p><strong>Шаг 1.</strong> Записываем расширенную матрицу и приводим к ступенчатому виду элементарными преобразованиями строк.</p>
+<p>$$[A\\,|\\,\\vec{b}] = \\begin{pmatrix} 1 & 1 & 2 & 3 & |& 1 \\\\ 2 & 3 & 5 & 7 &|& 2 \\\\ 3 & 4 & 7 & 10 &|& 3 \\end{pmatrix}.$$</p>
+
+<p>$R_2 \\leftarrow R_2 - 2R_1$, $R_3 \\leftarrow R_3 - 3R_1$:</p>
+<p>$$\\begin{pmatrix} 1 & 1 & 2 & 3 & |& 1 \\\\ 0 & 1 & 1 & 1 &|& 0 \\\\ 0 & 1 & 1 & 1 &|& 0 \\end{pmatrix}.$$</p>
+
+<p>$R_3 \\leftarrow R_3 - R_2$:</p>
+<p>$$\\begin{pmatrix} 1 & 1 & 2 & 3 & |& 1 \\\\ 0 & 1 & 1 & 1 &|& 0 \\\\ 0 & 0 & 0 & 0 &|& 0 \\end{pmatrix}.$$</p>
+
+<p><strong>Шаг 2. Ранг и совместность.</strong> В ступенчатой форме два ненулевых ряда, поэтому $\\operatorname{rank} A = 2$. Последний ряд $(0\\,0\\,0\\,0\\,|\\,0)$ даёт $0 = 0$, то есть система <em>совместна</em>: $\\operatorname{rank}(A|\\vec{b}) = 2 = \\operatorname{rank} A$.</p>
+
+<p><strong>Шаг 3. Параметризация.</strong> Ведущие переменные — $x_1, x_2$; свободные — $x_3 = s$, $x_4 = t$. Из второй строки:</p>
+<p>$$x_2 + s + t = 0 \\;\\Rightarrow\\; x_2 = -s - t.$$</p>
+<p>Из первой строки:</p>
+<p>$$x_1 + x_2 + 2s + 3t = 1 \\;\\Rightarrow\\; x_1 = 1 - (-s-t) - 2s - 3t = 1 - s - 2t.$$</p>
+
+<p><strong>Шаг 4. Общее решение.</strong></p>
+<p>$$\\vec{x} = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\begin{pmatrix} -1 \\\\ -1 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\begin{pmatrix} -2 \\\\ -1 \\\\ 0 \\\\ 1 \\end{pmatrix}, \\qquad s,t \\in \\mathbb{R}.$$</p>
+
+<p><strong>Шаг 5. Ядро.</strong> Векторы при свободных параметрах — это как раз базис ядра:</p>
+<p>$$\\ker A = \\operatorname{span}\\left\\{ \\begin{pmatrix} -1 \\\\ -1 \\\\ 1 \\\\ 0 \\end{pmatrix},\\; \\begin{pmatrix} -2 \\\\ -1 \\\\ 0 \\\\ 1 \\end{pmatrix} \\right\\}, \\qquad \\dim \\ker A = 4 - 2 = 2.$$</p>
+
+<p>Проверим: $A\\cdot(-1,-1,1,0)^{\\!\\top} = (-1-1+2+0,\\; -2-3+5+0,\\; -3-4+7+0)^{\\!\\top} = \\vec{0}$ — верно.</p>
+
+<hr>
+<p><strong>Ответы:</strong></p>
+<ul>
+  <li>$\\operatorname{rank} A = 2$,&nbsp; $\\dim \\ker A = 2$;</li>
+  <li>частное решение $\\vec{x}_0 = (1,\\,0,\\,0,\\,0)^{\\!\\top}$;</li>
+  <li>базис ядра: $(-1,\\,-1,\\,1,\\,0)^{\\!\\top}$ и $(-2,\\,-1,\\,0,\\,1)^{\\!\\top}$.</li>
+</ul>
+      `
+    },
+    {
+      id: 'kr2-s2-25-26-lu-solve',
+      source: 'КР №2, 2 сем. 2025–2026, 0.5 балла',
+      questionLatex: `<p>Реши систему уравнений $LU\\vec{x} = \\vec{b}$, где</p>
+<p>$$L = \\begin{pmatrix} 1 & 0 & 0 \\\\ 3 & 1 & 0 \\\\ 2 & 4 & 1 \\end{pmatrix},\\quad U = \\begin{pmatrix} 2 & 1 & 0 \\\\ 0 & 3 & 1 \\\\ 0 & 0 & 4 \\end{pmatrix},\\quad \\vec{b} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 6 \\end{pmatrix}.$$</p>`,
+      solutionHtml: `
+<p><strong>Идея.</strong> Когда $A = LU$ уже известно, решение $A\\vec{x} = \\vec{b}$ распадается на два треугольных шага: <em>прямой ход</em> $L\\vec{y} = \\vec{b}$ и <em>обратный ход</em> $U\\vec{x} = \\vec{y}$. Оба решаются подстановкой сверху-вниз / снизу-вверх.</p>
+
+<p><strong>Шаг 1. Прямой ход: $L\\vec{y} = \\vec{b}$.</strong></p>
+<p>$$\\begin{pmatrix} 1 & 0 & 0 \\\\ 3 & 1 & 0 \\\\ 2 & 4 & 1 \\end{pmatrix} \\begin{pmatrix} y_1 \\\\ y_2 \\\\ y_3 \\end{pmatrix} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 6 \\end{pmatrix}.$$</p>
+<p>Построчно:</p>
+<ul>
+  <li>$y_1 = 1$;</li>
+  <li>$3 y_1 + y_2 = 2 \\;\\Rightarrow\\; y_2 = 2 - 3 = -1$;</li>
+  <li>$2 y_1 + 4 y_2 + y_3 = 6 \\;\\Rightarrow\\; y_3 = 6 - 2 - 4\\cdot(-1) = 6 - 2 + 4 = 8$.</li>
+</ul>
+<p>Итого $\\vec{y} = (1,\\,-1,\\,8)^{\\!\\top}$.</p>
+
+<p><strong>Шаг 2. Обратный ход: $U\\vec{x} = \\vec{y}$.</strong></p>
+<p>$$\\begin{pmatrix} 2 & 1 & 0 \\\\ 0 & 3 & 1 \\\\ 0 & 0 & 4 \\end{pmatrix} \\begin{pmatrix} x_1 \\\\ x_2 \\\\ x_3 \\end{pmatrix} = \\begin{pmatrix} 1 \\\\ -1 \\\\ 8 \\end{pmatrix}.$$</p>
+<p>Снизу вверх:</p>
+<ul>
+  <li>$4 x_3 = 8 \\;\\Rightarrow\\; x_3 = 2$;</li>
+  <li>$3 x_2 + x_3 = -1 \\;\\Rightarrow\\; 3 x_2 = -3 \\;\\Rightarrow\\; x_2 = -1$;</li>
+  <li>$2 x_1 + x_2 = 1 \\;\\Rightarrow\\; 2 x_1 = 2 \\;\\Rightarrow\\; x_1 = 1$.</li>
+</ul>
+
+<hr>
+<p><strong>Ответ:</strong> $\\vec{x} = (1,\\,-1,\\,2)^{\\!\\top}$.</p>
+      `
     }
   ];
 

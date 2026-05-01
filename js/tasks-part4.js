@@ -299,6 +299,64 @@
         <p>$$L = \\begin{pmatrix} 1 & 0 & 0 \\\\ 3 & 1 & 0 \\\\ 2 & 4 & 1 \\end{pmatrix}, \\qquad U = \\begin{pmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 2 \\\\ 0 & 0 & 1 \\end{pmatrix}.$$</p>
       `,
     },
+    {
+      id: 'kr2-s2-25-26-q6-axat',
+      source: 'КР №2, 2 сем. 2025–2026, задача №6 (1 балл)',
+      questionLatex: `<p>Найди матрицу $X$, если $AXA^{\\top} = E$ и $A = \\begin{pmatrix} 1 & 2 \\\\ 0 & 1 \\end{pmatrix}$.</p>`,
+      solutionHtml: `
+        <p><strong>Шаг 1. Выражаем $X$.</strong> Матрица $A$ — верхнетреугольная с единицами на диагонали, $\\det A = 1 \\ne 0$, поэтому $A$ и $A^{\\top}$ обратимы. Умножаем уравнение слева на $A^{-1}$, справа на $(A^{\\top})^{-1}$:</p>
+        <p>$$A X A^{\\top} = E \\;\\Longrightarrow\\; X = A^{-1}\\,E\\,(A^{\\top})^{-1} = A^{-1}(A^{\\top})^{-1}.$$</p>
+
+        <p><strong>Шаг 2. Обратные.</strong> Для $2\\times 2$ используем $A^{-1} = \\dfrac{1}{\\det A}\\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}$ (где $A = \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$):</p>
+        <p>$$A^{-1} = \\begin{pmatrix} 1 & -2 \\\\ 0 & 1 \\end{pmatrix}, \\qquad A^{\\top} = \\begin{pmatrix} 1 & 0 \\\\ 2 & 1 \\end{pmatrix} \\;\\Rightarrow\\; (A^{\\top})^{-1} = \\begin{pmatrix} 1 & 0 \\\\ -2 & 1 \\end{pmatrix}.$$</p>
+
+        <p><strong>Шаг 3. Умножение.</strong></p>
+        <p>$$X = \\begin{pmatrix} 1 & -2 \\\\ 0 & 1 \\end{pmatrix} \\begin{pmatrix} 1 & 0 \\\\ -2 & 1 \\end{pmatrix}.$$</p>
+        <ul>
+          <li>$X_{11} = 1\\cdot 1 + (-2)\\cdot(-2) = 1 + 4 = 5$;</li>
+          <li>$X_{12} = 1\\cdot 0 + (-2)\\cdot 1 = -2$;</li>
+          <li>$X_{21} = 0\\cdot 1 + 1\\cdot(-2) = -2$;</li>
+          <li>$X_{22} = 0\\cdot 0 + 1\\cdot 1 = 1$.</li>
+        </ul>
+
+        <p><strong>Шаг 4. Проверка.</strong> $AXA^{\\top}$:</p>
+        <p>$AX = \\begin{pmatrix} 1 & 2 \\\\ 0 & 1 \\end{pmatrix}\\begin{pmatrix} 5 & -2 \\\\ -2 & 1 \\end{pmatrix} = \\begin{pmatrix} 1 & 0 \\\\ -2 & 1 \\end{pmatrix}$.</p>
+        <p>$AXA^{\\top} = \\begin{pmatrix} 1 & 0 \\\\ -2 & 1 \\end{pmatrix}\\begin{pmatrix} 1 & 0 \\\\ 2 & 1 \\end{pmatrix} = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix} = E$ ✓.</p>
+
+        <hr>
+        <p><strong>Ответ:</strong> $X = \\begin{pmatrix} 5 & -2 \\\\ -2 & 1 \\end{pmatrix}$.</p>
+      `,
+    },
+    {
+      id: 'kr2-s2-25-26-q7-ax-e-rect',
+      source: 'КР №2, 2 сем. 2025–2026, задача №7 (1.5 балла)',
+      questionLatex: `<p>Реши уравнение $AX = E$, где $A = \\begin{pmatrix} 2 & 0 & 1 \\\\ 2 & 1 & 1 \\end{pmatrix}$.</p>`,
+      solutionHtml: `
+        <p><strong>Шаг 1. Размерности.</strong> Матрица $A$ имеет размер $2\\times 3$ (не квадратная, значит $A^{-1}$ <em>не существует</em>). В уравнении $AX = E$ произведение должно быть определено, а результат — квадратной единичной, поэтому $E = I_2$ (размер $2\\times 2$), а $X$ размера $3\\times 2$. Речь идёт о <em>правой обратной</em> матрице.</p>
+
+        <p><strong>Шаг 2. По столбцам.</strong> Запишем $X = \\bigl(\\vec{x}^{(1)} \\mid \\vec{x}^{(2)}\\bigr)$, где $\\vec{x}^{(k)} \\in \\mathbb{R}^3$. Тогда $AX = I_2$ распадается на две независимые СЛАУ:</p>
+        <p>$$A\\,\\vec{x}^{(1)} = \\begin{pmatrix} 1 \\\\ 0 \\end{pmatrix}, \\qquad A\\,\\vec{x}^{(2)} = \\begin{pmatrix} 0 \\\\ 1 \\end{pmatrix}.$$</p>
+        <p>Каждая система — 2 уравнения и 3 неизвестных, значит будет одномерное семейство решений (бесконечно много).</p>
+
+        <p><strong>Шаг 3. Первый столбец.</strong> Пусть $\\vec{x}^{(1)} = (a,\\,b,\\,c)^{\\!\\top}$. Подставляем:</p>
+        <p>$$\\begin{cases} 2a + c = 1 \\\\ 2a + b + c = 0 \\end{cases}$$</p>
+        <p>Вычитаем первое из второго: $b = -1$. Пусть $a$ — свободно, тогда $c = 1 - 2a$. Итого $\\vec{x}^{(1)} = (a,\\,-1,\\,1-2a)^{\\!\\top}$.</p>
+
+        <p><strong>Шаг 4. Второй столбец.</strong> Аналогично для $\\vec{x}^{(2)} = (d,\\,e,\\,f)^{\\!\\top}$:</p>
+        <p>$$\\begin{cases} 2d + f = 0 \\\\ 2d + e + f = 1 \\end{cases} \\;\\Longrightarrow\\; e = 1,\\; f = -2d.$$</p>
+        <p>Итого $\\vec{x}^{(2)} = (d,\\,1,\\,-2d)^{\\!\\top}$.</p>
+
+        <p><strong>Шаг 5. Общий ответ.</strong> Семейство правых обратных:</p>
+        <p>$$X = \\begin{pmatrix} a & d \\\\ -1 & 1 \\\\ 1-2a & -2d \\end{pmatrix}, \\qquad a,\\,d \\in \\mathbb{R}.$$</p>
+
+        <p><strong>Шаг 6. Частное решение.</strong> Возьмём простейший случай $a = d = 0$:</p>
+        <p>$$X_0 = \\begin{pmatrix} 0 & 0 \\\\ -1 & 1 \\\\ 1 & 0 \\end{pmatrix}.$$</p>
+        <p>Проверка: $A X_0 = \\begin{pmatrix} 2 & 0 & 1 \\\\ 2 & 1 & 1 \\end{pmatrix} \\begin{pmatrix} 0 & 0 \\\\ -1 & 1 \\\\ 1 & 0 \\end{pmatrix} = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix} = I_2$ ✓.</p>
+
+        <hr>
+        <p><strong>Ответ:</strong> решений бесконечно много, общий вид $X = \\begin{pmatrix} a & d \\\\ -1 & 1 \\\\ 1-2a & -2d \\end{pmatrix}$, $a, d \\in \\mathbb{R}$. Частный пример: $X_0 = \\begin{pmatrix} 0 & 0 \\\\ -1 & 1 \\\\ 1 & 0 \\end{pmatrix}$.</p>
+      `,
+    },
   ];
 
   // ============================================================
