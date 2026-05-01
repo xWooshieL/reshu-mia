@@ -579,18 +579,31 @@ hr {
 .conv-table tr.conv-row--sat td:first-child { border-left: 3px solid var(--warning); }
 .conv-table tr.conv-row--fail td:first-child { border-left: 3px solid var(--danger); }
 
-/* sticky плашка с оценкой справа сверху на странице результатов */
+/* sticky плашка с оценкой — фиксирована у правого края окна, за пределами контейнера .main */
 .grade-sticky {
-  position: sticky;
-  top: 75px;
+  position: fixed;
+  top: 88px;
+  right: 1.5rem;
   z-index: 40;
   background: var(--bg-card);
   border: 2px solid var(--ink);
   border-radius: var(--radius);
-  padding: 0.85rem 1.2rem;
-  margin: 0 0 1rem auto;
-  max-width: 420px;
-  box-shadow: var(--shadow-md);
+  padding: 0.85rem 1.1rem;
+  width: 260px;
+  box-shadow: var(--shadow-lg);
+}
+
+/* на средних/узких экранах, где контейнер занимает всю ширину — возвращаем
+   плашку в обычный поток, чтобы не перекрывала содержимое */
+@media (max-width: 1420px) {
+  .grade-sticky {
+    position: sticky;
+    top: 75px;
+    right: auto;
+    width: auto;
+    max-width: 420px;
+    margin: 0 0 1rem auto;
+  }
 }
 .grade-sticky__title {
   font-size: 0.78rem;
